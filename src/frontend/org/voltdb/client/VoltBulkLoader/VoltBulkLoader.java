@@ -328,15 +328,13 @@ public class VoltBulkLoader {
         // Dedicate a PartitionProcessor to MP tables
         m_maxPartitionProcessors = ((hostcount * sitesPerHost) / (kfactor + 1)) + 1;
 
-        int queueDepthMultiplier;
+        int queueDepthMultiplier = Math.max(5, 1000/(m_maxPartitionProcessors-1));
         if (!m_isMP) {
             m_firstPartitionTable = 0;
             m_lastPartitionTable = m_maxPartitionProcessors-2;
-            queueDepthMultiplier = Math.max(5, 1000/(m_maxPartitionProcessors-1));
             m_procName = "@LoadSinglepartitionTable" ;
         }
         else {
-            queueDepthMultiplier = 1000;
             m_firstPartitionTable = m_maxPartitionProcessors-1;
             m_lastPartitionTable = m_maxPartitionProcessors-1;
             m_procName = "@LoadMultipartitionTable" ;

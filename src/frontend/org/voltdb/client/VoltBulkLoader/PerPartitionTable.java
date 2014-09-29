@@ -201,7 +201,7 @@ public class PerPartitionTable {
         m_partitionId = partitionProcessor.m_partitionId;
         m_partitionProcessorQueue = m_partitionProcessor.m_PendingTables;
         m_procName = firstLoader.m_procName;
-        m_partitionRowQueue = new LinkedBlockingQueue<VoltBulkLoaderRow>(rowQueueSize*minBatchTriggerSize);
+        m_partitionRowQueue = new LinkedBlockingQueue<VoltBulkLoaderRow>(rowQueueSize);
         m_minBatchTriggerSize = minBatchTriggerSize;
         m_columnInfo = firstLoader.m_colInfo;
         m_partitionedColumnIndex = firstLoader.m_partitionedColumnIndex;
