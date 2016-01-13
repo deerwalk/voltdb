@@ -238,7 +238,7 @@ def map_deployment(request, database_id):
             request.json['paths']['commandlogsnapshot']['path']
 
     if 'paths' in request.json and 'droverflow' in request.json['paths'] and \
-                    'path' in request['paths']['droverflow']:
+                    'path' in request.json['paths']['droverflow']:
         deployment[0]['paths']['droverflow']['path'] = \
             request.json['paths']['droverflow']['path']
 
@@ -301,25 +301,33 @@ def map_deployment(request, database_id):
             and 'priority' in request.json['systemsettings']['snapshot']:
         deployment[0]['systemsettings']['snapshot']['priority'] = request.json['systemsettings']['snapshot']['priority']
 
-    if 'systemsettings' in request.json and 'resourcemonitor' in request.json['systemsettings'] \
-            and 'disklimit' in request.json['systemsettings']['resourcemonitor'] \
-            and 'feature' in request.json['systemsettings']['resourcemonitor']['disklimit'] \
-            and 'name' in request.json['systemsettings']['resourcemonitor']['disklimit']['feature']:
-        deployment[0]['systemsettings']['resourcemonitor']['disklimit']['feature']['name'] = \
-            request.json['systemsettings']['resourcemonitor']['disklimit']['feature']['name']
+    if 'systemsettings' in request.json and 'resourcemonitor' in request.json['systemsettings']:
+        if deployment[0]['systemsettings']['resourcemonitor'] is None:
+            deployment[0]['systemsettings']['resourcemonitor'] = {}
+        print request.json['systemsettings']['resourcemonitor']['memorylimit']['size']
+        if 'memorylimit' in request.json['systemsettings']['resourcemonitor']:
+            deployment[0]['systemsettings']['resourcemonitor']['memorylimit'] = {}
+            if 'systemsettings' in request.json and 'resourcemonitor' in request.json['systemsettings'] \
+                and 'memorylimit' in request.json['systemsettings']['resourcemonitor'] \
+                and 'size' in request.json['systemsettings']['resourcemonitor']['memorylimit']:
+                deployment[0]['systemsettings']['resourcemonitor']['memorylimit']['size'] = \
+                request.json['systemsettings']['resourcemonitor']['memorylimit']['size']
 
-    if 'systemsettings' in request.json and 'resourcemonitor' in request.json['systemsettings'] \
-            and 'disklimit' in request.json['systemsettings']['resourcemonitor'] \
-            and 'feature' in request.json['systemsettings']['resourcemonitor']['disklimit'] \
-            and 'size' in request.json['systemsettings']['resourcemonitor']['disklimit']['feature']:
-        deployment[0]['systemsettings']['resourcemonitor']['disklimit']['feature']['size'] = \
-            request.json['systemsettings']['resourcemonitor']['disklimit']['feature']['size']
+        if 'disklimit' in request.json['systemsettings']['resourcemonitor']:
+            deployment[0]['systemsettings']['resourcemonitor']['disklimit'] = {}
+            if 'feature' in request.json['systemsettings']['resourcemonitor']['disklimit']:
+                deployment[0]['systemsettings']['resourcemonitor']['disklimit']['feature'] = []
+                for feature in request.json['systemsettings']['resourcemonitor']['disklimit']['feature']:
+                    deployment[0]['systemsettings']['resourcemonitor']['disklimit']['feature'].append(
+                        {
+                            'name': feature['name'],
+                            'size': feature['size']
+                        }
+                    )
 
-    if 'systemsettings' in request.json and 'resourcemonitor' in request.json['systemsettings'] \
-            and 'memorylimit' in request.json['systemsettings']['resourcemonitor'] \
-            and 'size' in request.json['systemsettings']['resourcemonitor']['memorylimit']:
-        deployment[0]['systemsettings']['resourcemonitor']['memorylimit']['size'] = \
-            request.json['systemsettings']['resourcemonitor']['memorylimit']['size']
+    if 'import' in request.json:
+        if deployment[0]['import'] is None:
+            deployment[0]['import'] = {}
 
     if 'import' in request.json and 'configuration' in request.json['import']:
         deployment[0]['import']['configuration'] = []
@@ -343,6 +351,10 @@ def map_deployment(request, database_id):
                         }
                     )
                 i += 1
+
+    if 'export' in request.json:
+        if deployment[0]['export'] is None:
+            deployment[0]['export'] = {}
 
     if 'export' in request.json and 'configuration' in request.json['export']:
         deployment[0]['export']['configuration'] = []
@@ -487,7 +499,7 @@ def make_configuration_file():
     db_top = SubElement(main_header, 'databases')
     server_top = SubElement(main_header, 'members')
     deployment_top = SubElement(main_header, 'deployments')
-    db1 = get_database_deployment(1)
+    # db1 = get_database_deployment(1)
     i = 0
     while i < len(DATABASES):
         db_elem = SubElement(db_top, 'database')
@@ -1097,6 +1109,17 @@ class StartServerAPI(MethodView):
                                  500)
 
 
+class VdmStatus(MethodView):
+    """
+    Class to get VDM status for peers to check.
+    """
+    @staticmethod
+    def get():
+        if  request.args is not None and 'jsonp' in request.args and request.args['jsonp'] is not None:
+            return str(request.args['jsonp']) + '(' + '{\'vdm\': {"running": "true"}}'+')'
+        else:
+            return jsonify({'vdm': {"running": "true"}})
+
 def main(runner, amodule, aport, apath):
     try:
         F_DEBUG = os.environ['DEBUG']
@@ -1130,6 +1153,7 @@ def main(runner, amodule, aport, apath):
     DATABASE_MEMBER_VIEW = DatabaseMemberAPI.as_view('database_member_api')
     DEPLOYMENT_VIEW = deploymentAPI.as_view('deployment_api')
     DEPLOYMENT_USER_VIEW = deploymentUserAPI.as_view('deployment_user_api')
+    VDM_STATUS_VIEW = VdmStatus.as_view('vdm_status_api')
     APP.add_url_rule('/api/1.0/servers/', defaults={'server_id': None},
                      view_func=SERVER_VIEW, methods=['GET'])
     APP.add_url_rule('/api/1.0/servers/<int:database_id>', view_func=SERVER_VIEW, methods=['POST'])
@@ -1155,5 +1179,6 @@ def main(runner, amodule, aport, apath):
                      methods=['GET', 'PUT', 'POST', 'DELETE'])
     APP.add_url_rule('/api/1.0/deployment/users/<int:database_id>/<string:username>', view_func=DEPLOYMENT_USER_VIEW,
                      methods=['PUT', 'POST', 'DELETE'])
-
+    APP.add_url_rule('/api/1.0/vdm/status',
+                     view_func=VDM_STATUS_VIEW, methods=['GET'])
     APP.run(threaded=True, host='0.0.0.0', port=aport)
