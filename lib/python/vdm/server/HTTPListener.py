@@ -35,6 +35,7 @@ import os
 import json
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 import sys
+import subprocess
 
 
 APP = Flask(__name__, template_folder="../templates", static_folder="../static")
@@ -437,6 +438,32 @@ def map_deployment_users(request, user):
 
     return deployment_user[0]
 
+
+def start_local_server(deploymentcontents):
+    cmd_dir, cmd_name = os.path.split(os.path.realpath(sys.argv[0]))
+    filename = os.path.join(cmd_dir, 'deployment.xml')
+    deploymentfile = open(filename, 'w');
+    deploymentfile.write(deploymentcontents)
+    deploymentfile.close()
+    voltdb_dir = os.path.realpath(os.path.join(cmd_dir, '../../..', 'bin'))
+    voltdb_cmd = [ os.path.join(voltdb_dir, 'voltdb'), 'create', '-d', filename ]
+    outfilename = os.path.join(cmd_dir, 'voltserver.output')
+    outfile = open(outfilename, 'w')
+
+    # Start server in a separate process
+    voltserver = subprocess.Popen(voltdb_cmd, stdout=outfile, stderr=subprocess.STDOUT)
+
+    grep_cmd = [ 'grep', 'Server completed initialization', outfilename ]
+    grep_retcode = subprocess.call(grep_cmd)
+    # Wait till server is ready or process exited due to error
+    while (voltserver.returncode==None and (grep_retcode!=0)):
+        voltserver.poll()
+        grep_retcode = subprocess.call(grep_cmd)
+
+    if (grep_retcode==0):
+        return 0
+    else:
+        return 1
 
 def get_database_deployment(key):
     deployment_top = Element('deployment')
@@ -1045,6 +1072,30 @@ class deploymentUserAPI(MethodView):
         DEPLOYMENT_USERS.remove(current_user[0])
         return jsonify({'status': 1, 'statusstring': "User Deleted"})
 
+class StartServerAPI(MethodView):
+    """Class to handle request to start a server."""
+
+    @staticmethod
+    def put(database_id, server_id):
+        """
+        Starts VoltDB database server on the specified server
+        Args:
+            database_id (int): The id of the database that should be started
+            server_id (int): The id of the server node that is to be started
+        Returns:
+            Status string indicating if the server node was started successfully
+        """
+
+        # TODO: Fix this later. Assume  this is local server for now
+        deploymentcontents = get_database_deployment(database_id)
+        retcode = start_local_server(deploymentcontents)
+        if (retcode == 0):
+            return make_response(jsonify({'statusstring': 'Server started successfully'}),
+                                 200)
+        else:
+            return make_response(jsonify({'statusstring': 'Error starting server'}),
+                                 500)
+
 
 def main(runner, amodule, aport, apath):
     try:
@@ -1075,6 +1126,7 @@ def main(runner, amodule, aport, apath):
 
     SERVER_VIEW = ServerAPI.as_view('server_api')
     DATABASE_VIEW = DatabaseAPI.as_view('database_api')
+    START_DATABASE_SERVER_VIEW = StartServerAPI.as_view('start_server_api')
     DATABASE_MEMBER_VIEW = DatabaseMemberAPI.as_view('database_member_api')
     DEPLOYMENT_VIEW = deploymentAPI.as_view('deployment_api')
     DEPLOYMENT_USER_VIEW = deploymentUserAPI.as_view('deployment_user_api')
@@ -1091,6 +1143,9 @@ def main(runner, amodule, aport, apath):
     APP.add_url_rule('/api/1.0/databases/', view_func=DATABASE_VIEW, methods=['POST'])
     APP.add_url_rule('/api/1.0/databases/member/<int:database_id>',
                      view_func=DATABASE_MEMBER_VIEW, methods=['GET', 'PUT', 'DELETE'])
+
+    APP.add_url_rule('/api/1.0/databases/<int:database_id>/servers/<int:server_id>/start',
+                     view_func=START_DATABASE_SERVER_VIEW, methods=['PUT'])
 
     APP.add_url_rule('/api/1.0/deployment/', defaults={'database_id': None},
                      view_func=DEPLOYMENT_VIEW, methods=['GET'])
