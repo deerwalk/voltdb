@@ -301,6 +301,7 @@ def map_deployment(request, database_id):
             and 'priority' in request.json['systemsettings']['snapshot']:
         deployment[0]['systemsettings']['snapshot']['priority'] = request.json['systemsettings']['snapshot']['priority']
 
+    print request.json['systemsettings']['resourcemonitor']
     if 'systemsettings' in request.json and 'resourcemonitor' in request.json['systemsettings']:
         if deployment[0]['systemsettings']['resourcemonitor'] is None:
             deployment[0]['systemsettings']['resourcemonitor'] = {}
@@ -452,14 +453,18 @@ def map_deployment_users(request, user):
 
 
 def start_local_server(deploymentcontents):
+    print '********start_local_server'
     cmd_dir, cmd_name = os.path.split(os.path.realpath(sys.argv[0]))
-    filename = os.path.join(cmd_dir, 'deployment.xml')
+    filename = os.path.join(PATH, 'deployment.xml')
+    print 'file: %s' % filename
     deploymentfile = open(filename, 'w');
     deploymentfile.write(deploymentcontents)
     deploymentfile.close()
     voltdb_dir = os.path.realpath(os.path.join(cmd_dir, '../../..', 'bin'))
+    print '****voltdb_dir: %s' % voltdb_dir
     voltdb_cmd = [ os.path.join(voltdb_dir, 'voltdb'), 'create', '-d', filename ]
-    outfilename = os.path.join(cmd_dir, 'voltserver.output')
+    print voltdb_cmd
+    outfilename = os.path.join(PATH, 'voltserver.output')
     outfile = open(outfilename, 'w')
 
     # Start server in a separate process
@@ -1100,8 +1105,13 @@ class StartServerAPI(MethodView):
             Status string indicating if the server node was started successfully
         """
 
+        print 'StartServerAPI.PUT!!!'
         # TODO: Fix this later. Assume  this is local server for now
-        deploymentcontents = get_database_deployment(database_id)
+        try:
+            deploymentcontents = get_database_deployment(database_id)
+        except Exception, err:
+            print str(err)
+        print deploymentcontents
         retcode = start_local_server(deploymentcontents)
         if (retcode == 0):
             return make_response(jsonify({'statusstring': 'Server started successfully'}),
