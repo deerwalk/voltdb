@@ -36,6 +36,7 @@ import json
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 import sys
 import subprocess
+import signal
 
 
 APP = Flask(__name__, template_folder="../templates", static_folder="../static")
@@ -448,6 +449,10 @@ def map_deployment_users(request, user):
     return deployment_user[0]
 
 
+def ignore_sighup():
+    signal.signal(signal.SIGHUP, signal.SIG_IGN)
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+
 def start_local_server(deploymentcontents):
     cmd_dir, cmd_name = os.path.split(os.path.realpath(sys.argv[0]))
     filename = os.path.join(PATH, 'deployment.xml')
@@ -455,12 +460,13 @@ def start_local_server(deploymentcontents):
     deploymentfile.write(deploymentcontents)
     deploymentfile.close()
     voltdb_dir = os.path.realpath(os.path.join(cmd_dir, '../../..', 'bin'))
-    voltdb_cmd = [ os.path.join(voltdb_dir, 'voltdb'), 'create', '-d', filename ]
+    voltdb_cmd = [ 'nohup', os.path.join(voltdb_dir, 'voltdb'), 'create', '-d', filename ]
     outfilename = os.path.join(PATH, 'voltserver.output')
     outfile = open(outfilename, 'w')
 
     # Start server in a separate process
-    voltserver = subprocess.Popen(voltdb_cmd, stdout=outfile, stderr=subprocess.STDOUT)
+    voltserver = subprocess.Popen(voltdb_cmd, stdout=outfile, stderr=subprocess.STDOUT,
+                                  preexec_fn=ignore_sighup)
 
     grep_cmd = [ 'grep', 'Server completed initialization', outfilename ]
     grep_retcode = subprocess.call(grep_cmd)
