@@ -37,6 +37,7 @@ from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 import sys
 import subprocess
 import signal
+import time
 
 
 APP = Flask(__name__, template_folder="../templates", static_folder="../static")
@@ -454,12 +455,11 @@ def ignore_sighup():
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 def start_local_server(deploymentcontents):
-    cmd_dir, cmd_name = os.path.split(os.path.realpath(sys.argv[0]))
     filename = os.path.join(PATH, 'deployment.xml')
     deploymentfile = open(filename, 'w');
     deploymentfile.write(deploymentcontents)
     deploymentfile.close()
-    voltdb_dir = os.path.realpath(os.path.join(cmd_dir, '../../..', 'bin'))
+    voltdb_dir = os.path.realpath(os.path.join(MODULE_PATH, '../../../..', 'bin'))
     voltdb_cmd = [ 'nohup', os.path.join(voltdb_dir, 'voltdb'), 'create', '-d', filename ]
     outfilename = os.path.join(PATH, 'voltserver.output')
     outfile = open(outfilename, 'w')
@@ -471,7 +471,11 @@ def start_local_server(deploymentcontents):
     grep_cmd = [ 'grep', 'Server completed initialization', outfilename ]
     grep_retcode = subprocess.call(grep_cmd)
     # Wait till server is ready or process exited due to error
-    while (voltserver.returncode==None and (grep_retcode!=0)):
+    # Wait a maximum of 60 seconds
+    endtime = time.time() + 60
+    while ((endtime-time.time()>0) and
+           (voltserver.returncode==None) and (grep_retcode!=0)):
+	time.sleep(0.5)
         voltserver.poll()
         grep_retcode = subprocess.call(grep_cmd)
 
@@ -1135,6 +1139,8 @@ def main(runner, amodule, aport, apath):
         APP.config.update(DEBUG=True)
 
     path = os.path.dirname(amodule.__file__)
+    global MODULE_PATH
+    MODULE_PATH = path
     depjson = path + "/deployment.json"
     json_data= open(depjson).read()
     deployment = json.loads(json_data)
