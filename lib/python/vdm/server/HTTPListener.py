@@ -27,7 +27,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 """
 
-from flask import Flask, render_template, jsonify, abort, make_response, request
+from flask import Flask, render_template, jsonify, abort, make_response, request, Response
 from flask.views import MethodView
 from Validation import ServerInputs, DatabaseInputs, JsonInputs, UserInputs, ConfigValidation
 import socket
@@ -317,8 +317,11 @@ def map_deployment(request, database_id):
             if 'systemsettings' in request.json and 'resourcemonitor' in request.json['systemsettings'] \
                 and 'memorylimit' in request.json['systemsettings']['resourcemonitor'] \
                 and 'size' in request.json['systemsettings']['resourcemonitor']['memorylimit']:
-                deployment[0]['systemsettings']['resourcemonitor']['memorylimit']['size'] = \
-                request.json['systemsettings']['resourcemonitor']['memorylimit']['size']
+                if request.json['systemsettings']['resourcemonitor']['memorylimit']['size'] != '':
+                    deployment[0]['systemsettings']['resourcemonitor']['memorylimit']['size'] = \
+                    request.json['systemsettings']['resourcemonitor']['memorylimit']['size']
+                else:
+                    deployment[0]['systemsettings']['resourcemonitor']['memorylimit'] = {}
 
     if 'systemsettings' in request.json and 'resourcemonitor' in request.json['systemsettings']:
         if 'resourcemonitor' not in deployment[0]['systemsettings'] or deployment[0]['systemsettings']['resourcemonitor'] is None:
@@ -328,15 +331,27 @@ def map_deployment(request, database_id):
             deployment[0]['systemsettings']['resourcemonitor']['disklimit'] = {}
             if 'feature' in request.json['systemsettings']['resourcemonitor']['disklimit']:
                 deployment[0]['systemsettings']['resourcemonitor']['disklimit']['feature'] = []
-                for feature in request.json['systemsettings']['resourcemonitor']['disklimit']['feature']:
-                    deployment[0]['systemsettings']['resourcemonitor']['disklimit']['feature'].append(
-                        {
-                            'name': feature['name'],
-                            'size': feature['size']
-                        }
-                    )
+                if request.json['systemsettings']['resourcemonitor']['disklimit']['feature']:
+                    for feature in request.json['systemsettings']['resourcemonitor']['disklimit']['feature']:
+                        deployment[0]['systemsettings']['resourcemonitor']['disklimit']['feature'].append(
+                            {
+                                'name': feature['name'],
+                                'size': feature['size']
+                            }
+                        )
+                else:
+                    deployment[0]['systemsettings']['resourcemonitor']['disklimit'] = {}
 
-    if  'import' in request.json:
+    if 'systemsettings' in deployment[0] and 'resourcemonitor' in deployment[0]['systemsettings']:
+        result = False;
+        if 'memorylimit' in deployment[0]['systemsettings']['resourcemonitor'] and deployment[0]['systemsettings']['resourcemonitor']['memorylimit']:
+            result = True;
+        if 'disklimit' in deployment[0]['systemsettings']['resourcemonitor'] and deployment[0]['systemsettings']['resourcemonitor']['disklimit']:
+            result = True;
+        if result == False:
+            deployment[0]['systemsettings']['resourcemonitor'] = {}
+
+    if 'import' in request.json:
         if 'import' not in deployment[0] or  deployment[0]['import'] is None:
             deployment[0]['import'] = {}
 
@@ -412,11 +427,20 @@ def map_deployment(request, database_id):
         if not hasattr(deployment[0]['dr'], 'connection'):
             deployment[0]['dr']['connection'] = {}
 
+    if 'dr' in request.json and 'connection' in request.json['dr'] and 'source' not in request.json['dr']['connection']:
+        deployment[0]['dr']['connection'] = None
+
     if 'dr' in request.json and 'id' in request.json['dr']:
         deployment[0]['dr']['id'] = request.json['dr']['id']
 
-    if 'dr' in request.json and 'type' in request.json['dr']:
-        deployment[0]['dr']['type'] = request.json['dr']['type']
+    if 'dr' in request.json and 'listen' in request.json['dr']:
+        deployment[0]['dr']['listen'] = request.json['dr']['listen']
+
+    if 'dr' in request.json and request.json['dr']:
+        if 'port' in request.json['dr']:
+            deployment[0]['dr']['port'] = request.json['dr']['port']
+        else:
+            deployment[0]['dr']['port'] = None
 
     if 'dr' in request.json and 'connection' in request.json['dr'] \
             and 'source' in request.json['dr']['connection']:
@@ -510,7 +534,13 @@ def get_database_deployment(dbid):
             uelem.attrib["name"] = duser["name"]
             uelem.attrib["password"] = duser["password"]
             uelem.attrib["roles"] = duser["roles"]
-            uelem.attrib["plaintext"] = duser["plaintext"]
+            plaintext = str(duser["plaintext"])
+            if isinstance(duser["plaintext"], bool):
+                if duser["plaintext"] == False:
+                    plaintext = "false"
+                else:
+                    plaintext = "true"
+            uelem.attrib["plaintext"] = plaintext
 
     handle_deployment_dict(deployment_top, dbid, value, True)
 
@@ -802,7 +832,7 @@ def get_deployment_from_xml(deployment_xml, is_list):
                         new_deployment[field]['temptables']['maxsize'] = int(deployment[field]['temptables']['maxsize'])
                         if 'resourcemonitor' not in deployment[field] or deployment[field]['resourcemonitor'] is None:
                             if 'resourcemonitor'  in deployment[field]:
-                                new_deployment[field]['resourcemonitor'] = deployment[field]['resourcemonitor']
+                                new_deployment[field]['resourcemonitor'] = None
                         else:
                             new_deployment[field]['resourcemonitor'] = {}
                             if 'memorylimit' in deployment[field]['resourcemonitor']:
@@ -823,11 +853,14 @@ def get_deployment_from_xml(deployment_xml, is_list):
                         if deployment[field] is not None:
                             new_deployment[field] = {}
                             new_deployment[field]['id'] = int(deployment[field]['id'])
-                            new_deployment[field]['type'] = str(deployment[field]['type'])
-                            if 'connection' in deployment[field] and deployment[field]['connection'] is not None and 'source' in deployment[field]['connection']:
+                            new_deployment[field]['listen'] = parse_bool_string(deployment[field]['listen'])
+                            if 'port' in deployment[field]:
+                                new_deployment[field]['port'] = int(deployment[field]['port'])
+                            if 'connection' in deployment[field] and deployment[field]['connection'] is not None and 'source' in deployment[field]['connection'] \
+                                    and 'servers' in deployment[field]['connection']:
                                 new_deployment[field]['connection'] = {}
-                                new_deployment[field]['connection']['source'] = deployment[field]['connection']['source']
-                                new_deployment[field]['connection']['servers'] = ast.literal_eval(str(deployment[field]['connection']['servers']))
+                                new_deployment[field]['connection']['source'] = str(deployment[field]['connection']['source'])
+                                new_deployment[field]['connection']['servers'] = str(deployment[field]['connection']['servers'])
 
                     except Exception, err:
                         print 'dr:' + str(err)
@@ -942,8 +975,9 @@ def get_deployment_from_xml(deployment_xml, is_list):
                     new_deployment[field]['temptables'] = {}
                     new_deployment[field]['temptables']['maxsize'] = int(deployment_xml[field]['temptables']['maxsize'])
 
-                    if deployment_xml[field]['resourcemonitor'] is None:
-                        new_deployment[field]['resourcemonitor'] = (deployment_xml[field]['resourcemonitor'])
+                    if 'resourcemonitor' not in deployment_xml[field] or deployment_xml[field]['resourcemonitor'] is None:
+                        if 'resourcemonitor'  in deployment_xml[field]:
+                            new_deployment[field]['resourcemonitor'] = None
                     else:
                         new_deployment[field]['resourcemonitor'] = {}
                         if 'memorylimit' in deployment_xml[field]['resourcemonitor']:
@@ -963,11 +997,14 @@ def get_deployment_from_xml(deployment_xml, is_list):
                     if deployment_xml[field] is not None:
                         new_deployment[field] = {}
                         new_deployment[field]['id'] = int(deployment_xml[field]['id'])
-                        new_deployment[field]['type'] = str(deployment_xml[field]['type'])
-                        if 'connection' not in deployment_xml[field] and deployment_xml[field]['connection'] is not None and 'source' in deployment[field]['connection']:
+                        new_deployment[field]['listen'] = parse_bool_string(deployment_xml[field]['listen'])
+                        if 'port' in deployment_xml[field]:
+                            new_deployment[field]['port'] = int(deployment_xml[field]['port'])
+                        if 'connection' not in deployment_xml[field] and deployment_xml[field]['connection'] is not None and 'source' in deployment_xml[field]['connection']\
+                                and 'servers' in deployment_xml[field]['connection']:
                             new_deployment[field]['connection'] = {}
-                            new_deployment[field]['connection']['source'] = deployment_xml[field]['connection']['source']
-                            new_deployment[field]['connection']['servers'] = deployment_xml[field]['connection']['servers']
+                            new_deployment[field]['connection']['source'] = str(deployment_xml[field]['connection']['source'])
+                            new_deployment[field]['connection']['servers'] = str(deployment_xml[field]['connection']['servers'])
 
                 except Exception, err:
                     print str(err)
@@ -1101,37 +1138,37 @@ def etree_to_dict(t):
 
 
 def handle_deployment_dict(deployment_elem, key, value, istop):
-
-    if istop == True:
-        deployment_sub_element = deployment_elem
-    else:
-        deployment_sub_element = SubElement(deployment_elem, str(key))
-    for key1, value1 in value.iteritems():
-        if type(value1) is dict:
-            if istop == True:
-                if key1 not in IGNORETOP:
-                    handle_deployment_dict(deployment_sub_element, key1, value1, False)
-            else:
-                handle_deployment_dict(deployment_sub_element, key1, value1, False)
-        elif type(value1) is list:
-            handle_deployment_list(deployment_sub_element, key1, value1)
+    if value:
+        if istop == True:
+            deployment_sub_element = deployment_elem
         else:
-            if isinstance(value1, bool):
-                if value1 == False:
-                    deployment_sub_element.attrib[key1] = "false"
+            deployment_sub_element = SubElement(deployment_elem, str(key))
+        for key1, value1 in value.iteritems():
+            if type(value1) is dict:
+                if istop == True:
+                    if key1 not in IGNORETOP:
+                        handle_deployment_dict(deployment_sub_element, key1, value1, False)
                 else:
-                    deployment_sub_element.attrib[key1] = "true"
+                    handle_deployment_dict(deployment_sub_element, key1, value1, False)
+            elif type(value1) is list:
+                handle_deployment_list(deployment_sub_element, key1, value1)
             else:
-                if key == "property":
-                    deployment_sub_element.attrib["name"] = value["name"];
-                    deployment_sub_element.text = str(value1)
+                if isinstance(value1, bool):
+                    if value1 == False:
+                        deployment_sub_element.attrib[key1] = "false"
+                    else:
+                        deployment_sub_element.attrib[key1] = "true"
                 else:
-                    if istop == False:
-                        if value1 != None:
-                            deployment_sub_element.attrib[key1] = str(value1)
-                    elif key1 not in IGNORETOP:
-                        if value1 != None:
-                            deployment_sub_element.attrib[key1] = str(value1)
+                    if key == "property":
+                        deployment_sub_element.attrib["name"] = value["name"];
+                        deployment_sub_element.text = str(value1)
+                    else:
+                        if istop == False:
+                            if value1 != None:
+                                deployment_sub_element.attrib[key1] = str(value1)
+                        elif key1 not in IGNORETOP:
+                            if value1 != None:
+                                deployment_sub_element.attrib[key1] = str(value1)
 
 
 def handle_deployment_list(deployment_elem, key, value):
@@ -1148,7 +1185,7 @@ def parse_bool_string(bool_string):
 
 IS_CURRENT_NODE_ADDED = False
 IS_CURRENT_DATABASE_ADDED = False
-IGNORETOP = { "databaseid" : True, "users" : True, "dr" : True}
+IGNORETOP = { "databaseid" : True, "users" : True}
 
 
 class ServerAPI(MethodView):
@@ -1528,56 +1565,6 @@ class deploymentAPI(MethodView):
         if not inputs.validate():
             return jsonify(success=False, errors=inputs.errors)
 
-        if 'dr' in request.json and 'type' in request.json['dr']:
-            if request.json['dr']['type'] != 'Master':
-                if 'connection' in request.json['dr'] \
-                        and 'source' in request.json['dr']['connection'] \
-                        and 'servers' in request.json['dr']['connection']:
-                    database_selected = [database for database in DATABASES if
-                                         database['name'] == str(request.json['dr']['connection']['source'])]
-                    if len(database_selected) == 0:
-                        make_response(jsonify({'error': 'The selected database must have database enabled.'}), 404)
-                    deployment_selected = [deployment1 for deployment1 in DEPLOYMENT
-                                           if deployment1['databaseid'] == database_selected[0]['id']]
-
-                    if request.json['dr']['type'] == 'Replica':
-                        if len(deployment_selected) == 0:
-                            make_response(jsonify({'error': 'The selected database must have database enabled.'}), 404)
-                        if deployment_selected[0]['dr'] is not None and \
-                                        deployment_selected[0]['dr']['type'] is not None:
-                            deployment_type = deployment_selected[0]['dr']['type']
-                            if deployment_type != 'Master':
-                                return make_response(jsonify({'error': 'The selected database '
-                                                                       'must be of type Master.'}), 404)
-                        else:
-                            return make_response(jsonify({'error': 'The selected database '
-                                                                   'must have database enabled.'}), 404)
-                    if request.json['dr']['type'] == 'XDCR':
-                        if len(deployment_selected) != 0 and deployment_selected[0]['dr'] is not None and \
-                                        len(deployment_selected[0]['dr']) != 0 and \
-                                        deployment_selected[0]['dr']['type'] is not None:
-                            database_selected = [database for database in DATABASES if database['id'] == database_id]
-                            if len(database_selected) == 0:
-                                return make_response(jsonify({'error': 'Database not found.'}))
-
-                            if deployment_selected[0]['dr']['type'] == 'Master':
-                                return make_response(jsonify({'error': 'The selected database should be '
-                                                                           'of DR type "XDCR".'}), 404)
-
-                            if database_selected[0]['name'] != deployment_selected[0]['dr']['connection']['source']:
-                                if deployment_selected[0]['dr']['type'] == 'Master' or \
-                                                deployment_selected[0]['dr']['type'] == 'Replica':
-                                    return make_response(jsonify({'error': 'The selected database should be '
-                                                                           'of DR type "XDCR".'}), 404)
-                                elif deployment_selected[0]['dr']['type'] == 'XDCR':
-                                    return make_response(jsonify({'error': 'The selected database is configured '
-                                                                           'to use XDCR with another database. '
-                                                                           'Please use another database.'}), 404)
-
-                else:
-                    return make_response(jsonify({'error': 'Connection source '
-                                                           'not defined properly.'}), 404)
-
         # if 'users' in request.json:
         #     if 'user' in request.json['users']:
         #         prev_username = ''
@@ -1847,6 +1834,14 @@ class VdmConfiguration(MethodView):
 
         return jsonify({'deployment': response.status_code})
 
+class DatabaseDeploymentAPI(MethodView):
+    """
+    Class related to the vdm configuration
+    """
+    @staticmethod
+    def get(database_id):
+        deployment_content = get_database_deployment(database_id)
+        return Response(deployment_content, mimetype='text/xml')
 
 def main(runner, amodule, aport, config_dir):
     try:
@@ -1894,6 +1889,7 @@ def main(runner, amodule, aport, config_dir):
     VDM_STATUS_VIEW = VdmStatus.as_view('vdm_status_api')
     VDM_CONFIGURATION_VIEW = VdmConfiguration.as_view('vdm_configuration_api')
     SYNC_VDM_CONFIGURATION_VIEW = SyncVdmConfiguration.as_view('sync_vdm_configuration_api')
+    DATABASE_DEPLOYMENT_VIEW = DatabaseDeploymentAPI.as_view('database_deployment_api')
     APP.add_url_rule('/api/1.0/servers/', defaults={'server_id': None},
                      view_func=SERVER_VIEW, methods=['GET'])
     APP.add_url_rule('/api/1.0/servers/<int:database_id>', view_func=SERVER_VIEW, methods=['POST'])
@@ -1927,4 +1923,6 @@ def main(runner, amodule, aport, config_dir):
                      view_func=VDM_CONFIGURATION_VIEW, methods=['GET', 'POST'])
     APP.add_url_rule('/api/1.0/vdm/sync_configuration/',
                      view_func=SYNC_VDM_CONFIGURATION_VIEW, methods=['POST'])
+    APP.add_url_rule('/api/1.0/database/<int:database_id>/deployment/', view_func=DATABASE_DEPLOYMENT_VIEW,
+                     methods=['GET'])
     APP.run(threaded=True, host='0.0.0.0', port=aport)

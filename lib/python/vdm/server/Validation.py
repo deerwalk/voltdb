@@ -740,9 +740,15 @@ schema = {
                     "minimum": 0,
                     "maximum": 2147483647
                 },
-                "type": {
-                    "id": "type",
-                    "type": "string",
+                "listen": {
+                    "id": "listen",
+                    "type": "boolean"
+                },
+                "port": {
+                    "id": "port",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 65536
                 },
                 "connection": {
                     "id": "connection",
@@ -754,10 +760,7 @@ schema = {
                         },
                         "servers": {
                             "id": "servers",
-                            "type": "array",
-                            "items": {
-                                "type": "integer"
-                            }
+                            "type": "string",
                         }
                     }
                 }
