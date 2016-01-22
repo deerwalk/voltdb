@@ -57,6 +57,10 @@ DEPLOYMENT_USERS = []
 
 __PATH__ = ""
 
+__IP__ = "localhost"
+
+__PORT__ = 8000
+
 
 @APP.errorhandler(400)
 def not_found(error):
@@ -446,10 +450,6 @@ def map_deployment(request, database_id):
             and 'source' in request.json['dr']['connection']:
         deployment[0]['dr']['connection']['source'] = request.json['dr']['connection']['source']
 
-    if 'dr' in request.json and 'connection' in request.json['dr'] \
-            and 'servers' in request.json['dr']['connection']:
-        deployment[0]['dr']['connection']['servers'] = request.json['dr']['connection']['servers']
-
     if 'dr' in request.json and not request.json['dr']:
         deployment[0]['dr'] = {}
 
@@ -496,6 +496,8 @@ def start_local_server(deploymentcontents, primary=''):
     voltdb_cmd = [ 'nohup', os.path.join(voltdb_dir, 'voltdb'), 'create', '-d', filename ]
     if primary:
         voltdb_cmd = voltdb_cmd + [ '-H', primary ]
+    print '****voltdb_cmd=' + str(voltdb_cmd)
+
     global OUTFILE_COUNTER
     OUTFILE_COUNTER = OUTFILE_COUNTER + 1
     outfilename = os.path.join(PATH, ('voltserver.output.%s.%u') % (OUTFILE_TIME, OUTFILE_COUNTER))
@@ -526,7 +528,9 @@ def start_local_server(deploymentcontents, primary=''):
 def get_database_deployment(dbid):
     deployment_top = Element('deployment')
     value = DEPLOYMENT[dbid-1]
-
+    db = DATABASES[dbid-1]
+    host_count = len(db['members'])
+    value['cluster']['hostcount'] = host_count
     # Add users
     addTop = False
     for duser in DEPLOYMENT_USERS:
@@ -570,8 +574,6 @@ def make_configuration_file():
     db_top = SubElement(main_header, 'databases')
     server_top = SubElement(main_header, 'members')
     deployment_top = SubElement(main_header, 'deployments')
-    # db1 = get_database_deployment(1)
-    # print db1
     i = 0
     while i < len(DATABASES):
         db_elem = SubElement(db_top, 'database')
@@ -641,10 +643,9 @@ def make_configuration_file():
 
 def sync_configuration():
     headers = {'content-type': 'application/json'}
-    url = 'http://localhost:8000/api/1.0/vdm/configuration/'
+    url = 'http://'+__IP__+':'+str(__PORT__)+'/api/1.0/vdm/configuration/'
     response = requests.post(url,headers = headers)
     return response
-
 
 def convert_xml_to_json(config_path):
     with open(config_path) as f:
@@ -861,11 +862,9 @@ def get_deployment_from_xml(deployment_xml, is_list):
                             new_deployment[field]['listen'] = parse_bool_string(deployment[field]['listen'])
                             if 'port' in deployment[field]:
                                 new_deployment[field]['port'] = int(deployment[field]['port'])
-                            if 'connection' in deployment[field] and deployment[field]['connection'] is not None and 'source' in deployment[field]['connection'] \
-                                    and 'servers' in deployment[field]['connection']:
+                            if 'connection' in deployment[field] and deployment[field]['connection'] is not None and 'source' in deployment[field]['connection']:
                                 new_deployment[field]['connection'] = {}
                                 new_deployment[field]['connection']['source'] = str(deployment[field]['connection']['source'])
-                                new_deployment[field]['connection']['servers'] = str(deployment[field]['connection']['servers'])
 
                     except Exception, err:
                         print 'dr:' + str(err)
@@ -1005,11 +1004,9 @@ def get_deployment_from_xml(deployment_xml, is_list):
                         new_deployment[field]['listen'] = parse_bool_string(deployment_xml[field]['listen'])
                         if 'port' in deployment_xml[field]:
                             new_deployment[field]['port'] = int(deployment_xml[field]['port'])
-                        if 'connection' not in deployment_xml[field] and deployment_xml[field]['connection'] is not None and 'source' in deployment_xml[field]['connection']\
-                                and 'servers' in deployment_xml[field]['connection']:
+                        if 'connection' in deployment_xml[field] and deployment_xml[field]['connection'] is not None and 'source' in deployment_xml[field]['connection']:
                             new_deployment[field]['connection'] = {}
                             new_deployment[field]['connection']['source'] = str(deployment_xml[field]['connection']['source'])
-                            new_deployment[field]['connection']['servers'] = str(deployment_xml[field]['connection']['servers'])
 
                 except Exception, err:
                     print str(err)
@@ -1027,7 +1024,15 @@ def get_deployment_export_field(export_xml, is_list):
         for export in export_xml:
             new_export = {}
             for field in export:
-                new_export[field] = export[field]
+                if field == 'property':
+                    if type(export['property']) is list:
+                        new_export['property'] = get_deployment_properties(export['property'], 'list')
+                    else:
+                        new_export['property'] = get_deployment_properties(export['property'], 'dict')
+                elif field == 'enabled':
+                    new_export[field] = parse_bool_string(export[field])
+                else:
+                    new_export[field] = export[field]
             exports.append(new_export)
     else:
         for field in export_xml:
@@ -1129,7 +1134,11 @@ def etree_to_dict(t):
         for dc in map(etree_to_dict, children):
             for k, v in dc.iteritems():
                 dd[k].append(v)
-        d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.iteritems()}}
+        #d = {t.tag: {k:v[0] if len(v) == 1 else v for k, v in dd.iteritems()}}
+        aa = {}
+        for k, v in dd.iteritems():
+             aa[k]=v[0] if len(v) == 1 else v
+        d = {t.tag: aa}
     if t.attrib:
         d[t.tag].update((k, v) for k, v in t.attrib.iteritems())
     if t.text:
@@ -1705,14 +1714,19 @@ class StartDatabaseAPI(MethodView):
                                              500)
         # Now start each server
         failed = False
+	primary = ''
         server_status = {}
         for server_id in members:
             server = [server for server in SERVERS if server['id'] == server_id]
             curr = server[0]
             try:
+		if not primary:
+		    primary = curr['hostname']
                 url = ('http://%s:8000/api/1.0/databases/%u/servers/%u/start') % \
                                   (curr['hostname'], database_id, server_id)
-                response = requests.put(url)
+		urlparams = { 'primary' : primary }
+		print '*****params: ' + urlparams
+                response = requests.put(url, params=urlparams)
                 if (response.status_code != requests.codes.ok):
                     failed = True
                 server_status[curr['hostname']] = json.loads(response.text)['statusstring']
@@ -1745,8 +1759,9 @@ class StartServerAPI(MethodView):
 
         # TODO: Fix this later. Assume  this is local server for now
         deploymentcontents = get_database_deployment(database_id)
+	primary = request.args.get('primary', '')
         try:
-            retcode = start_local_server(deploymentcontents)
+            retcode = start_local_server(deploymentcontents, primary)
             if (retcode == 0):
                 return make_response(jsonify({'statusstring': 'Success'}),
                                              200)
@@ -1820,7 +1835,7 @@ class VdmConfiguration(MethodView):
         for member in result['vdm']['members']:
             try:
                 headers = {'content-type': 'application/json'}
-                url = 'http://'+member['hostname']+':8000/api/1.0/vdm/sync_configuration/'
+                url = 'http://'+member['hostname']+':'+__PORT__+'/api/1.0/vdm/sync_configuration/'
                 data = result
                 response = requests.post(url,data=json.dumps(data),headers = headers)
             except Exception,errs:
@@ -1837,7 +1852,7 @@ class DatabaseDeploymentAPI(MethodView):
         deployment_content = get_database_deployment(database_id)
         return Response(deployment_content, mimetype='text/xml')
 
-def main(runner, amodule, aport, config_dir):
+def main(runner, amodule, config_dir, server):
     try:
         F_DEBUG = os.environ['DEBUG']
     except KeyError:
@@ -1854,19 +1869,33 @@ def main(runner, amodule, aport, config_dir):
     deployment = json.loads(json_data)
     global PATH
     PATH = config_dir
+    global __IP__
+    global __PORT__
+
+    # config_path = config_dir + '/' + 'vdm.xml'
     config_path = os.path.join(config_dir, 'vdm.xml')
     global OUTFILE_TIME
     OUTFILE_TIME = str(time.time())
     global OUTFILE_COUNTER
     OUTFILE_COUNTER = 0
 
+    arrServer = {}
+    if server is not None:
+        arrServer = server.split(':', 2)
     if os.path.exists(config_path):
         convert_xml_to_json(config_path)
     else:
         DEPLOYMENT.append(deployment)
 
-        __host_name__ = socket.gethostname()
-        __host_or_ip__ = socket.gethostbyname(__host_name__)
+        if server is None:
+            __host_name__ = socket.gethostname()
+            __host_or_ip__ = socket.gethostbyname(__host_name__)
+        else:
+            __host_name__ = arrServer[0]
+            __host_or_ip__ = arrServer[0]
+            __IP__ = arrServer[0]
+            __PORT__ = arrServer[1]
+
         SERVERS.append({'id': 1, 'name': __host_name__, 'hostname': __host_or_ip__, 'description': "",
                         'enabled': True, 'external-interface': "", 'internal-interface': "",
                         'public-interface': "", 'client-listener': "", 'internal-listener': "",
@@ -1920,6 +1949,9 @@ def main(runner, amodule, aport, config_dir):
                      view_func=VDM_CONFIGURATION_VIEW, methods=['GET', 'POST'])
     APP.add_url_rule('/api/1.0/vdm/sync_configuration/',
                      view_func=SYNC_VDM_CONFIGURATION_VIEW, methods=['POST'])
-    APP.add_url_rule('/api/1.0/database/<int:database_id>/deployment/', view_func=DATABASE_DEPLOYMENT_VIEW,
+    APP.add_url_rule('/api/1.0/databases/<int:database_id>/deployment/', view_func=DATABASE_DEPLOYMENT_VIEW,
                      methods=['GET'])
-    APP.run(threaded=True, host='0.0.0.0', port=aport)
+    if server is not None:
+        APP.run(threaded=True, host=arrServer[0], port=int(arrServer[1]))
+    else:
+        APP.run(threaded=True, host='0.0.0.0', port=8000)
