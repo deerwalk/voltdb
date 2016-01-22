@@ -483,23 +483,27 @@ def map_deployment_users(request, user):
     return deployment_user[0]
 
 
-def ignore_sighup():
+def ignore_signals():
     signal.signal(signal.SIGHUP, signal.SIG_IGN)
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
-def start_local_server(deploymentcontents):
+def start_local_server(deploymentcontents, primary=''):
     filename = os.path.join(PATH, 'deployment.xml')
     deploymentfile = open(filename, 'w')
     deploymentfile.write(deploymentcontents)
     deploymentfile.close()
     voltdb_dir = os.path.realpath(os.path.join(MODULE_PATH, '../../../..', 'bin'))
     voltdb_cmd = [ 'nohup', os.path.join(voltdb_dir, 'voltdb'), 'create', '-d', filename ]
-    outfilename = os.path.join(PATH, 'voltserver.output')
+    if primary:
+        voltdb_cmd = voltdb_cmd + [ '-H', primary ]
+    global OUTFILE_COUNTER
+    OUTFILE_COUNTER = OUTFILE_COUNTER + 1
+    outfilename = os.path.join(PATH, ('voltserver.output.%s.%u') % (OUTFILE_TIME, OUTFILE_COUNTER))
     outfile = open(outfilename, 'w')
 
     # Start server in a separate process
     voltserver = subprocess.Popen(voltdb_cmd, stdout=outfile, stderr=subprocess.STDOUT,
-                                  preexec_fn=ignore_sighup)
+                                  preexec_fn=ignore_signals)
 
     initialized = False
     rfile = open(outfilename, 'r')
@@ -511,8 +515,9 @@ def start_local_server(deploymentcontents):
            (voltserver.returncode is None) and (not initialized)):
         time.sleep(0.5)
         voltserver.poll()
-	initialized = 'Server completed initialization' in rfile.readline()
+        initialized = 'Server completed initialization' in rfile.readline()
 
+    rfile.close()
     if (voltserver.returncode is None):
         return 0
     else:
@@ -1699,29 +1704,18 @@ class StartDatabaseAPI(MethodView):
                 return make_response(jsonify({'statusstring': 'Server details not found for id ' + server_id}),
                                              500)
         # Now start each server
-        __host_name__ = socket.gethostname()
-        __host_or_ip__ = socket.gethostbyname(__host_name__)
         failed = False
         server_status = {}
         for server_id in members:
             server = [server for server in SERVERS if server['id'] == server_id]
             curr = server[0]
             try:
-                if (curr['hostname'] == __host_or_ip__):
-                    deploymentcontents = get_database_deployment(database_id)
-                    retcode = start_local_server(deploymentcontents)
-                    if (retcode == 0):
-                        server_status[curr['hostname']] = 'Success'
-                    else:
-                        failed = True
-                        server_status[curr['hostname']] = 'Error starting server'
-                else:
-                    url = ('http://%s:8000/api/1.0/databases/%u/servers/%u/start') % \
-		                      (curr['hostname'], database_id, server_id)
-                    response = requests.put(url)
-                    if (response.status_code != requests.codes.ok):
-                        failed = True
-                    server_status[curr['hostname']] = json.loads(response.text)['statusstring']
+                url = ('http://%s:8000/api/1.0/databases/%u/servers/%u/start') % \
+                                  (curr['hostname'], database_id, server_id)
+                response = requests.put(url)
+                if (response.status_code != requests.codes.ok):
+                    failed = True
+                server_status[curr['hostname']] = json.loads(response.text)['statusstring']
             except Exception, err:
                 failed = True
                 server_status[curr['hostname']] = str(err)
@@ -1860,8 +1854,11 @@ def main(runner, amodule, aport, config_dir):
     deployment = json.loads(json_data)
     global PATH
     PATH = config_dir
-    # config_path = config_dir + '/' + 'vdm.xml'
     config_path = os.path.join(config_dir, 'vdm.xml')
+    global OUTFILE_TIME
+    OUTFILE_TIME = str(time.time())
+    global OUTFILE_COUNTER
+    OUTFILE_COUNTER = 0
 
     if os.path.exists(config_path):
         convert_xml_to_json(config_path)
