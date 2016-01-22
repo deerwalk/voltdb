@@ -528,7 +528,7 @@ def get_first_hostname(database_id):
     """
     Gets the first hostname configured in the deployment file for a given database
     """
-    members = []
+
     current_database = [database for database in DATABASES if database['id'] == database_id]
     if not current_database:
         abort(404)
@@ -538,7 +538,7 @@ def get_first_hostname(database_id):
     if not server:
         abort(404)
 
-    return server['hostname']
+    return server[0]['hostname']
   
 def get_database_deployment(dbid):
     deployment_top = Element('deployment')
