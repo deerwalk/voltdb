@@ -524,6 +524,22 @@ def start_local_server(deploymentcontents, primary=''):
     else:
         return 1
 
+def get_first_hostname(database_id):
+    """
+    Gets the first hostname configured in the deployment file for a given database
+    """
+    members = []
+    current_database = [database for database in DATABASES if database['id'] == database_id]
+    if not current_database:
+        abort(404)
+
+    server_id = current_database[0]['members'][0]
+    server = [server for server in SERVERS if server['id'] == server_id]
+    if not server:
+        abort(404)
+
+    return server['hostname']
+  
 def get_database_deployment(dbid):
     deployment_top = Element('deployment')
     value = DEPLOYMENT[dbid-1]
@@ -1713,18 +1729,14 @@ class StartDatabaseAPI(MethodView):
                                              500)
         # Now start each server
         failed = False
-	primary = ''
         server_status = {}
         for server_id in members:
             server = [server for server in SERVERS if server['id'] == server_id]
             curr = server[0]
             try:
-		if not primary:
-		    primary = curr['hostname']
                 url = ('http://%s:8000/api/1.0/databases/%u/servers/%u/start') % \
                                   (curr['hostname'], database_id, server_id)
-		urlparams = { 'primary' : primary }
-                response = requests.put(url, params=urlparams)
+                response = requests.put(url)
                 if (response.status_code != requests.codes.ok):
                     failed = True
                 server_status[curr['hostname']] = json.loads(response.text)['statusstring']
@@ -1757,7 +1769,7 @@ class StartServerAPI(MethodView):
 
         # TODO: Fix this later. Assume  this is local server for now
         deploymentcontents = get_database_deployment(database_id)
-	primary = request.args.get('primary', '')
+        primary = get_first_hostname(database_id)
         try:
             retcode = start_local_server(deploymentcontents, primary)
             if (retcode == 0):
