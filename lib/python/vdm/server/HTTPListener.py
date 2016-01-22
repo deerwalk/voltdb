@@ -496,7 +496,6 @@ def start_local_server(deploymentcontents, primary=''):
     voltdb_cmd = [ 'nohup', os.path.join(voltdb_dir, 'voltdb'), 'create', '-d', filename ]
     if primary:
         voltdb_cmd = voltdb_cmd + [ '-H', primary ]
-    print '****voltdb_cmd=' + str(voltdb_cmd)
 
     global OUTFILE_COUNTER
     OUTFILE_COUNTER = OUTFILE_COUNTER + 1
@@ -1725,7 +1724,6 @@ class StartDatabaseAPI(MethodView):
                 url = ('http://%s:8000/api/1.0/databases/%u/servers/%u/start') % \
                                   (curr['hostname'], database_id, server_id)
 		urlparams = { 'primary' : primary }
-		print '*****params: ' + urlparams
                 response = requests.put(url, params=urlparams)
                 if (response.status_code != requests.codes.ok):
                     failed = True
