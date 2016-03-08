@@ -54,6 +54,7 @@ import voltdbclient
 import logging
 from logging.handlers import RotatingFileHandler
 from flask_logging import Filter
+from os.path import expanduser
 
 filter_log = Filter('/api/1.0/', 'GET')
 
@@ -2445,9 +2446,11 @@ def main(runner, amodule, config_dir, server):
     APP.add_url_rule('/api/1.0/voltdeploy/', view_func=VDM_VIEW,
                      methods=['GET'])
 
-    if os.path.exists('voltdeploy.log'):
-        open('voltdeploy.log', 'w').close()
-    handler = RotatingFileHandler('voltdeploy.log')
+    home = expanduser("~")
+    path = os.path.join(home, '.vdm', 'voltdeploy.log')
+    if os.path.exists(path):
+        open(path, 'w').close()
+    handler = RotatingFileHandler(path)
     handler.setFormatter(logging.Formatter(
          "%(asctime)s|%(levelname)s|%(message)s"))
     log = logging.getLogger('werkzeug')
