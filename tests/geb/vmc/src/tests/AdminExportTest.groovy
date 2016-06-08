@@ -1148,4 +1148,11 @@ class AdminExportTest extends TestBase {
         page.overview.errorPropertyName1.isDisplayed()
         page.overview.errorPropertyValue1.isDisplayed()
     }
+
+    def ExampleTest(){
+        when:
+        println("test")
+        then:
+        println("test")
+    }
 }
