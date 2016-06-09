@@ -73,12 +73,4 @@ class SchemaPageSizeWorksheetTab extends SchemaPage {
         sizeTab.displayed
         sizeTab.attr('class') == 'active'
     }
-
-
-    public String removeLastTwoChar(String s) {
-        if (s == null || s.length() == 0) {
-            return s;
-        }
-        return s.substring(0, s.length()-2);
-    }
 }

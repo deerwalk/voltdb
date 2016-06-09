@@ -332,4 +332,15 @@ class SchemaPage extends VoltDBManagementCenterPage {
     def boolean gotoSchemaSubTab() {
         schemaSubLink.click()
     }
+
+    public String removeLastTwoChar(String s) {
+        if (s == null || s.length() == 0) {
+            return s;
+        }
+        return s.substring(0, s.length()-2);
+    }
+
+    public String returnIdOfRowCount(int index) {
+        return "s-size-" + String.valueOf(index) + "-count"
+    }
 }

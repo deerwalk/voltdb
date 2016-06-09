@@ -30,6 +30,7 @@ import java.util.List;
 
 import spock.lang.*
 import vmcTest.pages.*
+import org.openqa.selenium.Keys
 
 /**
  * This class tests navigation between pages (or tabs), of the the VoltDB
@@ -1535,12 +1536,14 @@ class SchemaPageTest extends TestBase {
     def sizeWorksheetTabSizeWorksheetVariations() {
         String createQuery = page.getQueryToCreateTable()
         String createViewQuery = page.getQueryToCreateView()
-        int tableMin
-        int tableMax
-        int viewMin
-        int indexMin
-        int totalMin
-        int totalMax
+        String idOfFirstCount = page.returnIdOfRowCount(1)
+        String idOfSecondCount = page.returnIdOfRowCount(2)
+        int tableMin, newTableMin
+        int tableMax, newTableMax
+        int viewMin, newViewMin
+        int indexMin, newIndexMin
+        int totalMin, newTotalMin
+        int totalMax, newTotalMax
 
         when: 'click the SQL Query link (if needed)'
         openSqlQueryPage()
@@ -1582,6 +1585,48 @@ class SchemaPageTest extends TestBase {
         then: 'check if the values follow the rule or not'
         totalMax == tableMax + viewMin + indexMin
         totalMin == tableMin + viewMin + indexMin
+
+        when: 'row count is changed'
+        $(id:idOfFirstCount).value(Keys.chord(Keys.CONTROL, "A") + Keys.BACK_SPACE)
+        $(id:idOfFirstCount).value("100000")
+        then: 'click a text'
+        page.sizeTableMin.click()
+
+        report 'hello1'
+        when: 'assign new values from the page'
+        newTableMin = Integer.parseInt(removeLastTwoChar(page.sizeTableMin.text().replace(",", "")))
+        newTableMax = Integer.parseInt(removeLastTwoChar(page.sizeTableMax.text().replace(",", "")))
+        newViewMin  = Integer.parseInt(removeLastTwoChar(page.sizeViewMin.text().replace(",", "")))
+        newIndexMin = Integer.parseInt(removeLastTwoChar(page.sizeIndexMin.text().replace(",", "")))
+        newTotalMin = Integer.parseInt(removeLastTwoChar(page.sizeTotalMin.text().replace(",", "")))
+        newTotalMax = Integer.parseInt(removeLastTwoChar(page.sizeTotalMax.text().replace(",", "")))
+        and: 'compare the new values with old ones'
+        newTableMin == 100 * tableMin
+        newTableMax == 100 * tableMax
+        then: 'check if the new values follow the rule or not'
+        newTotalMax == newTableMax + newViewMin + newIndexMin
+        newTotalMin == newTableMin + newViewMin + newIndexMin
+
+        when: 'row count is changed'
+        $(id:idOfSecondCount).value(Keys.chord(Keys.CONTROL, "A") + Keys.BACK_SPACE)
+        $(id:idOfSecondCount).value("100000")
+        then: 'click a text'
+        page.sizeTableMin.click()
+
+        report 'hello2'
+        when: 'assign new values from the page'
+        newTableMin = Integer.parseInt(removeLastTwoChar(page.sizeTableMin.text().replace(",", "")))
+        newTableMax = Integer.parseInt(removeLastTwoChar(page.sizeTableMax.text().replace(",", "")))
+        newViewMin  = Integer.parseInt(removeLastTwoChar(page.sizeViewMin.text().replace(",", "")))
+        newIndexMin = Integer.parseInt(removeLastTwoChar(page.sizeIndexMin.text().replace(",", "")))
+        newTotalMin = Integer.parseInt(removeLastTwoChar(page.sizeTotalMin.text().replace(",", "")))
+        newTotalMax = Integer.parseInt(removeLastTwoChar(page.sizeTotalMax.text().replace(",", "")))
+        and: 'compare the new values with old ones'
+        newViewMin  == 100 * viewMin
+        newIndexMin == 100 * indexMin
+        then: 'check if the new values follow the rule or not'
+        newTotalMax == newTableMax + newViewMin + newIndexMin
+        newTotalMin == newTableMin + newViewMin + newIndexMin
     }
 
     def cleanupSpec() {
