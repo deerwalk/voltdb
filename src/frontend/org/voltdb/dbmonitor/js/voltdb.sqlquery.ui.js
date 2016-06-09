@@ -17,7 +17,7 @@ $(document).ready(function () {
         }
     }
 
-
+    $("#saveQueryBtn").popup()
     $("#bntTimeoutSetting").popup({
         open: function (event, ui, ele) {
             $("#errorQueryTimeoutConfig").hide();
