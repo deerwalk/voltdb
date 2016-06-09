@@ -75,4 +75,10 @@ class SchemaPageSizeWorksheetTab extends SchemaPage {
     }
 
 
+    public String removeLastTwoChar(String s) {
+        if (s == null || s.length() == 0) {
+            return s;
+        }
+        return s.substring(0, s.length()-2);
+    }
 }
