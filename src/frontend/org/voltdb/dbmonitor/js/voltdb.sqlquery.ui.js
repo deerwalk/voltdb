@@ -17,7 +17,7 @@ $(document).ready(function () {
         }
     }
 
-    $("#saveQueryBtn").popup()
+
     $("#bntTimeoutSetting").popup({
         open: function (event, ui, ele) {
             $("#errorQueryTimeoutConfig").hide();
@@ -227,6 +227,82 @@ $(document).ready(function () {
     //    railVisible: true,
     //    height: '225px'
     //});
+
+    $('#saveQueryBtn').popup({
+        open: function (event, ui, ele) {
+            $('#txtQueryName').val('')
+            $('#errorQueryName').hide()
+            var queryText = $('#theQueryText').val()
+            if(queryText == ''){
+                $('#btnSaveQueryOk').hide()
+                $('#queryError').show()
+            } else {
+                $('#btnSaveQueryOk').show()
+                $('#queryError').hide()
+            }
+            $.validator.addMethod(
+                "checkDuplicate",
+                function (value) {
+                    debugger;
+                    var arr = []
+                    server_keys = Object.keys(SQLQueryRender.queryNameList)
+                    if ($.inArray(value, server_keys) != -1) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                },
+                "Query name already exists."
+            );
+            $("#formSaveQuery").validate({
+                rules: {
+                    txtQueryName: {required: true,regex: /^[a-zA-Z0-9_.]+$/,checkDuplicate:[]}
+                },
+                messages: {
+                    txtQueryName: {required: 'This field is required.',
+                    regex: 'Only alphabets, numbers, _ and . are allowed.',checkDuplicate:'Query name already exist.'}
+                }
+            });
+        },
+        afterOpen: function () {
+            var popup = $(this)[0];
+            $('#btnSaveQueryOk').unbind('click');
+            $('#btnSaveQueryOk').on('click', function (e) {
+                debugger;
+                if (!$("#formSaveQuery").valid()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+                var queryText = $('#theQueryText').val()
+                var queryName = $('#txtQueryName').val()
+                var data = {}
+                var sqlCookieData = SQLQueryRender.getCookie('SqlQueryData')
+                if(sqlCookieData != undefined){
+                    data = $.parseJSON(sqlCookieData)
+                }
+                data[queryName] = queryText
+                SQLQueryRender.saveSqlQueryCookie('SqlQueryData', JSON.stringify(data))
+                SQLQueryRender.loadSavedQueries()
+                popup.close();
+
+
+            });
+
+            $('#btnSaveQueryCancel').unbind('click');
+            $('#btnSaveQueryCancel').on('click', function () {
+                //Close the popup
+                popup.close();
+            });
+            //Center align the popup
+            popup.center();
+        }
+    });
+
+
+
+    SQLQueryRender.loadSavedQueries()
+
 });
 
 (function (window) {
@@ -542,6 +618,53 @@ $(document).ready(function () {
 
         this.removeCookie = function (name) {
             return $.removeCookie(name + "_" + VoltDBConfig.GetPortId());
+        }
+
+        this.saveSqlQueryCookie = function (name, value){
+            $.cookie(name + "_" + VoltDBConfig.GetPortId(), value);
+        }
+
+        this.queryNameList = []
+
+        this.loadSavedQueries = function(){
+            debugger;
+            var sqlCookieData = SQLQueryRender.getCookie('SqlQueryData')
+            var data = {}
+            if(sqlCookieData != undefined){
+                data = $.parseJSON(sqlCookieData)
+            }
+            if($.isEmptyObject(data)){
+                $('.bubble').hide()
+                return;
+            }else{
+                $('.bubble').show()
+            }
+            $('#queryList').html('')
+            $.each( data, function( key, value ) {
+                SQLQueryRender.queryNameList[key] = value
+                var htmlList = '<li><a class="queryName" href="#">'+key+'</a><span href="#queryDeleteConfirmationPop" class="crossIconBubble">x</span> </li>'
+                $('#queryList').append(htmlList);
+            });
+
+            $('.crossIconBubble').unbind('click')
+            $('.crossIconBubble').on('click', function(){
+                var item = $(this.parentElement).find('a').text()
+                delete SQLQueryRender.queryNameList[item]
+                var sqlCookieData = SQLQueryRender.getCookie('SqlQueryData')
+                var data = {}
+                if(sqlCookieData != undefined){
+                    data = $.parseJSON(sqlCookieData)
+                }
+                delete data[item]
+                SQLQueryRender.saveSqlQueryCookie('SqlQueryData', JSON.stringify(data))
+                $(this.parentElement).remove()
+                SQLQueryRender.loadSavedQueries()
+            })
+
+            $('.queryName').unbind('click')
+            $('.queryName').on('click', function(){
+                $('#theQueryText').val(SQLQueryRender.queryNameList[this.text])
+            })
         }
     });
     window.SQLQueryRender = SQLQueryRender = new iSqlQueryRender();

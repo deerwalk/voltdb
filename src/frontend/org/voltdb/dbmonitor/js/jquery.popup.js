@@ -358,6 +358,15 @@
 		        });
 		    }
 
+		    var queryNoSqlOkBtn = $("a[id=btnQueryNoSqlOk]");
+		    if (queryNoSqlOkBtn != undefined) {
+		        queryNoSqlOkBtn.unbind('click');
+		        queryNoSqlOkBtn.bind('click', function (e) {
+		            e.preventDefault();
+		            p.close();
+		        });
+		    }
+
 			// Get the content
 			content = ( content === undefined || content === '#' )
 				? p.o.content
