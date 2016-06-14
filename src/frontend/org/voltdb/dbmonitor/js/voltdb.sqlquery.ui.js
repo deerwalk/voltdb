@@ -245,7 +245,7 @@ $(document).ready(function () {
                 function (value) {
                     var arr = []
                     server_keys = Object.keys(SQLQueryRender.queryNameList)
-                    if ($.inArray(value, server_keys) != -1) {
+                    if ($.inArray($.trim(value), server_keys) != -1) {
                         return false;
                     } else {
                         return true;
@@ -259,7 +259,7 @@ $(document).ready(function () {
                 },
                 messages: {
                     txtQueryName: {required: 'This field is required.',
-                    regex: 'Only alphabets, numbers, _ and . are allowed.',checkDuplicate:'Query name already exist.'},
+                    regex: 'Only alphabets, spaces, numbers, _ and . are allowed.',checkDuplicate:'Query name already exist.'},
                 }
             });
         },
@@ -273,7 +273,7 @@ $(document).ready(function () {
                     return;
                 }
                 var queryText = $('#theQueryText').val()
-                var queryName = $('#txtQueryName').val()
+                var queryName = $.trim($('#txtQueryName').val())
                 var data = {}
                 var sqlCookieData = SQLQueryRender.getCookie('SqlQueryData')
                 if(sqlCookieData != undefined){

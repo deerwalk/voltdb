@@ -3724,6 +3724,7 @@ label.errorTimeOut {
     height: 10px;
 }
 .txtQName input[type="text"] { width:260px;}
+.txtQName label {line-height:12px;}
 .bubble { background:#fff; border-bottom:2px solid #ccc; padding:10px 5px;  }
 .bubbleLabel { float:left;}
 ul.bubbleList { width:94%; float:right; margin:0; padding:0; overflow:hidden; }
