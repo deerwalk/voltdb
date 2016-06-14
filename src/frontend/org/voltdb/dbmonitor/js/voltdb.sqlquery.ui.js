@@ -255,11 +255,11 @@ $(document).ready(function () {
             );
             $("#formSaveQuery").validate({
                 rules: {
-                    txtQueryName: {required: true,regex: /^[a-zA-Z0-9_.]+$/,checkDuplicate:[]}
+                    txtQueryName: {required: true, maxlength: 30,  regex: /^[a-z\d\-_.\s]+$/i,checkDuplicate:[]},
                 },
                 messages: {
                     txtQueryName: {required: 'This field is required.',
-                    regex: 'Only alphabets, numbers, _ and . are allowed.',checkDuplicate:'Query name already exist.'}
+                    regex: 'Only alphabets, numbers, _ and . are allowed.',checkDuplicate:'Query name already exist.'},
                 }
             });
         },
