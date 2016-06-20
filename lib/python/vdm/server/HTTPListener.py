@@ -1227,7 +1227,6 @@ class StopDatabaseAPI(MethodView):
             try:
                 server = voltdbserver.VoltDatabase(database_id)
                 response = server.stop_database()
-                response = server.stop_database()
                 # Don't use the response in the json we send back
                 # because voltadmin shutdown gives 'Connection broken' output
                 resp_json = json.loads(json.loads(response.data)['statusString'])
