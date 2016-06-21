@@ -1013,26 +1013,37 @@
                         <div class="clear"></div>
                     </div>
                     <div class="queryInput" id="inputQuery">
-                    <h1 class="theHeadingQuery">
-                    
-                    <div class="icon-query queryHeadName"><span>Query</span></div>
-                        <ul class="btnList" id="queryBtnList">
-                            <li>
-                              <div class="queryTimeOutLabel" id="divQueryTimeOut"><span id="queryTimeoutTxt" class="qtmText"></span><span id="timeoutCross" class="setqueryTimeOut timeOutCross"></span></div>
+                        <h1 class="theHeadingQuery">
+                            <div class="icon-query queryHeadName"><span>Query</span></div>
+                            <ul class="btnList" id="queryBtnList">
+                                <li>
+                                  <div class="queryTimeOutLabel" id="divQueryTimeOut"><span id="queryTimeoutTxt" class="qtmText"></span><span id="timeoutCross" class="setqueryTimeOut timeOutCross"></span></div>
 
-                            </li>
-                            <li>
-                                <a href="#queryTimeoutConfigPopup" id="bntTimeoutSetting" class="setServer sqlSetting"></a>
-                            </li>
-                            <li>
-                                <button class="btnStudio" id="runBTn">Run</button>
-                            </li>
-                            <li>
-                                <button class="btnStudio" id="clearQuery">Clear</button>
-                            </li>
-                        </ul>
-                         <div class="clear"></div>
+                                </li>
+                                <li>
+                                    <a href="#queryTimeoutConfigPopup" id="bntTimeoutSetting" class="setServer sqlSetting"></a>
+                                </li>
+                                <li>
+                                    <button class="btnStudio" id="runBTn">Run</button>
+                                </li>
+                                <li>
+                                    <button href="#saveQueryPopup" class="btnStudio" id="saveQueryBtn">Save</button>
+                                </li>
+                                <li>
+                                    <button class="btnStudio" id="clearQuery">Clear</button>
+                                </li>
+                            </ul>
+                            <div class="clear"></div>
                         </h1>
+                        <div class="bubble">
+                           <div class="bubbleLabel">Saved:</div>
+                                <ul id="queryList" class="bubbleList">
+                                </ul>
+                           <div class="clear"></div>
+
+
+                        </div>
+
                         <div class="query">
                             <form name="" id="queryForm">
                                 <div class="textWritingArea">
@@ -1936,7 +1947,7 @@
                 <tbody><tr>
                   <td>Query Timeout</td>
                   <td align="center">
-                    <input id="txtQueryTimeoutConfig" name="txtQueryTimeoutConfig"  type="text">
+                    <input id="txtQueryTimeoutConfig" name="txtQueryTimeoutConfig"  type="text" required>
                     <label id="errorQueryTimeoutConfig" for="txtQueryTimeoutConfig" class="error errorTimeOut" style="display: none;"></label>
                   </td>
                   <td align="left">milliseconds</td>
@@ -1956,6 +1967,67 @@
         </div>
       </div>
     </div>
+    <!--Save Query Popup-->
+    <div id="saveQueryPopup" style="display: none; width:20px;">
+        <div id="saveQueryInnerPopup">
+            <div class="overlay-title icon-alert">
+                <div id="saveQueryHeader" class="addConfigHeader">Save Query</div>
+            </div>
+            <div id="saveQueryControls">
+                <div class="clear"></div>
+                <form id="formSaveQuery" method="get" action=""  style="overflow:auto;">
+                    <div id="saveQueryWrapper" class="configWrapper" style="width:300px; overflow:hidden">
+                        <table width="100%" cellpadding="0" cellspacing="0" class="configurTbl">
+                            <tbody>
+                                <tr id="Tr1">
+                                    <td>Name:</td>
+                                    <td width="15%" class="txtQName">
+                                        <input id="txtQueryName" name="txtQueryName" type="text">
+                                        <label id="errorQueryName" for="txtQueryName" class="error" style="display: none;"></label>
+                                    </td>
+                                </tr>
+                            <tr id = 'queryError'>
+                               <td colspan="2">
+                                   Query field is empty. Go back and fill the query field to save queries.
+                               </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+                <br />
+                <div class="overlay-btns"><a id="btnSaveQueryOk" class="btn">Save</a> <a id="btnSaveQueryCancel" class="btn btn-gray">Cancel</a></div>
+            </div>
+            <div id="saveQueryConfirmation" style="display: none;">
+                <div class="overlay-content ">
+                    <div class="confirmationInfo">Are you sure you want to <span data-state="edit" id="queryText">save</span>?</div>
+                </div>
+                <div class="overlay-btns"><a id="btnSaveQueryConfrmOk" class="btn closeBtn">Yes</a> <a id="btnSaveQueryConfrmCancel" class="btn btn-gray confirmNoSave">No</a> </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- POPUP query delete -->
+    <div id="queryDeleteConfirmationPopup" style="display: none" data-item="">
+        <div class="overlay-title icon-alert">Query delete: Confirmation</div>
+        <div class="clear"></div>
+        <div class="overlay-content">
+            <p class="txt-bold">Are you sure you want to delete the query?</p>
+        </div>
+        <div class="overlay-btns"><a id="btnQueryDeleteConfirmationOk" class="btn">Ok</a> <a id="btnQueryDeleteConfirmationCancel" class="btn btn-gray">Cancel</a></div>
+    </div>
+    <!-- POPUP query delete -->
+
+    <!-- POPUP query overwrite -->
+    <div id="queryOverwriteConfirmationPopup" style="display: none" data-item="">
+        <div class="overlay-title icon-alert">Query Overwrite: Confirmation</div>
+        <div class="clear"></div>
+        <div class="overlay-content">
+            <p class="txt-bold">Are you sure you want to overwrite the existing query in query box?</p>
+        </div>
+        <div class="overlay-btns"><a id="btnQueryOverwriteConfirmationOk" class="btn">Ok</a> <a id="btnQueryOverwriteConfirmationCancel" class="btn btn-gray">Cancel</a></div>
+    </div>
+    <!-- POPUP query overwrite -->
 
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="js/bootstrap.js"></script>
