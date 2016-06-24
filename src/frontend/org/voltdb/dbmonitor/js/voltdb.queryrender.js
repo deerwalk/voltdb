@@ -316,11 +316,6 @@ function QueryUI(queryString, userName) {
             src += '<tr>';
             for (var k = 0; k < table.data[j].length; k++) {
                 var val = table.data[j][k];
-                if (typeof val == 'string'){
-                    if (val == '0E-12'){
-                        val = parseInt(val).toFixed(12);
-                    }
-                }
                 var typ = table.schema[k].type;
                 if (typ == 11 && val) {
                     var us = val % 1000;
@@ -333,6 +328,9 @@ function QueryUI(queryString, userName) {
                         + lPadZero(dt.getUTCSeconds(), 2) + "."
                         + lPadZero((dt.getUTCMilliseconds()) * 1000 + us, 6);
                     typ = 9;  //code for varchar
+                }
+                else if(typ == 22){
+                    val = parseFloat(val).toFixed(12)
                 }
                 if (isExplainQuery == true) {
                     val = applyFormat(val);
