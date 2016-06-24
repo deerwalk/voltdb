@@ -24,7 +24,14 @@ class ClusterSettingsPage extends Page {
         serverSettingsTab { $("#serverSetting") }
 
         // DB
-        startCluster { $("#divDbManager > div.clusterContent > div.clusterStartStop > div > a") }
+        startCluster        { $("#btnStartCluster") }
+        adminModeCheckbox   { $("#pauseOption") }
+        adminModeText       { $("#divDbManager > div.clusterContent > div.clusterStartStop > div.clusterBtnWrap > div.startAdminMode > label") }
+
+        overwriteCheckbox   { $("#startOption") }
+        overwriteText       { $("#divDbManager > div.clusterContent > div.clusterStartStop > div.clusterBtnWrap > div.startSelect > label") }
+
+        overridePopupYes    { $("#btnOverwriteYes") }
 
         // Servers
         buttonAddServer { $("#btnAddServer") }
@@ -54,6 +61,8 @@ class ClusterSettingsPage extends Page {
         deleteServer { $("#serverList > tbody > tr:nth-child(5) > td:nth-child(2) > a > div") }
         popupDeleteServer { $("#deleteConfirmation > div > div") }
         popupDeleteServerButtonOk { $("#deleteServerOk") }
+
+        stopServerOk            { $("#btnConfirmStopServerOk")}
 
         testingPath(required: false) { $("#serverList > tbody > tr:nth-child(5) > td:nth-child(1)") }
         errorServerName { $("#errorServerName") }

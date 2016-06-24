@@ -407,7 +407,7 @@ class ClusterSettingsTest extends TestBase {
                 for(countNext=0; countNext<numberOfTrials; countNext++) {
                     try {
                         waitFor { buttonAddDatabase.isDisplayed() }
-                            break
+                        break
                     } catch(geb.waiting.WaitTimeoutException exception) {
                         currentDatabase.click()
                     }
@@ -863,11 +863,51 @@ class ClusterSettingsTest extends TestBase {
         page.logPopupOk.click()
     }
 
-    /*def cleanup() {
+    def startCluster() {
+        when: ''
+        try {
+            waitFor { $("#startFailed > div > div > div.modal-header > h4 > span").isDisplayed() }
+            $("#btnFailedOk").click()
+        } catch (geb.waiting.WaitTimeoutException exception) {
+            println("No error message")
+        }
+        then:
+        waitFor { page.overwriteCheckbox.isDisplayed() }
+
+        when:
+        page.overwriteCheckbox.click()
+        and: 'Close the popup'
+        page.startCluster.click()
+        then:
+        page.overridePopupYes.click()
+
+        when:
+        waitFor(30) { $("#divDbManager > div.clusterContent > div.clusterStartStop > div.loadingStart > p:nth-child(2)").isDisplayed() }
+        then:
+        waitFor(30) { $("#startSuccess > p").isDisplayed() }
+        waitFor { $("#deleteServer_1 > span").isDisplayed() }
+        report "eh"
+
+        when:
+        $("#deleteServer_1 > span").click()
+        then:
+        waitFor { page.stopServerOk.isDisplayed() }
+
+        when:
+        page.stopServerOk.click()
+        then:
+        try {
+            waitFor(30) { 1==0 }
+        } catch(geb.waiting.WaitTimeoutException exception) {
+            println("waited")
+        }
+    }
+
+    def cleanup() {
         to ClusterSettingsPage
         int indexToDelete = 2
         indexOfNewDatabase = 1
         chooseDatabase(indexOfNewDatabase, "Database")
         deleteNewDatabase(indexToDelete, "name_src")
-    }*/
+    }
 }
