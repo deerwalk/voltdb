@@ -6,6 +6,16 @@ var $tabs = null;
 var tab_counter = 1;
 var INT_MAX_VALUE = 2147483647;
 $(document).ready(function () {
+    localStorage.test = 1
+    function CheckBrowser() {
+        if ('localStorage' in window && window['localStorage'] !== null) {
+            return true;
+        } else {
+             return false;
+        }
+    }
+    CheckBrowser();
+
     var sqlValidationRule = {
         numericRules: {
             min: 1,
@@ -18,6 +28,8 @@ $(document).ready(function () {
             digits: "Please enter a positive number without any decimal."
         }
     }
+
+
 
     var fixWidth= function(){
         var totalWidth = $(window).width()
@@ -87,6 +99,132 @@ $(document).ready(function () {
             });
         }
     });
+
+    $("#btnQuerySaveConfirmation").popup({
+        afterOpen: function () {
+            var popup = $(this)[0];
+            $("#btnQuerySaveOk").unbind("click");
+            $("#btnQuerySaveOk").on("click", function(){
+                popup.close();
+            });
+
+            $("#btnQuerySaveCancel").unbind("click");
+            $("#btnQuerySaveCancel").on("click", function () {
+                popup.close();
+            });
+        }
+    });
+
+    $('#btnSaveQueryConfirmation').popup({
+        open: function (event, ui, ele) {
+            var element = $("#worktabs .ui-tabs-panel:visible").attr("id");
+            var element_id = element.split('-')[1]
+
+            $('#txtQueryName').val('')
+            $('#errorQueryName').hide()
+            var queryText = $('#querybox-' + element_id).val()
+            if(queryText == ''){
+                $('#btnSaveQueryOk').hide()
+                $('#queryError').show()
+            } else {
+                $('#btnSaveQueryOk').show()
+                $('#queryError').hide()
+            }
+
+            $.validator.addMethod(
+                "checkDuplicate",
+                function (value) {
+                    var arr = []
+                    if ($.inArray(value, SQLQueryRender.queryNameList) != -1) {
+                        if(value ==  SQLQueryRender.orgQueryName)
+                            return true;
+                        else
+                            return false;
+                    } else {
+                        return true;
+                    }
+                },
+                "Query name already exists."
+            );
+
+            $("#formSaveQuery").validate({
+                rules: {
+                    txtQueryName: {required: true,regex: /^[a-zA-Z0-9_.]+$/,checkDuplicate:[]}
+                },
+                messages: {
+                    txtQueryName: {required: 'This field is required.',
+                    regex: 'Only alphabets, numbers, _ and . are allowed.',checkDuplicate:'Query name already exist.'}
+                }
+            });
+        },
+        afterOpen: function () {
+            var popup = $(this)[0];
+            $("#btnSaveQueryOk").unbind("click");
+            $("#btnSaveQueryOk").on("click", function(e){
+                if (!$("#formSaveQuery").valid()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+
+                tabName = $('#txtQueryName').val()
+
+                var element = $("#worktabs .ui-tabs-panel:visible").attr("id");
+                var element_id = element.split('-')[1]
+                $('#qTab-' + element_id).find('a').html(tabName)
+
+                queryData = {}
+                query_localStorage = localStorage.queries
+                if (query_localStorage != undefined){
+                    queryData = $.parseJSON(query_localStorage)
+                }
+                queryData[tabName] = $('#querybox-' + element_id).val()
+                localStorage.queries = JSON.stringify(queryData)
+                popup.close();
+            });
+
+            $("#btnSaveQueryCancel").unbind("click");
+            $("#btnSaveQueryCancel").on("click", function () {
+                popup.close();
+            });
+        }
+    });
+
+    $('#btnCloseTabConfirmation').popup({
+        afterOpen: function () {
+            var popup = $(this)[0];
+            $('#btnCloseTabOk').unbind('click');
+            $('#btnCloseTabOk').on('click', function (e) {
+                var element_id = $('#closeTabConfirmation').data('id')
+                var id = element_id.split('-')[1]
+                tablist = []
+                $('#worktabs ul li').each(function(){
+                    tablist.push($(this).attr('id').split('-')[1])
+                })
+                $tabs.tabs( "refresh");
+                var active_id = $tabs.tabs( "option", "active")
+                var current_position = $.inArray(id, tablist)
+                if(current_position == active_id){
+                    if (current_position > 0)
+                        $tabs.tabs( "option", "active", active_id - 1)
+                    else if (current_position == 0 && tablist.length > 0)
+                        $tabs.tabs( "option", "active", active_id + 1)
+                } else if (active_id >= tablist.length){
+                    //$tabs.tabs( "option", "active", tablist.length - 3)
+                }
+                $('#'+ element_id).remove();
+                $('#q-' + id).remove()
+                $('#queryBtnList-' + id).remove()
+                SQLQueryRender.showHideNewTab()
+                popup.close()
+            });
+
+            $('#btnCloseTabCancel').unbind('click');
+            $('#btnCloseTabCancel').on('click', function (e) {
+                popup.close()
+            });
+        }
+    })
 
     $("#timeoutCross").on("click", function(){
         SQLQueryRender.removeCookie("timeoutTime")
@@ -259,8 +397,10 @@ $(document).ready(function () {
     //});
     $tabs = $("#worktabs").tabs();
 
-
-    SQLQueryRender.createQueryTab()
+    if(localStorage.queries == undefined)
+        SQLQueryRender.createQueryTab();
+    else
+        SQLQueryRender.loadSavedQueries();
 });
 
 (function (window) {
@@ -282,19 +422,43 @@ $(document).ready(function () {
                 digits: "Please enter a positive number without any decimal."
             }
         }
-        this.createQueryTab = function(){
-            if($('#worktabs ul li').length == 0 || $('#worktabs ul li').length == 1)
-                queryId = 1
-            else{
-                var last_tab_txt = $($('#worktabs ul li')[$('#worktabs ul li').length -2]).find('a').text()
-                queryId = parseInt(last_tab_txt.replace(/[^0-9]/gi, '')) + 1
+        this.queryNameList = []
+        this.orgQueryName = ''
+
+        this.loadSavedQueries= function(){
+            var sql_localStorage = localStorage.queries
+            var queryData = {}
+
+            if(sql_localStorage != undefined){
+                queryData = $.parseJSON(sql_localStorage)
             }
+
+            $.each( queryData, function( key, value ) {
+                SQLQueryRender.createQueryTab(key, value)
+            });
+        }
+
+        this.createQueryTab = function(tabName, tabQuery){
+            if($('#worktabs ul li').length == 0 || $('#worktabs ul li').length == 1)
+                tab_counter = 1
+            else{
+                var last_tab_txt = $($('#worktabs ul li')[$('#worktabs ul li').length -2]).attr('id')
+                tab_counter = parseInt(last_tab_txt.replace(/[^0-9]/gi, '')) + 1
+            }
+
             var ul = $tabs.find( "ul" );
             var html = ''
-            if($('#new-query').length == 0)
-                html = '<li id="qTab-'+tab_counter+'"><a href="#q-'+tab_counter+'">Query'+ queryId +'</a> <span class="ui-icon ui-icon-close close-tab" id="close-tab-' + tab_counter + '" href="#closeTabConfirmation" title="Close Tab">Close</span></li><li id="liNewQuery" title="New Query Tab"><a class="btnStudio plusBtn" id="new-query"><span>+</span></a></li>'
-            else
-               html = '<li id="qTab-'+tab_counter+'"><a href="#q-'+tab_counter+'">Query'+ queryId +'</a> <span class="ui-icon ui-icon-close close-tab" id="close-tab-' + tab_counter + '" href="#closeTabConfirmation" title="Close Tab">Close</span></li>'
+            if($('#new-query').length == 0){
+                html = '<li id="qTab-'+tab_counter+'"><a href="#q-'+tab_counter+'">'+
+                    (tabName == undefined ? 'Query' + tab_counter : tabName) +
+                    '</a> <span class="ui-icon ui-icon-close close-tab" id="close-tab-' + tab_counter +
+                    '" href="#closeTabConfirmation" title="Close Tab">Close</span></li><li id="liNewQuery" title="New Query Tab"><a class="btnStudio plusBtn" id="new-query"><span>+</span></a></li>'
+            } else {
+                html = '<li id="qTab-'+tab_counter+'"><a href="#q-'+tab_counter+'">'+
+                    (tabName == undefined ? 'Query' +
+                    tab_counter : tabName) +'</a> <span class="ui-icon ui-icon-close close-tab" id="close-tab-' + tab_counter +
+                    '" href="#closeTabConfirmation" title="Close Tab">Close</span></li>'
+            }
             var html_body = '<div class="querybar"><div class="wrapper"><textarea id="querybox-'+tab_counter+'" class="querybox-'+tab_counter+'" wrap="off"></textarea></div></div><div class="workspacestatusbar noborder"></div>'
             var html_query = '<div class="blockWrapper" id="blockContainer02">' +
                              '   <div class="exportType">' +
@@ -319,6 +483,7 @@ $(document).ready(function () {
             $(html).appendTo( ul );
             $('#ulTabList').append($('#liNewQuery'))
             $('#worktabs').append('<div id="q-'+tab_counter+'" >' + html_body + html_query + '</div>')
+            $('#querybox-'+tab_counter).val(tabQuery == undefined ? '' : tabQuery)
             SQLQueryRender.addQueryBtn(tab_counter)
             $('#exportType-' + tab_counter).change(function () {
                 var tab_id = $(this).attr('id').split('-')[1]
@@ -350,42 +515,9 @@ $(document).ready(function () {
             $('#close-tab-' + tab_counter).click(function() {
                 var element_id = $(this.parentElement).attr('id')
                 $('#closeTabConfirmation').data('id' , element_id )
+                $('#btnCloseTabConfirmation').trigger('click')
             });
-            $('#close-tab-' + tab_counter).popup({
-                afterOpen: function () {
-                    var popup = $(this)[0];
-                    $('#btnCloseTabOk').unbind('click');
-                    $('#btnCloseTabOk').on('click', function (e) {
-                        var element_id = $('#closeTabConfirmation').data('id')
-                        var id = element_id.split('-')[1]
-                        tablist = []
-                        $('#worktabs ul li').each(function(){
-                            tablist.push($(this).attr('id').split('-')[1])
-                        })
-                        $tabs.tabs( "refresh");
-                        var active_id = $tabs.tabs( "option", "active")
-                        var current_position = $.inArray(id, tablist)
-                        if(current_position == active_id){
-                            if (current_position > 0)
-                                $tabs.tabs( "option", "active", active_id - 1)
-                            else if (current_position == 0 && tablist.length > 0)
-                                $tabs.tabs( "option", "active", active_id + 1)
-                        } else if (active_id >= tablist.length){
-                            //$tabs.tabs( "option", "active", tablist.length - 3)
-                        }
-                        $('#'+ element_id).remove();
-                        $('#q-' + id).remove()
-                        $('#queryBtnList-' + id).remove()
-                        SQLQueryRender.showHideNewTab()
-                        popup.close()
-                    });
 
-                    $('#btnCloseTabCancel').unbind('click');
-                    $('#btnCloseTabCancel').on('click', function (e) {
-                        popup.close()
-                    });
-                }
-            })
             $tabs.tabs( "refresh");
             $tabs.tabs( "option", "active", $('#worktabs ul li').length - 2);
             $tabs.tabs({
@@ -394,6 +526,7 @@ $(document).ready(function () {
                 SQLQueryRender.ShowQueryBtnById(tab_id)
               }
             });
+            SQLQueryRender.queryNameList.push(tabName == undefined ? 'Query' + tab_counter : tabName)
             tab_counter++
             this.showHideNewTab()
         }
@@ -405,6 +538,9 @@ $(document).ready(function () {
                           ' </li> ' +
                           ' <li> ' +
                           '     <button class="btnStudio" id="clearQuery-'+ tab_id+'">Clear</button> ' +
+                          ' </li> ' +
+                          ' <li> ' +
+                          '     <button class="btnStudio" id="querySaveBtn-'+ tab_id+'">Save</button> ' +
                           ' </li> ' +
                           '</ul>';
             $('#divQueryBtns').append(htmlBtn)
@@ -424,6 +560,14 @@ $(document).ready(function () {
             $('#clearQuery-' + tab_id).click(function () {
                 query_id = $(this).attr('id').split('-')[1]
                 $('#querybox-' + query_id).val('')
+            });
+
+            $('#querySaveBtn-' + tab_id).unbind('click');
+            $('#querySaveBtn-' + tab_id).click(function(){
+                var element = $("#worktabs .ui-tabs-panel:visible").attr("id");
+                var element_id = element.split('-')[1]
+                SQLQueryRender.orgQueryName = $('#qTab-' + element_id).find('a').text()
+                $('#btnSaveQueryConfirmation').trigger('click')
             });
 
             SQLQueryRender.ShowQueryBtnById(tab_id)

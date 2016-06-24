@@ -5,7 +5,7 @@ var table = '';
 $(document).ready(function () {
     $("#helppopup").load("help.htm", function () {
     });
-    localStorage.clear(); //clear the localStorage for DataTables in DR Section
+    //localStorage.clear(); //clear the localStorage for DataTables in DR Section
 
     var rv = -1;
     if (VoltDbUI.getCookie("username") != undefined && VoltDbUI.getCookie("username") != 'null') {
