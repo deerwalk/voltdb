@@ -120,7 +120,7 @@ $(document).ready(function () {
             var element = $("#worktabs .ui-tabs-panel:visible").attr("id");
             var element_id = element.split('-')[1]
 
-            $('#txtQueryName').val('')
+            $('#txtQueryName').val(SQLQueryRender.orgQueryName)
             $('#errorQueryName').hide()
             var queryText = $('#querybox-' + element_id).val()
             if(queryText == ''){
@@ -167,19 +167,27 @@ $(document).ready(function () {
                     return;
                 }
 
-                tabName = $('#txtQueryName').val()
+                newTabName = $('#txtQueryName').val()
 
                 var element = $("#worktabs .ui-tabs-panel:visible").attr("id");
                 var element_id = element.split('-')[1]
-                $('#qTab-' + element_id).find('a').html(tabName)
+                var oldTabName = $('#qTab-' + element_id).find('a').text()
+                $('#qTab-' + element_id).find('a').html(newTabName)
 
                 queryData = {}
                 query_localStorage = localStorage.queries
                 if (query_localStorage != undefined){
                     queryData = $.parseJSON(query_localStorage)
                 }
-                queryData[tabName] = $('#querybox-' + element_id).val()
+                if($('#qTab-' + element_id).data('isold')){
+                    if(newTabName != oldTabName){
+                        delete queryData[oldTabName]
+                    }
+                }
+                queryData[newTabName] = $('#querybox-' + element_id).val()
+
                 localStorage.queries = JSON.stringify(queryData)
+                $('#qTab-' + element_id).data('isold', true)
                 popup.close();
             });
 
@@ -212,6 +220,7 @@ $(document).ready(function () {
                 } else if (active_id >= tablist.length){
                     //$tabs.tabs( "option", "active", tablist.length - 3)
                 }
+                removeTabData(element_id)
                 $('#'+ element_id).remove();
                 $('#q-' + id).remove()
                 $('#queryBtnList-' + id).remove()
@@ -225,6 +234,17 @@ $(document).ready(function () {
             });
         }
     })
+
+    var removeTabData =  function(elementId){
+        var tabName = $('#' + elementId).find('a').text();
+        var queryData = {}
+        var sql_localStorage = localStorage.queries
+        if(sql_localStorage != undefined){
+            queryData = $.parseJSON(sql_localStorage);
+        }
+        delete queryData[tabName]
+        localStorage.queries = JSON.stringify(queryData);
+    }
 
     $("#timeoutCross").on("click", function(){
         SQLQueryRender.removeCookie("timeoutTime")
@@ -449,12 +469,12 @@ $(document).ready(function () {
             var ul = $tabs.find( "ul" );
             var html = ''
             if($('#new-query').length == 0){
-                html = '<li id="qTab-'+tab_counter+'"><a href="#q-'+tab_counter+'">'+
+                html = '<li data-isold="' + (tabName == undefined ? false : true ) + '" id="qTab-'+tab_counter+'"><a href="#q-'+tab_counter+'">'+
                     (tabName == undefined ? 'Query' + tab_counter : tabName) +
                     '</a> <span class="ui-icon ui-icon-close close-tab" id="close-tab-' + tab_counter +
                     '" href="#closeTabConfirmation" title="Close Tab">Close</span></li><li id="liNewQuery" title="New Query Tab"><a class="btnStudio plusBtn" id="new-query"><span>+</span></a></li>'
             } else {
-                html = '<li id="qTab-'+tab_counter+'"><a href="#q-'+tab_counter+'">'+
+                html = '<li data-isold="' + (tabName == undefined ? false : true ) + '" id="qTab-'+tab_counter+'"><a href="#q-'+tab_counter+'">'+
                     (tabName == undefined ? 'Query' +
                     tab_counter : tabName) +'</a> <span class="ui-icon ui-icon-close close-tab" id="close-tab-' + tab_counter +
                     '" href="#closeTabConfirmation" title="Close Tab">Close</span></li>'
