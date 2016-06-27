@@ -2034,6 +2034,31 @@
     </div>
     <!--Save Query Popup-->
 
+    <!-- Memory exceeded message -->
+    <a id="btnMemoryError" href="#memoryErrorPopup" style="display: none;"></a>
+    <div id="memoryErrorPopup" style="display: none" data-id="" data-elementid="">
+        <div class="overlay-title errorIcon ">Error</div>
+        <div class="clear"></div>
+        <div class="overlay-content confirmationHeight">
+            <p id="memErrorMsg" class="txt-bold">Maximum storage limit reached. Cannot save the current tab. <br/>Please remove the existing tabs or decrease the length of query.</p>
+        </div>
+        <div class="overlay-btns"><a id="btnMemoryErrorOk" class="btn">Ok</a></div>
+    </div>
+    <!-- Memory exceeded message -->
+
+    <!-- HTML5 support popup -->
+    <a id="btnHtmlSupport" href="#htmlSupportPopup" style="display: none;"></a>
+    <div id="htmlSupportPopup" style="display: none" data-id="" data-elementid="">
+        <div class="overlay-title errorIcon ">Error</div>
+        <div class="clear"></div>
+        <div class="overlay-content confirmationHeight">
+            <p class="txt-bold">Your browser doesn't support the html5 web storage. Cannot save the current tab.</p>
+        </div>
+        <div class="overlay-btns"><a id="btnIsSupportedOk" class="btn">Ok</a></div>
+    </div>
+    <!-- HTML5 support popup -->
+
+
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="js/bootstrap.js"></script>
     <script src="js/jquery.tablesorter.js"></script>

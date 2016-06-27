@@ -6,7 +6,6 @@ var $tabs = null;
 var tab_counter = 1;
 var INT_MAX_VALUE = 2147483647;
 $(document).ready(function () {
-    localStorage.test = 1
     function CheckBrowser() {
         if ('localStorage' in window && window['localStorage'] !== null) {
             return true;
@@ -161,33 +160,63 @@ $(document).ready(function () {
             var popup = $(this)[0];
             $("#btnSaveQueryOk").unbind("click");
             $("#btnSaveQueryOk").on("click", function(e){
-                if (!$("#formSaveQuery").valid()) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return;
-                }
-
-                newTabName = $('#txtQueryName').val()
-
-                var element = $("#worktabs .ui-tabs-panel:visible").attr("id");
-                var element_id = element.split('-')[1]
-                var oldTabName = $('#qTab-' + element_id).find('a').text()
-                $('#qTab-' + element_id).find('a').html(newTabName)
-
-                queryData = {}
-                query_localStorage = localStorage.queries
-                if (query_localStorage != undefined){
-                    queryData = $.parseJSON(query_localStorage)
-                }
-                if($('#qTab-' + element_id).data('isold')){
-                    if(newTabName != oldTabName){
-                        delete queryData[oldTabName]
+                if(typeof(Storage) !== "undefined"){
+                    if (!$("#formSaveQuery").valid()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
                     }
-                }
-                queryData[newTabName] = $('#querybox-' + element_id).val()
 
-                localStorage.queries = JSON.stringify(queryData)
-                $('#qTab-' + element_id).data('isold', true)
+                    var newTabName = $('#txtQueryName').val()
+                    var element = $("#worktabs .ui-tabs-panel:visible").attr("id");
+                    var element_id = element.split('-')[1]
+                    var oldTabName = $('#qTab-' + element_id).find('a').text()
+                    var oldQuery = '';
+
+                    queryData = {}
+                    orgQueryData = ""
+                    query_localStorage = localStorage.queries
+                    if (query_localStorage != undefined){
+                        queryData = $.parseJSON(query_localStorage)
+                        orgQueryData = query_localStorage
+                    }
+
+                    queryData[newTabName] = $('#querybox-' + element_id).val()
+
+                    if($('#qTab-' + element_id).data('isold')){
+                        if(newTabName != oldTabName){
+                            oldQuery = queryData[oldTabName]
+                            delete queryData[oldTabName]
+                        }
+                    }
+
+                    try{
+                        localStorage.queries = JSON.stringify(queryData)
+                        $('#qTab-' + element_id).find('a').html(newTabName)
+                        $('#qTab-' + element_id).data('isold', true)
+                    } catch(e){
+                        errorMsg = "Cannot save the current tab."
+                        if(navigator.userAgent.indexOf('Mozilla') != -1 && navigator.userAgent.indexOf('Firefox') != -1){
+                            if(e.code != undefined && e.code == '1014'){
+                                errorMsg = 'Maximum storage limit reached. Cannot save the current tab. '+
+                                '<br/>Please remove the existing tabs or decrease the length of query.';
+                            }
+                        } else {
+                            if(e.code != undefined && e.code == '22'){
+                                errorMsg = 'Maximum storage limit reached. Cannot save the current tab. '+
+                                '<br/>Please remove the existing tabs or decrease the length of query.';
+                            }
+                        }
+                        $('#memErrorMsg').html(errorMsg);
+                        if(orgQueryData != "" && orgQueryData != "{}" )
+                            localStorage.queries = orgQueryData;
+                        $("#btnMemoryError").trigger("click")
+                    }
+
+                } else {
+                    $("#btnHtmlSupport").trigger("click");
+                }
+
                 popup.close();
             });
 
@@ -195,6 +224,26 @@ $(document).ready(function () {
             $("#btnSaveQueryCancel").on("click", function () {
                 popup.close();
             });
+        }
+    });
+
+    $("#btnMemoryError").popup({
+        afterOpen: function () {
+            var popup = $(this)[0];
+            $("#btnMemoryErrorOk").unbind("click");
+            $("#btnMemoryErrorOk").on("click", function(){
+                popup.close();
+            })
+        }
+    });
+
+    $("#btnHtmlSupport").popup({
+        afterOpen: function () {
+            var popup = $(this)[0];
+            $("#btnIsSupportedOk").unbind("click");
+            $("#btnIsSupportedOk").on("click", function(){
+                popup.close();
+            })
         }
     });
 
@@ -243,7 +292,8 @@ $(document).ready(function () {
             queryData = $.parseJSON(sql_localStorage);
         }
         delete queryData[tabName]
-        localStorage.queries = JSON.stringify(queryData);
+        if(typeof(Storage) !== "undefined")
+            localStorage.queries = JSON.stringify(queryData);
     }
 
     $("#timeoutCross").on("click", function(){
@@ -456,6 +506,16 @@ $(document).ready(function () {
             $.each( queryData, function( key, value ) {
                 SQLQueryRender.createQueryTab(key, value)
             });
+
+            if($.isEmptyObject(queryData)){
+                var ul = $tabs.find( "ul" );
+                html = '<li id="liNewQuery" title="New Query Tab"><a class="btnStudio plusBtn" id="new-query"><span>+</span></a></li>';
+                $(html).appendTo( ul );
+                $("#new-query").unbind('click')
+                $("#new-query").on('click', function() {
+                SQLQueryRender.createQueryTab()
+            });
+            }
         }
 
         this.createQueryTab = function(tabName, tabQuery){
@@ -463,7 +523,7 @@ $(document).ready(function () {
                 tab_counter = 1
             else{
                 var last_tab_txt = $($('#worktabs ul li')[$('#worktabs ul li').length -2]).attr('id')
-                tab_counter = parseInt(last_tab_txt.replace(/[^0-9]/gi, '')) + 1
+                tab_counter = parseInt(last_tab_txt.replace(/[^0-9]/gi, '')) + 1;
             }
 
             var ul = $tabs.find( "ul" );
