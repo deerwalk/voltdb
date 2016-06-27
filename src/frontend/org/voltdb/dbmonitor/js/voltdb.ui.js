@@ -8,7 +8,7 @@ $(document).ready(function () {
 
     //clear the localStorage for DataTables in DR Section
     $.each(localStorage, function(key, value){
-        if(key != 'queries'){
+        if(key != 'queries' && key != 'queryNameList' ){
             localStorage.removeItem(key)
         }
     });

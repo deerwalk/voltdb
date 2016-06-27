@@ -134,7 +134,10 @@ $(document).ready(function () {
                 "checkDuplicate",
                 function (value) {
                     var arr = []
-                    if ($.inArray(value, SQLQueryRender.queryNameList) != -1) {
+                    if(localStorage.queryNameList != undefined){
+                        arr = localStorage.queryNameList.split(',')
+                    }
+                    if ($.inArray(value, SQLQueryRender.queryNameList) != -1 || $.inArray(value, arr) != -1) {
                         if(value ==  SQLQueryRender.orgQueryName)
                             return true;
                         else
@@ -194,6 +197,8 @@ $(document).ready(function () {
                         localStorage.queries = JSON.stringify(queryData)
                         $('#qTab-' + element_id).find('a').html(newTabName)
                         $('#qTab-' + element_id).data('isold', true)
+                        saveQueryNameListToStorage(newTabName)
+                        deleteQueryFromGlobal(oldTabName)
                     } catch(e){
                         errorMsg = "Cannot save the current tab."
                         if(navigator.userAgent.indexOf('Mozilla') != -1 && navigator.userAgent.indexOf('Firefox') != -1){
@@ -226,6 +231,20 @@ $(document).ready(function () {
             });
         }
     });
+
+    var saveQueryNameListToStorage = function(queryName){
+        var queryList = localStorage.queryNameList
+        var queryNameList = []
+        if(queryList != undefined){
+            queryNameList = queryList.split(',')
+        }
+        queryNameList.push(queryName)
+        localStorage.queryNameList = queryNameList.join()
+    }
+
+    var deleteQueryFromGlobal = function(queryName){
+        SQLQueryRender.queryNameList.splice($.inArray(queryName,SQLQueryRender.queryNameList) ,1)
+    }
 
     $("#btnMemoryError").popup({
         afterOpen: function () {
@@ -270,6 +289,7 @@ $(document).ready(function () {
                     //$tabs.tabs( "option", "active", tablist.length - 3)
                 }
                 removeTabData(element_id)
+                removeTabNameFromStorageAndGlobal(element_id)
                 $('#'+ element_id).remove();
                 $('#q-' + id).remove()
                 $('#queryBtnList-' + id).remove()
@@ -294,6 +314,23 @@ $(document).ready(function () {
         delete queryData[tabName]
         if(typeof(Storage) !== "undefined")
             localStorage.queries = JSON.stringify(queryData);
+    }
+
+    var removeTabNameFromStorageAndGlobal = function(elementId){
+        var tabName = $('#' + elementId).find('a').text();
+        globalList = SQLQueryRender.queryNameList;
+        if($.inArray(tabName, globalList) != -1)
+            globalList.splice( $.inArray(tabName, globalList) ,1 )
+
+        queryList =  []
+        if(localStorage.queryNameList != undefined){
+            queryList = localStorage.queryNameList.split(',');
+        }
+
+        if($.inArray(tabName, queryList) != -1)
+            queryList.splice( $.inArray(tabName, queryList) ,1 )
+
+        localStorage.queryNameList = queryList.join()
     }
 
     $("#timeoutCross").on("click", function(){
@@ -606,7 +643,10 @@ $(document).ready(function () {
                 SQLQueryRender.ShowQueryBtnById(tab_id)
               }
             });
-            SQLQueryRender.queryNameList.push(tabName == undefined ? 'Query' + tab_counter : tabName)
+            if(tabName == undefined){
+                SQLQueryRender.queryNameList.push(tabName == undefined ? 'Query' + tab_counter : tabName)
+            }
+
             tab_counter++
             this.showHideNewTab()
         }
