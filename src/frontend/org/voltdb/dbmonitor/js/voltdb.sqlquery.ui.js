@@ -577,13 +577,13 @@ $(document).ready(function () {
             if($('#new-query').length == 0){
                 html = '<li data-isold="' + (tabName == undefined ? false : true ) + '" id="qTab-'+tab_counter+'"><a href="#q-'+tab_counter+'">'+
                     (tabName == undefined ? 'Query' + tab_counter : tabName) +
-                    '</a> <span class="ui-icon ui-icon-close close-tab" id="close-tab-' + tab_counter +
-                    '" href="#closeTabConfirmation" title="Close Tab">Close</span></li><li id="liNewQuery" title="New Query Tab"><a class="btnStudio plusBtn" id="new-query"><span>+</span></a></li>'
+                    '</a> <div class="ui-icon ui-icon-close close-tab" id="close-tab-' + tab_counter +
+                    '" href="#closeTabConfirmation" title="Close Tab">Close</div></li><li id="liNewQuery" title="New Query Tab"><a class="btnStudio plusBtn" id="new-query"><span>+</span></a></li>'
             } else {
                 html = '<li data-isold="' + (tabName == undefined ? false : true ) + '" id="qTab-'+tab_counter+'"><a href="#q-'+tab_counter+'">'+
                     (tabName == undefined ? 'Query' +
-                    tab_counter : tabName) +'</a> <span class="ui-icon ui-icon-close close-tab" id="close-tab-' + tab_counter +
-                    '" href="#closeTabConfirmation" title="Close Tab">Close</span></li>'
+                    tab_counter : tabName) +'</a> <div class="ui-icon ui-icon-close close-tab" id="close-tab-' + tab_counter +
+                    '" href="#closeTabConfirmation" title="Close Tab">Close</div></li>'
             }
             var html_body = '<div class="querybar"><div class="wrapper"><textarea id="querybox-'+tab_counter+'" class="querybox-'+tab_counter+'" wrap="off"></textarea></div></div><div class="workspacestatusbar noborder"></div>'
             var html_query = '<div class="blockWrapper" id="blockContainer02">' +
