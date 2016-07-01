@@ -187,14 +187,20 @@ $(document).ready(function () {
                         orgQueryData = query_localStorage
                     }
 
-                    queryData[newTabName] = $('#querybox-' + element_id).val()
-
+                    var newQueryData = {}
                     if($('#qTab-' + element_id).data('isold')){
                         if(newTabName != oldTabName){
-                            oldQuery = queryData[oldTabName]
-                            delete queryData[oldTabName]
+                            $.each(queryData,function(key, value){
+                                if(key == oldTabName){
+                                    newQueryData[newTabName] = value
+                                } else{
+                                    newQueryData[key] = value
+                                }
+                            });
                         }
+                        queryData = newQueryData
                     }
+                    queryData[newTabName] = $('#querybox-' + element_id).val()
 
                     try{
                         localStorage.queries = JSON.stringify(queryData)
