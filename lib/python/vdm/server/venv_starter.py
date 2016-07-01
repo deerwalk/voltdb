@@ -30,7 +30,6 @@ import shutil
 import re
 import glob
 import copy
-import urllib2
 from os.path import expanduser
 
 
@@ -105,7 +104,7 @@ def get_virtualenv():
 
 
 # Internal function to build/rebuild the virtual environment
-def _build_virtual_environment(venv_dir, version):
+def _build_virtual_environment(venv_dir, version, packages):
     # Wipe any existing virtual environment directory.
     if os.path.exists(venv_dir):
         try:
@@ -143,7 +142,7 @@ def _build_virtual_environment(venv_dir, version):
         args += ['--clear', '--system-site-packages', sys.platform]
         run_cmd(*args)
         os.chdir(save_dir)
-        install_required_packages(pip)
+        run_cmd(pip, '--quiet', 'install', '-r', packages)
     finally:
         os.chdir(save_dir)
         if save_lc_all is None:
@@ -151,39 +150,6 @@ def _build_virtual_environment(venv_dir, version):
         else:
             os.environ['LC_ALL'] = save_lc_all
 
-
-def check_internet_connection():
-    try:
-        response = urllib2.urlopen('https://voltdb.com/', timeout=1)
-        return True
-    except:
-        pass
-        return False
-
-
-def install_required_packages(pip=''):
-    if pip == '':
-        pip = 'pip'
-
-    if not check_internet_connection():
-        if pip == '':
-            info('No internet connection. Installing the python dependencies locally.')
-        if sys.version_info[:2] >= (2, 7):
-            packages = [line.rstrip('\n') for line in open(os.path.join(G.base_dir, 'lib/python/vdm/requirement_offline.txt'))]
-        else:
-            packages = [line.rstrip('\n') for line in open(os.path.join(G.base_dir, 'lib/python/vdm/requirement_offline_python_2.6.txt'))]
-
-        for package_name in packages:
-            if package_name != '' and '#' not in package_name:
-                run_cmd(pip, '--quiet', 'install', os.path.join(G.base_dir, 'third_party/python/packages', package_name))
-    else:
-        if pip == '':
-            info('Installing the python dependencies.')
-        if sys.version_info[:2] >= (2, 7):
-            packages = os.path.join(G.base_dir, 'lib/python/vdm/requirements.txt')
-        else:
-            packages = os.path.join(G.base_dir, 'lib/python/vdm/requirements_python_2.6.txt')
-        run_cmd(pip, '--quiet', 'install', '-r', packages)
 
 def create_data_config_path(path, con_path):
     org_wd = os.getcwd()
@@ -234,9 +200,9 @@ def main(arr):
         sys.exit(1)
     else:
         python = 'python'
-        install_required_packages()
-        args = [python, os.path.join(G.base_dir, 'lib/python/vdm/vdmrunner.py'), '-p' + G.data_path,
-                '-c' + G.config_path]
+        args = [python, os.path.join(G.base_dir, 'lib/python/vdm/vdmrunner.py')]
+        args.append('-p' + G.data_path)
+        args.append('-c' + G.config_path)
         if arr[0]['server'] is not None:
             args.append('-s' + str(arr[0]['server']))
         os.execvp(python, args)
@@ -285,11 +251,15 @@ def start_virtual_environment(arr, verbose=False):
                 else:
                     build_venv = venv_version != version
 
-            if build_venv:
-                _build_virtual_environment(venv_dir, version)
+            if sys.version_info[:2] >= (2, 7):
+                packages = os.path.join(G.base_dir, 'lib/python/vdm/requirements.txt')
             else:
-                #run_cmd(os.path.join(venv_dir, 'bin', 'pip'), '--quiet', 'install', '-r', packages)
-                install_required_packages(os.path.join(venv_dir, 'bin', 'pip'))
+                packages = os.path.join(G.base_dir, 'lib/python/vdm/requirements_python_2.6.txt')
+
+            if build_venv:
+                _build_virtual_environment(venv_dir, version, packages)
+            else:
+                run_cmd(os.path.join(venv_dir, 'bin', 'pip'), '--quiet', 'install', '-r', packages)
             venv_complete = True
             # the virtual environment's Python.
             python = os.path.join(venv_dir, 'bin', 'python')
