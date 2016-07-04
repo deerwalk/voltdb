@@ -536,7 +536,7 @@ def validate_server_ports(database_id, server_id=-1):
         value = specified_port_values[option]
         for port_key in specified_port_values.keys():
             if option != port_key and value is not None and specified_port_values[port_key] == value:
-                return jsonify(success=False, errors="Duplicate port")
+                return jsonify(status=401, statusString="Duplicate port")
     database_servers = get_servers_from_database_id(database_id)
     if server_id == -1:
         servers = [servers for servers in database_servers if servers['hostname'] == request.json['hostname']]
@@ -836,7 +836,7 @@ class ServerAPI(MethodView):
         if server_id in members:
             inputs = ServerInputs(request)
             if not inputs.validate():
-                return jsonify(status=401, success=False, statusString=inputs.errors)
+                return jsonify(status=401, statusString=inputs.errors)
             current_server = Global.SERVERS.get(server_id)
             if current_server is None:
                 abort(404)
@@ -919,7 +919,7 @@ class DatabaseAPI(MethodView):
                 jsonify({'error': 'You cannot specify \'Id\' or \'Members\' while creating database.'}), 404)
         inputs = DatabaseInputs(request)
         if not inputs.validate():
-            return jsonify(status=401, success=False, statusString=inputs.errors)
+            return jsonify(status=401, statusString=inputs.errors)
 
         databases = [v if type(v) is list else [v] for v in Global.DATABASES.values()]
         if request.json['name'] in [(d["name"]) for item in databases for d in item]:
@@ -969,7 +969,7 @@ class DatabaseAPI(MethodView):
                                  404)
         inputs = DatabaseInputs(request)
         if not inputs.validate():
-            return jsonify(status=401, success=False, statusString=inputs.errors)
+            return jsonify(status=401, statusString=inputs.errors)
 
         database = Global.DATABASES.get(database_id)
         if database is None:
@@ -1052,7 +1052,7 @@ class DeploymentUserAPI(MethodView):
         #     """
         inputs = UserInputs(request)
         if not inputs.validate():
-            return jsonify(status=401,  success=False, statusString=inputs.errors)
+            return jsonify(status=401, statusString=inputs.errors)
 
         is_invalid_roles = check_invalid_roles(request.json['roles'])
         if not is_invalid_roles:
@@ -1098,7 +1098,7 @@ class DeploymentUserAPI(MethodView):
 
         inputs = UserInputs(request)
         if not inputs.validate():
-            return jsonify(status=401, success=False, statusString=inputs.errors)
+            return jsonify(status=401, statusString=inputs.errors)
 
         current_user = Global.DEPLOYMENT_USERS.get(user_id)
         if current_user is None:
