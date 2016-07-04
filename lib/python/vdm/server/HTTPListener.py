@@ -726,7 +726,7 @@ class ServerAPI(MethodView):
 
         inputs = ServerInputs(request)
         if not inputs.validate():
-            return jsonify(success=False, errors=inputs.errors)
+            return jsonify(status=401,statusString=inputs.errors)
 
         result = validate_server_ports(database_id)
         if result is not None:
@@ -1515,7 +1515,7 @@ class DatabaseDeploymentAPI(MethodView):
         if 'application/json' in request.headers['Content-Type']:
             inputs = JsonInputs(request)
             if not inputs.validate():
-                return jsonify(status= 401, success=False, statusString=inputs.errors)
+                return jsonify(status=401, statusString=inputs.errors)
             result = Configuration.check_validation_deployment(request)
             if 'status' in result and result['status'] == 'error':
                 return jsonify(result)
