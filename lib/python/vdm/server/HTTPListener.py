@@ -1102,7 +1102,7 @@ class DeploymentUserAPI(MethodView):
 
         current_user = Global.DEPLOYMENT_USERS.get(user_id)
         if current_user is None:
-            return make_response(jsonify({'statusString': 'No user found for id: %u' % user_id}), 404)
+            return make_response(jsonify({'status': 401, 'statusString': 'No user found for id: %u' % user_id}), 404)
 
         is_invalid_roles = check_invalid_roles(request.json['roles'])
         if not is_invalid_roles:
@@ -1190,13 +1190,15 @@ class RecoverDatabaseAPI(MethodView):
         try:
             if 'pause' in request.args:
                 pause = request.args.get('pause')
+            else:
+                pause = "false"
 
             database = voltdbserver.VoltDatabase(database_id)
             response = database.start_database(True, pause)
             return response
         except Exception, err:
             print traceback.format_exc()
-            return make_response(jsonify({'statusString': str(err)}),
+            return make_response(jsonify({'status':500, 'statusString': str(err)}),
                                  500)
 
 
@@ -1238,7 +1240,7 @@ class StopDatabaseAPI(MethodView):
                                      200)
             except Exception, err:
                 print traceback.format_exc()
-                return make_response(jsonify({'statusString': str(err)}),
+                return make_response(jsonify({'status': 500, 'statusString': str(err)}),
                                      500)
 
 
@@ -1322,7 +1324,7 @@ class StartServerAPI(MethodView):
                 return make_response(jsonify({'status': '200', 'statusString': resp_json['statusString']}), 200)
         except Exception, err:
             print traceback.format_exc()
-            return make_response(jsonify({'statusString': str(err)}),
+            return make_response(jsonify({'status': 500, 'statusString': str(err)}),
                                  500)
 
 

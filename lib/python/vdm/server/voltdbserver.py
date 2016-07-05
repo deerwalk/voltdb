@@ -103,7 +103,7 @@ class VoltDatabase:
         HTTPListener.sync_configuration()
 
         members = []
-        current_database = HTTPL9istener.Global.DATABASES.get(self.database_id)
+        current_database = HTTPListener.Global.DATABASES.get(self.database_id)
         if not current_database:
             return create_response('No database found for id: %u' % self.database_id, 404)
         else:
