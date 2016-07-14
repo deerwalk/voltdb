@@ -883,6 +883,7 @@ class ClusterSettingsTest extends TestBase {
 
         when:
         waitFor(30) { $("#divDbManager > div.clusterContent > div.clusterStartStop > div.loadingStart > p:nth-child(2)").isDisplayed() }
+        report "checking"
         then:
         waitFor(30) { $("#startSuccess > p").isDisplayed() }
         waitFor { $("#deleteServer_1 > span").isDisplayed() }
