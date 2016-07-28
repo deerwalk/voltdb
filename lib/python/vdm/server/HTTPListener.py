@@ -28,7 +28,8 @@ import sys
 import traceback
 import urllib
 from xml.etree.ElementTree import Element, SubElement, tostring, XML
-from Validation import ServerInputs, DatabaseInputs, JsonInputs, UserInputs, ConfigValidation
+from Validation import ServerInputs, DatabaseInputs, JsonInputs, UserInputs, ConfigValidation, ValidateDbFieldType, \
+    ValidateServerFieldType
 import DeploymentConfig
 import voltdbserver
 import glob
@@ -724,6 +725,10 @@ class ServerAPI(MethodView):
         if 'id' in request.json:
             return make_response(jsonify({'status': 404, 'statusString': 'You cannot specify \'Id\' while creating server.'}), 404)
 
+        server_type_error = ValidateServerFieldType(request.json)
+        if 'status' in server_type_error and server_type_error['status'] == 'error':
+            return jsonify(status=401, statusString=server_type_error['errors'])
+
         inputs = ServerInputs(request)
         if not inputs.validate():
             return jsonify(status=401,statusString=inputs.errors)
@@ -834,6 +839,10 @@ class ServerAPI(MethodView):
         else:
             members = database['members']
         if server_id in members:
+            server_type_error = ValidateServerFieldType(request.json)
+            if 'status' in server_type_error and server_type_error['status'] == 'error':
+                return jsonify(status=401, statusString=server_type_error['errors'])
+
             inputs = ServerInputs(request)
             if not inputs.validate():
                 return jsonify(status=401, statusString=inputs.errors)
@@ -917,6 +926,11 @@ class DatabaseAPI(MethodView):
         if 'id' in request.json or 'members' in request.json:
             return make_response(
                 jsonify({'error': 'You cannot specify \'Id\' or \'Members\' while creating database.'}), 404)
+
+        db_type_error = ValidateDbFieldType(request.json)
+        if 'status' in db_type_error and db_type_error['status'] == 'error':
+            return jsonify(status=401, statusString=db_type_error['errors'])
+
         inputs = DatabaseInputs(request)
         if not inputs.validate():
             return jsonify(status=401, statusString=inputs.errors)
@@ -967,6 +981,10 @@ class DatabaseAPI(MethodView):
         if 'id' in request.json and database_id != request.json['id']:
             return make_response(jsonify({'status': 404, 'statusString': 'Database Id mentioned in the payload and url doesn\'t match.'}),
                                  404)
+        db_type_error = ValidateDbFieldType(request.json)
+        if 'status' in db_type_error and db_type_error['status'] == 'error':
+            return jsonify(status=401, statusString=db_type_error['errors'])
+
         inputs = DatabaseInputs(request)
         if not inputs.validate():
             return jsonify(status=401, statusString=inputs.errors)
