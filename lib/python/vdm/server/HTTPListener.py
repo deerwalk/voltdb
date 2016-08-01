@@ -1052,6 +1052,10 @@ class DeploymentUserAPI(MethodView):
         """
         # deployment_user = Global.DEPLOYMENT_USERS.get(user_id)
 
+        current_database = Global.DATABASES.get(database_id)
+        if not current_database:
+            return make_response(jsonify({'status': 404, 'statusString': 'No database found for id: %u' % database_id}), 404)
+
         deployment_user = []
         for key, value in Global.DEPLOYMENT_USERS.iteritems():
             if value["databaseid"] == database_id:
@@ -1071,6 +1075,10 @@ class DeploymentUserAPI(MethodView):
         inputs = UserInputs(request)
         if not inputs.validate():
             return jsonify(status=401, statusString=inputs.errors)
+
+        current_database = Global.DATABASES.get(database_id)
+        if not current_database:
+            return make_response(jsonify({'status': 404, 'statusString': 'No database found for id: %u' % database_id}), 404)
 
         is_invalid_roles = check_invalid_roles(request.json['roles'])
         if not is_invalid_roles:
@@ -1154,6 +1162,10 @@ class DeploymentUserAPI(MethodView):
         current_user = Global.DEPLOYMENT_USERS.get(user_id)
         if current_user is None:
             return make_response(jsonify({'statusstring': 'No user found for id: %u' % user_id}), 404)
+
+        current_database = Global.DATABASES.get(database_id)
+        if not current_database:
+            return make_response(jsonify({'status': 404, 'statusString': 'No database found for id: %u' % database_id}), 404)
 
         del Global.DEPLOYMENT_USERS[user_id]
 
