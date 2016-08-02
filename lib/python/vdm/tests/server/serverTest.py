@@ -1055,6 +1055,22 @@ class DeleteServer(ServerDelete):
                 print "ServerId to be deleted is " + str(last_server_id)
                 url = 'http://%s:8000/api/1.0/databases/%u/servers/' % \
                 (__host_or_ip__,last_db_id)
+                url_non_existing_server =url + str(3)
+                response_non_existing_server = requests.delete(url_non_existing_server)
+                value_non_existing_server = response_non_existing_server.json()
+                print value_non_existing_server['statusstring']
+                self.assertEqual(value_non_existing_server['statusstring'], 'No server found for id: 3 in database 2')
+                self.assertEqual(response_non_existing_server.status_code, 404)
+
+                url_non_existing_database = 'http://%s:8000/api/1.0/databases/3/servers/' % \
+                (__host_or_ip__)
+                url_non_existing_database += str(last_server_id)
+                response_non_existing_database = requests.delete(url_non_existing_database)
+                value_non_existing_database = response_non_existing_database.json()
+                print value_non_existing_database['statusstring']
+                self.assertEqual(str(value_non_existing_database['statusstring']), 'No database found for id: 3')
+                self.assertEqual(response_non_existing_database.status_code, 404)
+
                 url += str(last_server_id)
                 response = requests.delete(url)
                 if response.status_code == 403:
