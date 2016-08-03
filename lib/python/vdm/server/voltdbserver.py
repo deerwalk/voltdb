@@ -124,6 +124,7 @@ class VoltDatabase:
 
         # Now start each server
         server_unreachable = False
+        error_msg = ''
         failed = False
         server_status = {}
         action = 'start'
@@ -140,21 +141,18 @@ class VoltDatabase:
                     failed = True
 
                 db_status = json.loads(response.text)['statusString']
-                if 'dbStatus' in str(db_status):
-                    server_unreachable = True
-                    break
-                else:
-                    server_status[curr['hostname']] = db_status
+                server_status[curr['hostname']] = db_status
             except Exception, err:
                 if 'ConnectionError' in str(err):
-                    err = "Server is currently unreachable."
+                    error_msg = "Could not connect to the server " + curr['hostname'] + ". " \
+                                "Please ensure that all servers are reachable."
                     server_unreachable = True
                     break
                 failed = True
                 print traceback.format_exc()
                 server_status[curr['hostname']] = str(err)
         if server_unreachable:
-            return make_response(jsonify({'status': 500, 'statusString': 'Could not connect to the server(s). Please ensure that all servers are reachable.'}), 200)
+            return make_response(jsonify({'status': 500, 'statusString': error_msg}), 500)
         elif failed:
             url = ('http://%s:%u/api/1.0/databases/%u/status/') % \
                   (HTTPListener.__IP__, HTTPListener.__PORT__, self.database_id)
@@ -193,7 +191,7 @@ class VoltDatabase:
             return create_response(json.loads(response.text)['statusString'], response.status_code)
         except Exception, err:
             if 'ConnectionError' in str(err):
-               err = "Server is currently unreachable."
+               err = "Server " + server['hostname'] + " is currently unreachable."
             print traceback.format_exc()
             return create_response(str(err), 500)
 
