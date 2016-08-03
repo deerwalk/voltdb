@@ -1221,7 +1221,6 @@
 
             if (monitor.lastTimedTransactionCount > 0 && monitor.lastTimerTick > 0 && monitor.lastTimerTick != currentTimerTick) {
                 var delta = currentTimedTransactionCount - monitor.lastTimedTransactionCount;
-
                 var calculatedValue = parseFloat(delta * 1000.0 / (currentTimerTick - monitor.lastTimerTick)).toFixed(1) * 1;
                 if (calculatedValue < 0 || isNaN(calculatedValue) || (currentTimerTick - monitor.lastTimerTick == 0))
                     calculatedValue = 0;
@@ -1263,6 +1262,7 @@
             }
             else{
                 var delta = currentTimedTransactionCount - monitor.lastTimedTransactionCount;
+
                 if (tpsSecCount >= 6 || monitor.tpsFirstData) {
                     datatransMin = sliceFirstData(datatransMin, dataView.Minutes);
                     if (monitor.tpsFirstData || delta != 0 || (currentTimedTransactionCount == 0 && monitor.lastTimedTransactionCount == 0)) {
@@ -1282,11 +1282,33 @@
                     MonitorGraphUI.Monitors.tpsDataDay = datatransDay;
                     tpsMinCount = 0;
                 }
-                transDetailsArr = MonitorGraphUI.saveLocalStorage(transDetailsArr, {"timestamp": new Date(transacDetail["TimeStamp"]), "transaction": 0 }, MonitorGraphUI.timeUnit.sec  )
 
-                if (monitor.tpsFirstData || delta != 0 || (currentTimedTransactionCount == 0 && monitor.lastTimedTransactionCount == 0)) {
-                    datatrans.push({ "x": new Date(transacDetail["TimeStamp"]), "y": 0 });
-                    MonitorGraphUI.Monitors.tpsData = datatrans;
+                if (monitor.tpsFirstData){
+                    if(localStorage.transDetails == undefined){
+                        datatrans.push({ "x": new Date(transacDetail["TimeStamp"]), "y": null });
+                        MonitorGraphUI.Monitors.tpsData = datatrans;
+                    }
+                    else{
+                        if (delta != 0 || (currentTimedTransactionCount == 0 && monitor.lastTimedTransactionCount == 0)) {
+                            datatrans.push({ "x": new Date(transacDetail["TimeStamp"]), "y": datatrans[datatrans.length - 1].y });
+                            transDetailsArr = MonitorGraphUI.saveLocalStorage(transDetailsArr, {"timestamp": new Date(transacDetail["TimeStamp"]), "transaction": datatrans[datatrans.length - 1].y }, MonitorGraphUI.timeUnit.sec  )
+                            MonitorGraphUI.Monitors.tpsData = datatrans;
+                        }
+                    }
+                }
+                else{
+                    if(localStorage.transDetails == undefined){
+                        datatrans.push({ "x": new Date(transacDetail["TimeStamp"]), "y": 0 });
+                        MonitorGraphUI.Monitors.tpsData = datatrans;
+                    }
+                    else{
+                        var calculatedValue = parseFloat(delta * 1000.0 / (currentTimerTick - monitor.lastTimerTick)).toFixed(1) * 1;
+                        if (delta != 0 || (currentTimedTransactionCount == 0 && monitor.lastTimedTransactionCount == 0)) {
+                            datatrans.push({ "x": new Date(transacDetail["TimeStamp"]), "y": calculatedValue });
+                            transDetailsArr = MonitorGraphUI.saveLocalStorage(transDetailsArr, {"timestamp": new Date(transacDetail["TimeStamp"]), "transaction": calculatedValue }, MonitorGraphUI.timeUnit.sec  )
+                            MonitorGraphUI.Monitors.tpsData = datatrans;
+                        }
+                    }
                 }
                 monitor.tpsFirstData = false;
             }
