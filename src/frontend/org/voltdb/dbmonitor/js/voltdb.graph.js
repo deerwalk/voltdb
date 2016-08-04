@@ -1061,36 +1061,54 @@
 
             if(localStorage.memoryDetailsMin != undefined)
                 memoryDetailsArrMin = JSON.parse(localStorage.memoryDetailsMin)
+            else {
+                memoryDetailsArrMin =  JSON.stringify(MonitorGraphUI.convertDataFormatForMemory(dataMemMin))
+                memoryDetailsArrMin = JSON.parse(memoryDetailsArrMin)
+            }
+
 
             if(localStorage.memoryDetails != undefined)
                 memoryDetailsArr = JSON.parse(localStorage.memoryDetails)
+            else {
+                memoryDetailsArr = JSON.stringify(MonitorGraphUI.convertDataFormatForMemory(dataMem))
+                memoryDetailsArr = JSON.parse(memoryDetailsArr)
+            }
 
             if(localStorage.memoryDetailsDay != undefined)
                 memoryDetailsArrDay = JSON.parse(localStorage.memoryDetailsDay)
+            else {
+                memoryDetailsArrDay = JSON.stringify(MonitorGraphUI.convertDataFormatForMemory(dataMemDay))
+                memoryDetailsArrDay = JSON.parse(memoryDetailsArrDay)
+            }
 
             if(monitor.memFirstData){
+                if(memoryDetailsArr.length != 0)
+                    dataMem = []
                 for(var i = 0; i< memoryDetailsArr.length; i++){
                     sliceFirstData(monitor.memData, dataView.Seconds);
-                    monitor.memData.push({"x": new Date(memoryDetailsArr[i].timestamp),
+                    dataMem.push({"x": new Date(memoryDetailsArr[i].timestamp),
                         "y": memoryDetailsArr[i].physicalMemory
                     })
                 }
+
+                if(memoryDetailsArrMin.length != 0)
+                    dataMemMin = []
                 for(var j = 0; j< memoryDetailsArrMin.length; j++){
                     sliceFirstData(monitor.memDataMin, dataView.Minutes);
-                    monitor.memDataMin.push({"x": new Date(memoryDetailsArrMin[j].timestamp),
+                    dataMemMin.push({"x": new Date(memoryDetailsArrMin[j].timestamp),
                         "y": memoryDetailsArrMin[j].physicalMemory
                     })
                 }
+
+                if(memoryDetailsArrDay.length != 0)
+                    dataMemDay = []
                 for(var k = 0; k< memoryDetailsArrDay.length; k++){
                     sliceFirstData(monitor.memDataDay, dataView.Days);
-                    monitor.memDataDay.push({"x": new Date(memoryDetailsArrDay[k].timestamp),
+                    dataMemDay.push({"x": new Date(memoryDetailsArrDay[k].timestamp),
                         "y": memoryDetailsArrDay[k].physicalMemory
                     })
                 }
             }
-
-
-
 
             if ($.isEmptyObject(memDetails) || memDetails == undefined || memDetails[currentServer].PHYSICALMEMORY == undefined || memDetails[currentServer].RSS == undefined || memDetails[currentServer].TIMESTAMP == undefined)
                 return;
@@ -1968,6 +1986,14 @@
             var requiredFormat = []
             for(var i = 0; i < cmdLogData.length; i++){
                 requiredFormat.push({"timestamp": cmdLogData[i].x, "outstandingTxn": cmdLogData[i].y})
+            }
+            return requiredFormat;
+        }
+
+        this.convertDataFormatForMemory = function(memoryData){
+            var requiredFormat = []
+            for(var i = 0; i < memoryData.length; i++){
+                requiredFormat.push({"timestamp": memoryData[i].x, "physicalMemory": memoryData[i].y})
             }
             return requiredFormat;
         }
