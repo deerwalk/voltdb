@@ -492,10 +492,10 @@ def get_port(ip_with_port):
 
 
 def check_port_valid(port_option, server):
-    if port_option == "http-listener":
-        default_port = "8080"
-    if port_option == "admin-listener":
-        default_port = "21211"
+    # if port_option == "http-listener":
+    #     default_port = "8080"
+    # if port_option == "admin-listener":
+    #     default_port = "21211"
     if port_option == "zookeeper-listener":
         default_port = "7181"
     if port_option == "replication-listener":
@@ -521,12 +521,10 @@ def check_port_valid(port_option, server):
 
 
 def validate_server_ports(database_id, server_id=-1):
-    arr = ["http-listener", "admin-listener", "internal-listener", "replication-listener", "zookeeper-listener",
+    arr = ["internal-listener", "replication-listener", "zookeeper-listener",
            "client-listener"]
 
     specified_port_values = {
-        "http-listener": get_port(request.json.get('http-listener', "").strip().lstrip("0")),
-        "admin-listener": get_port(request.json.get('admin-listener', "").strip().lstrip("0")),
         "replication-listener": get_port(request.json.get('replication-listener', "").strip().lstrip("0")),
         "client-listener": get_port(request.json.get('client-listener', "").strip().lstrip("0")),
         "zookeeper-listener": get_port(request.json.get('zookeeper-listener', "").strip().lstrip("0")),
@@ -550,6 +548,31 @@ def validate_server_ports(database_id, server_id=-1):
             if result is not None:
                 return result
 
+
+def validate_database_ports():
+    arr = ["http-listener", "admin-listener"]
+
+    specified_port_values = {
+        "http-listener": get_port(request.json.get('http-listener', "").strip().lstrip("0")),
+        "admin-listener": get_port(request.json.get('admin-listener', "").strip().lstrip("0"))
+    }
+
+    for option in arr:
+        value = specified_port_values[option]
+        for port_key in specified_port_values.keys():
+            if option != port_key and value is not None and specified_port_values[port_key] == value:
+                return jsonify(status=401, statusString="Duplicate port")
+    # database_servers = get_servers_from_database_id(database_id)
+    # if server_id == -1:
+    #     servers = [servers for servers in database_servers if servers['hostname'] == request.json['hostname']]
+    # else:
+    #     servers = [servers for servers in database_servers if servers['hostname'] ==
+    #                request.json['hostname'] and servers['id'] != server_id]
+    # for server in servers:
+    #     for option in arr:
+    #         result = check_port_valid(option, server)
+    #         if result is not None:
+    #             return result
 
 def sync_configuration():
     headers = {'content-type': 'application/json'}
@@ -748,7 +771,7 @@ class ServerAPI(MethodView):
             'description': request.json.get('description', "").strip(),
             'hostname': request.json.get('hostname', "").strip(),
             'enabled': True,
-            'admin-listener': request.json.get('admin-listener', "").strip().lstrip("0"),
+            # 'admin-listener': request.json.get('admin-listener', "").strip().lstrip("0"),
             'zookeeper-listener': request.json.get('zookeeper-listener', "").strip().lstrip("0"),
             'replication-listener': request.json.get('replication-listener', "").strip().lstrip("0"),
             'client-listener': request.json.get('client-listener', "").strip().lstrip("0"),
@@ -756,7 +779,7 @@ class ServerAPI(MethodView):
             'external-interface': request.json.get('external-interface', "").strip(),
             'public-interface': request.json.get('public-interface', "").strip(),
             'internal-listener': request.json.get('internal-listener', "").strip().lstrip("0"),
-            'http-listener': request.json.get('http-listener', "").strip().lstrip("0"),
+            # 'http-listener': request.json.get('http-listener', "").strip().lstrip("0"),
             'placement-group': request.json.get('placement-group', "").strip(),
             'isAdded': False
         }
@@ -925,6 +948,7 @@ class DatabaseAPI(MethodView):
         Returns:
             Information and the status of database if it is saved otherwise the error message.
         """
+
         if 'id' in request.json or 'members' in request.json:
             return make_response(
                 jsonify({'error': 'You cannot specify \'Id\' or \'Members\' while creating database.'}), 404)
@@ -937,6 +961,10 @@ class DatabaseAPI(MethodView):
         if not inputs.validate():
             return jsonify(status=401, statusString=inputs.errors)
 
+        result = validate_database_ports()
+        if result is not None:
+            return result
+
         databases = [v if type(v) is list else [v] for v in Global.DATABASES.values()]
         if request.json['name'] in [(d["name"]) for item in databases for d in item]:
             return make_response(jsonify({'status':400, 'statusString': 'database name already exists'}), 400)
@@ -946,7 +974,11 @@ class DatabaseAPI(MethodView):
         else:
             database_id = Global.DATABASES.keys()[-1] + 1
 
-        Global.DATABASES[database_id] = {'id': database_id, 'name': request.json['name'], 'members': []}
+        Global.DATABASES[database_id] = {'id': database_id,
+                                         'name': request.json['name'],
+                                         'admin-listener': request.json.get('admin-listener', "").strip().lstrip("0"),
+                                         'http-listener': request.json.get('http-listener', "").strip().lstrip("0"),
+                                         'members': []}
 
         # Create new deployment
         app_root = os.path.dirname(os.path.abspath(__file__))
@@ -979,7 +1011,7 @@ class DatabaseAPI(MethodView):
             Information and the status of database if it is updated otherwise the error message.
         """
         if 'members' in request.json:
-            return make_response(jsonify({'status':404, 'statusString': 'You cannot specify \'Members\' while updating database.'}), 404)
+            return make_response(jsonify({'status': 404, 'statusString': 'You cannot specify \'Members\' while updating database.'}), 404)
         if 'id' in request.json and database_id != request.json['id']:
             return make_response(jsonify({'status': 404, 'statusString': 'Database Id mentioned in the payload and url doesn\'t match.'}),
                                  404)
@@ -991,16 +1023,22 @@ class DatabaseAPI(MethodView):
         if not inputs.validate():
             return jsonify(status=401, statusString=inputs.errors)
 
+        result = validate_database_ports()
+        if result is not None:
+            return result
+
         database = Global.DATABASES.get(database_id)
         if database is None:
             abort(404)
 
         Global.DATABASES[database_id] = {'id': database_id, 'name': request.json['name'],
+                                          'admin-listener': request.json.get('admin-listener', "").strip().lstrip("0"),
+                                         'http-listener': request.json.get('http-listener', "").strip().lstrip("0"),
                                          'members': database['members']}
 
         sync_configuration()
         Configuration.write_configuration_file()
-        return jsonify({'status': 200, 'statusString': 'OK', 'database': database})
+        return jsonify({'status': 200, 'statusString': 'OK', 'database': Global.DATABASES[database_id]})
 
     @staticmethod
     def delete(database_id):
@@ -1804,10 +1842,10 @@ def main(runner, amodule, config_dir, data_dir, server):
         Global.SERVERS[1] = {'id': 1, 'name': __host_name__, 'hostname': __host_or_ip__, 'description': "",
                              'enabled': True, 'external-interface': "", 'internal-interface': "",
                              'public-interface': "", 'client-listener': "", 'internal-listener': "",
-                             'admin-listener': "", 'http-listener': "", 'replication-listener': "",
-                             'zookeeper-listener': "", 'placement-group': "", 'isAdded': False}
+                             'replication-listener': "", 'zookeeper-listener': "",
+                             'placement-group': "", 'isAdded': False}
 
-        Global.DATABASES[1] = {'id': 1, 'name': "Database", "members": [1]}
+        Global.DATABASES[1] = {'id': 1, 'name': "Database", 'admin-listener': '21211', 'http-listener': '8080', "members": [1]}
 
     Configuration.write_configuration_file()
 
