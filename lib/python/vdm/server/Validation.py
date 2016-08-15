@@ -52,36 +52,46 @@ class Validation(object):
                 try:
                     val = int(array[1])
                     if val < 1 or val >= 65535:
-                        raise ValidationError('Port must be greater than 1 and less than 65535')
+                        raise ValidationError(str(field.id) + ' must be greater than 1 and less than 65535')
                 except ValueError as err:
                     msg = err.args[0]
                     #print traceback.format_exc()
-                    if msg is 'Port must be greater than 1 and less than 65535':
-                        raise ValidationError('Port must be greater than 1 and less than 65535')
+                    if msg is str(field.id) + ' must be greater than 1 and less than 65535':
+                        raise ValidationError(str(field.id) + ' must be greater than 1 and less than 65535')
                     else:
-                        raise ValidationError('Value must be positive.')
+                        raise ValidationError(str(field.id) + ' must be positive.')
             else:
                 raise ValidationError('Invalid value')
         else:
             try:
                 val = int(field.data)
                 if val < 1 or val > 65536:
-                    raise ValidationError('Port must be greater than 1 and less than 65535')
+                    raise ValidationError(str(field.id) + ' must be greater than 1 and less than 65535')
             except ValueError as err:
                 msg = err.args[0]
                 #print traceback.format_exc()
-                if msg is 'Port must be greater than 1 and less than 65535':
-                    raise ValidationError('Port must be greater than 1 and less than 65535')
+                if msg is str(field.id) + ' must be greater than 1 and less than 65535':
+                    raise ValidationError(str(field.id) + ' Port must be greater than 1 and less than 65535')
                 else:
-                    raise ValidationError('Value must be positive.')
+                    raise ValidationError(str(field.id) + ' must be positive.')
 
     @staticmethod
     def length_validation(form, field):
         if field.data is not None:
-            value = int(field.data)
-            if value <= 0 or value >= 2:
-                raise ValidationError('value must be minimum 0 and maximum 2')
+            try:
+                value = int(field.data)
+            except:
+                raise ValidationError(str(field.id) + ' must be positive')
+            if value < 0 or value > 2:
+                raise ValidationError(str(field.id) + ' must be greater than 0 and less than 1')
 
+    @staticmethod
+    def type_validation(form, field):
+         if field.data is not None:
+            try:
+                value = int(field.data)
+            except:
+                raise ValidationError(str(field.id) + ' must be positive')
 
 
 class ServerInputs(Inputs):
@@ -806,6 +816,9 @@ class DatabaseInputs(Inputs):
         ],
         'kfactor':[
             Validation.length_validation
+        ],
+        'hostcount':[
+          Validation.type_validation
         ]
     }
 
