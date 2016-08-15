@@ -75,6 +75,14 @@ class Validation(object):
                 else:
                     raise ValidationError('Value must be positive.')
 
+    @staticmethod
+    def length_validation(form, field):
+        if field.data is not None:
+            value = int(field.data)
+            if value <= 0 or value >= 2:
+                raise ValidationError('value must be minimum 0 and maximum 2')
+
+
 
 class ServerInputs(Inputs):
     """
@@ -787,6 +795,17 @@ class DatabaseInputs(Inputs):
         'name': [
             DataRequired('Database name is required.'),
             Regexp('^[a-zA-Z0-9_.]+$', 0, 'Only alphabets, numbers, _ and . are allowed.')
+        ],
+        'admin-listener': [
+            Optional(),
+            Validation.port_validation
+        ],
+        'http-listener': [
+            Optional(),
+            Validation.port_validation
+        ],
+        'kfactor':[
+            Validation.length_validation
         ]
     }
 

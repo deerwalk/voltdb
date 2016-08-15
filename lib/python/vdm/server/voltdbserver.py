@@ -289,6 +289,10 @@ class VoltDatabase:
         if not server:
             return 1
 
+        database = HTTPListener.Global.DATABASES.get(self.database_id)
+        if not database:
+            return 1
+
         """
         Gets deployment.xml for this database and starts voltdb server locally
         """
@@ -346,7 +350,7 @@ class VoltDatabase:
         else:
             voltdb_cmd = ['nohup', os.path.join(voltdb_dir, 'voltdb'), verb, '-d', filename, '-H', primary]
 
-        self.build_network_options(server, voltdb_cmd)
+        self.build_network_options(server, voltdb_cmd, database)
 
         G.OUTFILE_COUNTER = G.OUTFILE_COUNTER + 1
         outfilename = os.path.realpath(os.path.join(HTTPListener.Global.CONFIG_PATH,
@@ -384,15 +388,15 @@ class VoltDatabase:
         return folder_path
 
     # Build network options for command line.
-    def build_network_options(self, sconfig, voltdb_cmd):
+    def build_network_options(self, sconfig, voltdb_cmd, dconfig):
         self.add_voltdb_option(sconfig, 'internal-interface', '--internalinterface', voltdb_cmd)
         self.add_voltdb_option(sconfig, 'external-interface', '--externalinterface', voltdb_cmd)
         self.add_voltdb_option(sconfig, 'internal-listener', '--internal', voltdb_cmd)
         self.add_voltdb_option(sconfig, 'placement-group', '--placement-group', voltdb_cmd)
         self.add_voltdb_option(sconfig, 'zookeeper-listener', '--zookeeper', voltdb_cmd)
-        self.add_voltdb_option(sconfig, 'http-listener', '--http', voltdb_cmd)
+        self.add_voltdb_option(dconfig, 'http-listener', '--http', voltdb_cmd)
         self.add_voltdb_option(sconfig, 'client-listener', '--client', voltdb_cmd)
-        self.add_voltdb_option(sconfig, 'admin-listener', '--admin', voltdb_cmd)
+        self.add_voltdb_option(dconfig, 'admin-listener', '--admin', voltdb_cmd)
         self.add_voltdb_option(sconfig, 'replication-listener', '--replication', voltdb_cmd)
         self.add_voltdb_option(sconfig, 'public-interface', '--publicinterface', voltdb_cmd)
 

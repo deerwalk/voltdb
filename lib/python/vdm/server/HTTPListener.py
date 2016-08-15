@@ -974,10 +974,21 @@ class DatabaseAPI(MethodView):
         else:
             database_id = Global.DATABASES.keys()[-1] + 1
 
+        if 'kfactor' not in request.json:
+            kfactor = 0
+        else:
+            kfactor = request.json['kfactor']
+        if 'hostcount' not in request.json:
+            hostcount = 1
+        else:
+            hostcount = request.json['hostcount']
+
         Global.DATABASES[database_id] = {'id': database_id,
                                          'name': request.json['name'],
                                          'admin-listener': request.json.get('admin-listener', "").strip().lstrip("0"),
                                          'http-listener': request.json.get('http-listener', "").strip().lstrip("0"),
+                                         'kfactor': kfactor,
+                                         'hostcount': hostcount,
                                          'members': []}
 
         # Create new deployment
@@ -1034,6 +1045,8 @@ class DatabaseAPI(MethodView):
         Global.DATABASES[database_id] = {'id': database_id, 'name': request.json['name'],
                                           'admin-listener': request.json.get('admin-listener', "").strip().lstrip("0"),
                                          'http-listener': request.json.get('http-listener', "").strip().lstrip("0"),
+                                         'kfactor': request.json['kfactor'],
+                                         'hostcount': request.json['hostcount'],
                                          'members': database['members']}
 
         sync_configuration()
@@ -1845,7 +1858,7 @@ def main(runner, amodule, config_dir, data_dir, server):
                              'replication-listener': "", 'zookeeper-listener': "",
                              'placement-group': "", 'isAdded': False}
 
-        Global.DATABASES[1] = {'id': 1, 'name': "Database", 'admin-listener': '21211', 'http-listener': '8080', "members": [1]}
+        Global.DATABASES[1] = {'id': 1, 'name': "Database", 'admin-listener': '21211', 'http-listener': '8080', 'kfactor': '0', 'hostcount': '1', "members": [1]}
 
     Configuration.write_configuration_file()
 
