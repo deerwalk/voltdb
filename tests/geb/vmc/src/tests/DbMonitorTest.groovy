@@ -589,25 +589,29 @@ class DbMonitorTest extends TestBase {
         String after  = ""
 
         when: 'click row count'
-            page.clickRowcount()
+        page.clickRowcount()
+        report 'first_click'
         then: 'check if row count is in ascending'
-            if ( page.tableInAscendingOrder() )
-                before = "ascending"
-            else
-                before = "descending"
+        if ( page.tableInAscendingOrder() )
+            before = "ascending"
+        else
+            before = "descending"
 
         when: 'click row count'
-            page.clickRowcount()
+        page.clickRowcount()
+        report 'second_click'
         then: 'check if row count is in descending'
-            if ( page.tableInDescendingOrder() )
-                after = "descending"
-            else
-                after = "ascending"
+        if ( page.tableInDescendingOrder() )
+            after = "descending"
+        else
+            after = "ascending"
 
-            if ( before.equals("ascending") && after.equals("descending") )
-                assert true
-            else
-                assert false
+        println("Before: " + before + " and After: " + after)
+
+        if ( before.equals("ascending") && after.equals("descending") )
+            assert true
+        else
+            assert false
     }
 
     def "check if Max Rows is clickable"() {
