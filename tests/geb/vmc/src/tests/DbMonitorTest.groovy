@@ -2250,7 +2250,7 @@ class DbMonitorTest extends TestBase {
         }
     }
 
-    def "check min value in cluster Partition Idle graph with respect to minutes"(){
+    def CheckMinValueInPartitionIdleGraphWithRespectToMinutes(){
         int count = 0
 
         when:
