@@ -2959,6 +2959,9 @@ function loadAdminPage() {
             } else {
                 $("#deleteUser").css('display', 'none');
             }
+
+
+
             var content = '<table width="100%" cellpadding="0" cellspacing="0" class="configurTbl">' +
                             '<tbody>' +
                                 '<tr>' +
@@ -3014,6 +3017,12 @@ function loadAdminPage() {
                 $('#labelPassword').html('Password');
                 $('#addUserHeader').html('Add User');
             } else {
+                if($('#addUserInnerPopup').data('plaintext') == "false"){
+                    $('#txtPassword').attr('value','********');
+                    $('#txtPassword').attr('disabled','disabled');
+                    $('#txtPassword').attr('title','Edit is not allowed when plaintext is set to false.');
+                }
+
                 $('#labelPassword').html('New Password');
                 $('#addUserHeader').html('Edit User');
                 $('#txtUser').val($('#addUserInnerPopup').data('username'));
@@ -3885,13 +3894,14 @@ function loadAdminPage() {
                 for (var i = 0; i < userData.length; i++) {
                     var userName = userData[i].name;
                     var role = userData[i].roles;
+                    var plaintext = userData[i].plaintext;
                     VoltDbAdminConfig.orgUserList.push(userName);
-                    result += '<tr>' +
-                        '<td>' + userName + '</td>' +
-                        '<td>' + formatDisplayName(role) + '</td>' +
-                        '<td>&nbsp</td>' +
-                        '<td><a  href="javascript:void(0)" class="edit" title="Edit" onclick="addUser(1,\'' + userName + '\',\'' + role + '\');">&nbsp;</a></td>' +
-                        '</tr>';
+                        result += '<tr>' +
+                            '<td>' + userName + '</td>' +
+                            '<td>' + formatDisplayName(role) + '</td>' +
+                            '<td>&nbsp</td>' +
+                            '<td><a  href="javascript:void(0)" class="edit" title="Edit" onclick="addUser(1,\'' + userName + '\',\'' + role + '\',\''+ plaintext +'\');">&nbsp;</a></td>' +
+                            '</tr>';
                 }
             }
             $('#UsersList').html(tableHeader + result + tableFooter);
@@ -4170,11 +4180,12 @@ var editDiskLimit = function (editId) {
     adminDOMObjects.addDiskLimitLink.trigger("click");
 };
 
-var addUser = function (editId, username, role) {
+var addUser = function (editId, username, role, plaintext) {
     $('#addUserInnerPopup').data('isupdate', editId);
     if (editId == 1) {
         $('#addUserInnerPopup').data('username', username);
         $('#addUserInnerPopup').data('role', role);
+        $('#addUserInnerPopup').data('plaintext', plaintext);
     }
     $("#addNewUserLink").trigger("click");
 };
