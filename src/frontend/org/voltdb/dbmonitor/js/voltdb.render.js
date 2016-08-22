@@ -2536,7 +2536,6 @@ function alertNodeClicked(obj) {
         var getPortAndOverviewDetails = function () {
             var portConfigValues = [];
             var currentServer = getCurrentServer();
-//            var httpPort = VoltDBConfig.GetPortId();
 
             $.each(systemOverview, function (key, val) {
                 if (val["HOSTNAME"] == currentServer){}
