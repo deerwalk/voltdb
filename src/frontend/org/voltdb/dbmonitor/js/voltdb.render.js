@@ -655,11 +655,17 @@ function alertNodeClicked(obj) {
 
         var configureRequestedHost = function (hostName) {
             $.each(systemOverview, function (id, val) {
-                if (val["IPADDRESS"] == hostName) {
-                    gCurrentServer = val["HOSTNAME"];
-                    saveInLocalStorage("currentServer", val["HOSTNAME"]);
-                    return false;
+                if (val["PUBLICINTERFACE"] == ""){
+                    if (val["IPADDRESS"] == hostName) {
+                        gCurrentServer = val["HOSTNAME"];
+                        saveInLocalStorage("currentServer", val["HOSTNAME"]);
+                        return false;
 
+                    }
+                }
+                else{
+                    saveInLocalStorage("currentServer", val["PUBLICINTERFACE"]);
+                    return false;
                 }
                 return true;
             });
@@ -2539,7 +2545,21 @@ function alertNodeClicked(obj) {
             var httpPort = VoltDBConfig.GetPortId();
 
             $.each(systemOverview, function (key, val) {
-                if (val["HOSTNAME"] == currentServer && val["HTTPPORT"] == httpPort) {
+                var correctServer = "";
+                if (val["PUBLICINTERFACE"] == ""){
+                    correctServer = val["HOSTNAME"]
+                }
+                else{
+                    var publicInterface = val["PUBLICINTERFACE"]
+                    var arr = [];
+                    if(publicInterface.indexOf(":") != -1){
+                        arr = publicInterface.split(":")
+                    }
+                    correctServer = arr[0];
+//                    httpPort = arr[1];
+
+                }
+                if (correctServer == currentServer && val["HTTPPORT"] == httpPort) {
                     portConfigValues['adminPort'] = val["ADMINPORT"];
                     portConfigValues['httpPort'] = val["HTTPPORT"];
                     portConfigValues['clientPort'] = val["CLIENTPORT"];
