@@ -157,15 +157,20 @@ label.ccErrorMsg {
 	line-height: 15px!important;
 	height: auto!important;
 }
-.clusterIcon, .plus, .stop, .stopServer, .deleteServer, .editServerDatabase, .deleteDatabaseServer, .deleteDisableDS, .editServer, .uploadIcon, .downloadIcon, .drArrow, .popup_close, .popup_close:hover, .clusterConfigIcon, .serverIcon, .plusIcon, .plusIconDR, .secCrossIcon, .popDelete, .onIcon, .offIcon, .onIconDR, .offIconDR, .editIcon, .offIconSecurity, .deleteDiskLimit, .deleteDR {
+.clusterIcon, .plus, .stop, .stopServer, .deleteServer, .editServerDatabase, .deleteDatabaseServer, .deleteDisableDS, .editServer, .uploadIcon, .downloadIcon, .drArrow, .popup_close, .popup_close:hover, .clusterConfigIcon, .serverIcon, .plusIcon, .plusIconDR, .secCrossIcon, .popDelete, .onIcon, .offIcon, .onIconDR, .offIconDR, .editIcon, .offIconSecurity, .deleteDiskLimit, .deleteDR, .serverMainIcon {
 	background-image: url(../images/icons.png);
 	background-repeat: no-repeat;
 }
+.serverMainIcon {
+	width: 105px;
+	height: 35px;
+	background-position: 0 -444px;}
 .clusterIcon {
 	width: 105px;
 	height: 35px;
 	background-position: 0 -12px;
 }
+
 .plus {
 	width: 30px;
 	height: 22px;
@@ -612,7 +617,7 @@ table td.tdROle label.error {
   overflow-y:auto;
 	height:211px;
 }
-.clusterConfig {
+.clusterConfig{
 	background: #e4e4e4;
 	margin: 0 15px 0 15px;
 	padding-bottom: 15px;
@@ -1048,6 +1053,8 @@ table.tblPopup {
 	border-bottom: 1px solid #cccccc;
 	padding: 10px 25px 10px 10px;
 }
+.serverMainPanel, .serverMainPanelInside{ padding:0;}
+.formServer { border-bottom:1px solid #cccccc;overflow:hidden; padding:10px 0 10px 0; margin:0;}
 .formServer input[type="text"] {
 	width: 80%;
 }
@@ -1749,6 +1756,17 @@ color: grey;
  }
 
 /**************Server List Ends******************/
+
+.serverContainer { margin:20px 0 0 0;}
+.serverInsideWrapper { backgournd:#CCC;}
+.deploymentHeader { padding:0;}
+.deploymentInside { background:#ECEAEB; border: 1px solid #CCCCCC; padding-bottom:20px;}
+.detailsWrapper {margin:15px 15px 0 15px;}
+.databaseDetails {background: #e4e4e4;margin: 0 15px 0 15px;padding-bottom: 15px;border-left: 1px solid #CCCCCC;
+	border-right: 1px solid #CCCCCC; border-bottom: 1px solid #CCCCCC;}
+.databseDetailsContainer { padding:10px; background:#ffffff; margin-top:10px; overflow:hidden;}
+.dataDetailsLeft { float:left; margin-top:5px; font-weight:bold;}
+.dataDetailsRight {float:right;}
 /************Media Queries for mobile compatibility***************/
 @media (min-width: 768px) {
 .form-horizontal .control-label {
