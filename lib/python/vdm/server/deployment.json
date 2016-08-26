@@ -1,5 +1,5 @@
 {
-    "databaseid": 1,
+    "serverid": 1,
     "cluster": {
         "hostcount": 1,
         "sitesperhost": 8,

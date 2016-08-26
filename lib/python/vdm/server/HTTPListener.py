@@ -763,6 +763,15 @@ class ServerAPI(MethodView):
             'isAdded': False
         }
 
+         # Create new deployment
+        app_root = os.path.dirname(os.path.abspath(__file__))
+
+        with open(os.path.join(app_root, "deployment.json")) as json_file:
+            deployment = json.load(json_file)
+            deployment['serverid'] = server_id
+            is_pro_version(deployment)
+        Global.DEPLOYMENT[server_id] = deployment
+
         # Add server to the current database
         current_database = Global.DATABASES.get(database_id)
         if current_database is None:
@@ -953,25 +962,25 @@ class DatabaseAPI(MethodView):
             kfactor = 0
         else:
             kfactor = request.json['kfactor']
-        if 'hostcount' not in request.json:
-            hostcount = 1
+        if 'sitesperhost' not in request.json:
+            sitesperhost = 1
         else:
-            hostcount = request.json['hostcount']
+            sitesperhost = request.json['sitesperhost']
 
         Global.DATABASES[database_id] = {'id': database_id,
                                          'name': request.json['name'],
                                          'kfactor': kfactor,
-                                         'hostcount': hostcount,
+                                         'sitesperhost': sitesperhost,
                                          'members': []}
 
         # Create new deployment
-        app_root = os.path.dirname(os.path.abspath(__file__))
-
-        with open(os.path.join(app_root, "deployment.json")) as json_file:
-            deployment = json.load(json_file)
-            deployment['databaseid'] = database_id
-            is_pro_version(deployment)
-        Global.DEPLOYMENT[database_id] = deployment
+        # app_root = os.path.dirname(os.path.abspath(__file__))
+        #
+        # with open(os.path.join(app_root, "deployment.json")) as json_file:
+        #     deployment = json.load(json_file)
+        #     deployment['databaseid'] = database_id
+        #     is_pro_version(deployment)
+        # Global.DEPLOYMENT[database_id] = deployment
 
         sync_configuration()
 
@@ -1013,7 +1022,7 @@ class DatabaseAPI(MethodView):
 
         Global.DATABASES[database_id] = {'id': database_id, 'name': request.json['name'],
                                          'kfactor': request.json['kfactor'],
-                                         'hostcount': request.json['hostcount'],
+                                         'sitesperhost': request.json['sitesperhost'],
                                          'members': database['members']}
 
         sync_configuration()
@@ -1584,9 +1593,9 @@ class DatabaseDeploymentAPI(MethodView):
     """
 
     @staticmethod
-    def get(database_id):
+    def get(database_id, server_id):
         if 'Accept' in request.headers and 'application/json' in request.headers['Accept']:
-            deployment = Global.DEPLOYMENT.get(database_id)
+            deployment = Global.DEPLOYMENT.get(server_id)
 
             new_deployment = deployment.copy()
 
@@ -1597,7 +1606,7 @@ class DatabaseDeploymentAPI(MethodView):
 
             if deployment_user is not None:
                 for user in deployment_user:
-                    if user[0]['databaseid'] == database_id:
+                    if user[0]['database_id'] == database_id:
                         new_deployment['users']['user'].append({
                             'name': user[0]['name'],
                             'roles': user[0]['roles'],
@@ -1605,15 +1614,15 @@ class DatabaseDeploymentAPI(MethodView):
 
                         })
 
-            del new_deployment['databaseid']
+            del new_deployment['serverid']
 
             return jsonify({'deployment': new_deployment})
         else:
-            deployment_content = DeploymentConfig.DeploymentConfiguration.get_database_deployment(database_id)
+            deployment_content = DeploymentConfig.DeploymentConfiguration.get_server_deployment(server_id, database_id)
             return Response(deployment_content, mimetype='text/xml')
 
     @staticmethod
-    def put(database_id):
+    def put(database_id, server_id):
         if 'application/json' in request.headers['Content-Type']:
             inputs = JsonInputs(request)
             if not inputs.validate():
@@ -1817,15 +1826,15 @@ def main(runner, amodule, config_dir, data_dir, server):
     else:
         is_pro_version(deployment)
 
-        Global.DEPLOYMENT[deployment['databaseid']] = deployment
+        Global.DEPLOYMENT[deployment['serverid']] = deployment
 
         Global.SERVERS[1] = {'id': 1, 'name': __host_name__, 'hostname': __host_or_ip__, 'description': "",
-                             'enabled': True, 'external-interface': "", 'internal-interface': "",
+                             'enabled': True, 'external-interface': "", 'admin-listener': '21211', 'http-listener': '8080', 'internal-interface': "",
                              'public-interface': "", 'client-listener': "", 'internal-listener': "",
                              'replication-listener': "", 'zookeeper-listener': "",
                              'placement-group': "", 'isAdded': False}
 
-        Global.DATABASES[1] = {'id': 1, 'name': "Database", 'admin-listener': '21211', 'http-listener': '8080', 'kfactor': '0', 'hostcount': '1', "members": [1]}
+        Global.DATABASES[1] = {'id': 1, 'name': "Database", 'kfactor': '0', 'sitesperhost': '8', "members": [1]}
 
     Configuration.write_configuration_file()
 
@@ -1891,7 +1900,10 @@ def main(runner, amodule, config_dir, data_dir, server):
                      view_func=VDM_CONFIGURATION_VIEW, methods=['GET', 'POST'])
     APP.add_url_rule('/api/1.0/voltdeploy/sync_configuration/', strict_slashes=False,
                      view_func=SYNC_VDM_CONFIGURATION_VIEW, methods=['POST'])
-    APP.add_url_rule('/api/1.0/databases/<int:database_id>/deployment/', strict_slashes=False,
+    # APP.add_url_rule('/api/1.0/databases/<int:database_id>/deployment/', strict_slashes=False,
+    #                  view_func=DATABASE_DEPLOYMENT_VIEW,
+    #                  methods=['GET', 'PUT'])
+    APP.add_url_rule('/api/1.0/databases/<int:database_id>/servers/<int:server_id>/deployment/', strict_slashes=False,
                      view_func=DATABASE_DEPLOYMENT_VIEW,
                      methods=['GET', 'PUT'])
     APP.add_url_rule('/api/1.0/voltdeploy/', strict_slashes=False, view_func=VDM_VIEW,

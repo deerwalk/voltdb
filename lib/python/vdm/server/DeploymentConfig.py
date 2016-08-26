@@ -100,3 +100,35 @@ class DeploymentConfiguration():
         xmlstr = tostring(deployment_top,encoding='UTF-8')
         return xmlstr
 
+    @staticmethod
+    def get_server_deployment(serverid, dbid):
+        deployment_top = Element('deployment')
+        value = HTTPListener.Global.DEPLOYMENT[serverid]
+        db = HTTPListener.Global.DATABASES[dbid]
+        host_count = len(db['members'])
+        value['cluster']['hostcount'] = host_count
+        # Add users
+        addTop = False
+        for key, duser in HTTPListener.Global.DEPLOYMENT_USERS.items():
+            if duser['databaseid'] == dbid:
+                # Only create subelement if users have anything in this database.
+                if addTop != True:
+                    users_top = SubElement(deployment_top, 'users')
+                    addTop = True
+                uelem = SubElement(users_top, "user")
+                uelem.attrib["name"] = duser["name"]
+                uelem.attrib["password"] = duser["password"]
+                uelem.attrib["roles"] = duser["roles"]
+                plaintext = str(duser["plaintext"])
+                if isinstance(duser["plaintext"], bool):
+                    if duser["plaintext"] == False:
+                        plaintext = "false"
+                    else:
+                        plaintext = "true"
+                uelem.attrib["plaintext"] = plaintext
+
+        handle_deployment_dict(deployment_top, dbid, value, True)
+
+        xmlstr = tostring(deployment_top,encoding='UTF-8')
+        return xmlstr
+

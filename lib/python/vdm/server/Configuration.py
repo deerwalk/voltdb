@@ -67,12 +67,12 @@ def convert_xml_to_json(config_path):
     if type(D2[k]['deployments']['deployment']) is dict:
         deployment_json = get_deployment_from_xml(D2[k]['deployments']
                                                   ['deployment'], 'dict')
-        HTTPListener.Global.DEPLOYMENT[deployment_json[0]['databaseid']] = deployment_json[0]
+        HTTPListener.Global.DEPLOYMENT[deployment_json[0]['serverid']] = deployment_json[0]
     else:
         deployment_json = get_deployment_from_xml(D2[k]['deployments']
                                                   ['deployment'], 'list')
         for deployment in deployment_json:
-            HTTPListener.Global.DEPLOYMENT[deployment['databaseid']] = deployment
+            HTTPListener.Global.DEPLOYMENT[deployment['serverid']] = deployment
 
 
     if D2[k]['deployments'] and 'deployment' in D2[k]['deployments']:
@@ -1003,7 +1003,7 @@ def convert_field_required_format(type, field):
     :param field: field name
     :return: field value in required format
     """
-    if field == 'databaseid':
+    if field == 'serverid':
         modified_field = int(type[field])
     elif field == 'id':
         modified_field = int(type[field])
