@@ -3285,7 +3285,7 @@ a.restoreBtn {
 
 .configureImportTbl tr td{
     border: none;
-    padding: 5px 1px;
+    padding: 5px 2px;
 }
 .propertiesAlign {
     margin: 10px 0 0 0;
@@ -3377,6 +3377,12 @@ a.drTblBtn {
 
 
 .loadExport {
+    position: relative;
+    left: 3px;
+    top: 5px;
+}
+
+.loadImport {
     position: relative;
     left: 3px;
     top: 5px;

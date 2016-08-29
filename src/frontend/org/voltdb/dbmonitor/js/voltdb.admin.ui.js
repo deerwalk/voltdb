@@ -1957,14 +1957,6 @@ function loadAdminPage() {
         }
     };
 
-    function showHideImportModule() {
-        if ($('#txtImportType').val() == "CUSTOM") {
-            $("#TrImportConnectorClass").show();
-        } else {
-            $("#TrImportConnectorClass").hide();
-        }
-    };
-
     $("#addConfigPopupLink").popup({
         open: function (event, ui, ele) {
             editId = adminDOMObjects.addConfigLink.data("id");
@@ -2334,7 +2326,7 @@ function loadAdminPage() {
         open: function (event, ui, ele) {
             editId = adminDOMObjects.addImportConfigPopupLink.data("id");
 
-            //For adding a new configuration
+            //For adding a new import configuration
             if (editId == "-1") {
                 $("#addImportConfigHeader").text("Add Configuration");
                 $("#deleteImportConfig").hide();
@@ -2352,7 +2344,7 @@ function loadAdminPage() {
                 '    <td style="width:60%">' +
                 '       <select id="txtImportType" name="txtImportType"> '+
                 '           <option>KAFKA</option> ' +
-                '           <option>CUSTOM</option> ' +
+                '           <option>KINESIS</option> ' +
                 '       </select>' +
                 '    </td>' +
                 '    <td width="8%" align="right"><input type="checkbox" checked="true" id="chkImportStream" class="chkStream"/></td>' +
@@ -2426,6 +2418,7 @@ function loadAdminPage() {
             })
             $(".formatOption").on("click", function(){
                 $("#txtImportFormat").val($(this).text())
+                $("#ddlFormat").hide()
             });
 
             $("#addImportConfigControls").show();
@@ -2441,7 +2434,6 @@ function loadAdminPage() {
             });
 
             $('#txtImportType').change(function () {
-                showHideImportModule();
                 if (typeof type === "undefined") {
                     addImportProperties();
                 }
@@ -2527,7 +2519,6 @@ function loadAdminPage() {
             } else {
                 addImportProperties();
             }
-            showHideImportModule();
             var popup = $(this)[0];
             $("#btnAddImportConfigSave").unbind("click");
             $("#btnAddImportConfigSave").on("click", function (e) {
@@ -2583,7 +2574,7 @@ function loadAdminPage() {
             $("#btnSaveImportConfigOk").on("click", function () {
                 var adminConfigurations = VoltDbAdminConfig.getLatestRawAdminConfigurations();
                 if ($("#importSaveConfigText").data("status") == "delete") {
-                    adminConfigurations.export.configuration.splice(editId * 1, 1);
+                    adminConfigurations.import.configuration.splice(editId * 1, 1);
                 }
                 else {
                     var newConfig = {};
@@ -2596,9 +2587,7 @@ function loadAdminPage() {
                             "value": encodeURIComponent($(newStreamProperties[i + 1]).val()),
                         });
                     }
-                    newConfig["property"].push({"name": "procedure", "value": "test"})
                     newConfig["format"] = $("#txtImportFormat").val();
-                    newConfig["formatProperty"] = []
                     newConfig["type"] = $("#txtImportType").val().trim();
                     newConfig["enabled"] = $("#chkImportStream").is(':checked');
                     if ($("#txtImportType").val().trim().toUpperCase() == "CUSTOM") {
@@ -2630,18 +2619,15 @@ function loadAdminPage() {
                 var loadingConfig = '<tr class="child-row-4 subLabelRow">' +
                     '   <td colspan="4" style="position:relative">&nbsp;<div class="loading-small loadExportConfig"></div></td>' +
                     '</tr>';
-
                 adminEditObjects.addNewImportConfigLink.hide();
                 adminEditObjects.importConfiguration.html(loadingConfig);
                 adminEditObjects.loadingImportConfig.show();
-
-
+                adminEditObjects.importConfiguration.data("status", "loading");
 
                 //Close the popup
                 popup.close();
 
                 voltDbRenderer.updateAdminConfiguration(adminConfigurations, function (result) {
-
                     if (result.status == "1") {
 
                         //Reload Admin configurations for displaying the updated value
@@ -3329,24 +3315,139 @@ function loadAdminPage() {
                 $($(".newImportStreamMinProperty")[i]).addClass("propertyToRemove");
             }
         }
-        $(".propertyToRemove").not(".addedProperty").remove();
+        $(".propertyToRemove").not(".addedImportProperty").remove();
 
         var exportProperties = '';
-       if (exportType.toUpperCase() == "KAFKA") {
-            if (!$('#txtImportMetadataBrokerList').length) {
+        if (exportType.toUpperCase() == "KAFKA") {
+            if (!$('#txtBrokers').length) {
                 exportProperties += '<tr class="newImportStreamMinProperty">' +
                     '   <td>' +
-                    '       <input size="15" id="txtImportMetadataBrokerList" name="txtImportMetadataBrokerList" value="metadata.broker.list" disabled="disabled" class="newImportStreamPropertyName newImportStreamProperty requiredProperty" type="text">' +
-                    '       <label id="errorImportMetadataBrokerList" for="txtImportMetadataBrokerList" class="error" style="display: none;"></label>' +
+                    '       <input size="15" id="txtBrokers" name="txtBrokers" value="brokers" disabled="disabled" class="newImportStreamPropertyName newImportStreamProperty requiredImportProperty" type="text">' +
+                    '       <label id="errorBrokers" for="txtBrokers" class="error" style="display: none;"></label>' +
                     '   </td>' +
                     '   <td>' +
-                    '       <input size="15" id="txtImportMetadataBrokerListValue" name="txtImportMetadataBrokerListValue" class="newImportStreamPropertyValue newImportStreamProperty" type="text">' +
-                    '       <label id="errorImportMetadataBrokerListValue" for="txtImportMetadataBrokerListValue" class="error" style="display: none;"></label>' +
+                    '       <input size="15" id="txtBrokersValue" name="txtBrokersValue" class="newImportStreamPropertyValue newImportStreamProperty" type="text">' +
+                    '       <label id="errorBrokersValue" for="txtBrokersValue" class="error" style="display: none;"></label>' +
                     '   </td>' +
                     '   <td></td>' +
                     '</tr>';
             } else {
-                $('#txtImportMetadataBrokerList').attr("disabled", "disabled");
+                $('#txtBrokers').attr("disabled", "disabled");
+            }
+
+            if (!$('#txtProcedure').length) {
+                exportProperties += '<tr class="newImportStreamMinProperty">' +
+                    '   <td>' +
+                    '       <input size="15" id="txtProcedure" name="txtProcedure" value="procedure" disabled="disabled" class="newImportStreamPropertyName newImportStreamProperty requiredImportProperty" type="text">' +
+                    '       <label id="errorProcedure" for="txtProcedure" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td>' +
+                    '       <input size="15" id="txtProcedureValue" name="txtProcedureValue" class="newImportStreamPropertyValue newImportStreamProperty" type="text">' +
+                    '       <label id="errorProcedureValue" for="txtProcedureValue" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td></td>' +
+                    '</tr>';
+            } else {
+                $('#txtProcedure').attr("disabled", "disabled");
+            }
+
+            if (!$('#txtTopics').length) {
+                exportProperties += '<tr class="newImportStreamMinProperty">' +
+                    '   <td>' +
+                    '       <input size="15" id="txtTopics" name="txtTopics" value="topics" disabled="disabled" class="newImportStreamPropertyName newImportStreamProperty requiredImportProperty" type="text">' +
+                    '       <label id="errorTopics" for="txtTopics" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td>' +
+                    '       <input size="15" id="txtTopicsValue" name="txtTopicsValue" class="newImportStreamPropertyValue newImportStreamProperty" type="text">' +
+                    '       <label id="errorTopicValue" for="txtTopicsValue" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td></td>' +
+                    '</tr>';
+            } else {
+                $('#txtTopics').attr("disabled", "disabled");
+            }
+
+        }
+
+        else if (exportType.toUpperCase() == "KINESIS") {
+            if (!$('#txtAppName').length) {
+                exportProperties += '<tr class="newImportStreamMinProperty">' +
+                    '   <td>' +
+                    '       <input size="15" id="txtAppName" name="txtAppName" value="app.name" disabled="disabled" class="newImportStreamPropertyName newImportStreamProperty requiredImportProperty" type="text">' +
+                    '       <label id="errorAppName" for="txtAppName" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td>' +
+                    '       <input size="15" id="txtAppNameValue" name="txtAppNameValue" class="newImportStreamPropertyValue newImportStreamProperty" type="text">' +
+                    '       <label id="errorAppNameValue" for="txtAppNameValue" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td></td>' +
+                    '</tr>';
+            } else {
+                $('#txtAppName').attr("disabled", "disabled");
+            }
+
+            if (!$('#txtProcedureKi').length) {
+                exportProperties += '<tr class="newImportStreamMinProperty">' +
+                    '   <td>' +
+                    '       <input size="15" id="txtProcedureKi" name="txtProcedureKi" value="procedure" disabled="disabled" class="newImportStreamPropertyName newImportStreamProperty requiredImportProperty" type="text">' +
+                    '       <label id="errorProcedureKi" for="txtProcedureKi" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td>' +
+                    '       <input size="15" id="txtProcedureKiValue" name="txtProcedureKiValue" class="newImportStreamPropertyValue newImportStreamProperty" type="text">' +
+                    '       <label id="errorProcedureKiValue" for="txtProcedureKiValue" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td></td>' +
+                    '</tr>';
+            } else {
+                $('#txtProcedureKi').attr("disabled", "disabled");
+            }
+
+            if (!$('#txtStreamName').length) {
+                exportProperties += '<tr class="newImportStreamMinProperty">' +
+                    '   <td>' +
+                    '       <input size="15" id="txtStreamName" name="txtStreamName" value="stream.name" disabled="disabled" class="newImportStreamPropertyName newImportStreamProperty requiredImportProperty" type="text">' +
+                    '       <label id="errorStreamName" for="txtStreamName" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td>' +
+                    '       <input size="15" id="txtStreamNameValue" name="txtStreamNameValue" class="newImportStreamPropertyValue newImportStreamProperty" type="text">' +
+                    '       <label id="errorStreamNameValue" for="txtStreamNameValue" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td></td>' +
+                    '</tr>';
+            } else {
+                $('#txtStreamName').attr("disabled", "disabled");
+            }
+
+            if (!$('#txtAccessKey').length) {
+                exportProperties += '<tr class="newImportStreamMinProperty">' +
+                    '   <td>' +
+                    '       <input size="15" id="txtAccessKey" name="txtAccessKey" value="access.key" disabled="disabled" class="newImportStreamPropertyName newImportStreamProperty requiredImportProperty" type="text">' +
+                    '       <label id="errorAccessKey" for="txtAccessKey" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td>' +
+                    '       <input size="15" id="txtAccessKeyValue" name="txtAccessKeyValue" class="newImportStreamPropertyValue newImportStreamProperty" type="text">' +
+                    '       <label id="errorAccessKeyValue" for="txtAccessKeyValue" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td></td>' +
+                    '</tr>';
+            } else {
+                $('#txtAccessKey').attr("disabled", "disabled");
+            }
+
+            if (!$('#txtSecretKey').length) {
+                exportProperties += '<tr class="newImportStreamMinProperty">' +
+                    '   <td>' +
+                    '       <input size="15" id="txtSecretKey" name="txtSecretKey" value="secret.key" disabled="disabled" class="newImportStreamPropertyName newImportStreamProperty requiredImportProperty" type="text">' +
+                    '       <label id="errorSecretKey" for="txtSecretKey" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td>' +
+                    '       <input size="15" id="txtSecretKeyValue" name="txtSecretKeyValue" class="newImportStreamPropertyValue newImportStreamProperty" type="text">' +
+                    '       <label id="errorSecretKeyValue" for="txtSecretKeyValue" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td></td>' +
+                    '</tr>';
+            } else {
+                $('#txtSecretKey').attr("disabled", "disabled");
             }
         }
         $('#tblAddNewImportProperty tr.headerProperty').after(exportProperties);
@@ -3357,8 +3458,20 @@ function loadAdminPage() {
 
     var removeDuplicateImportProperty = function () {
         $('#tblAddNewImportProperty :input').each(function () {
-            if ($(this).val() == "metadata.broker.list") {
-                removeDuplicateImport(this, "metadata.broker.list");
+            if ($(this).val() == "brokers") {
+                removeDuplicateImport(this, "brokers");
+            } else if ($(this).val() == "procedure") {
+                removeDuplicateImport(this, "procedure");
+            } else if ($(this).val() == "topics") {
+                removeDuplicateImport(this, "topics");
+            } else if ($(this).val() == "app.name") {
+                removeDuplicateImport(this, "app.name");
+            } else if ($(this).val() == "stream.name") {
+                removeDuplicateImport(this, "stream.name");
+            } else if ($(this).val() == "access.key") {
+                removeDuplicateImport(this, "access.key");
+            } else if ($(this).val() == "secret.key") {
+                removeDuplicateImport(this, "secret.key");
             }
         });
     };
@@ -3384,17 +3497,33 @@ function loadAdminPage() {
     var setDefaultImportProperty = function () {
         var importType = $('#txtImportType').val();
         if (importType.toUpperCase() == "KAFKA") {
-            setDefaultImportDisplay($("#txtImportMetadataBrokerList"));
+            setDefaultImportDisplay($("#txtBrokers"));
+            setDefaultImportDisplay($("#txtProcedure"));
+            setDefaultImportDisplay($("#txtTopics"));
         } else {
-            setNormalImportDisplay($("#txtImportMetadataBrokerList"));
+            setNormalImportDisplay($("#txtBrokers"));
+            setNormalImportDisplay($("#txtProcedure"));
+            setNormalImportDisplay($("#txtTopics"));
+        }
+
+        if (importType.toUpperCase() == "KINESIS") {
+            setDefaultImportDisplay($("#txtAppName"));
+            setDefaultImportDisplay($("#txtProcedureKi"));
+            setDefaultImportDisplay($("#txtStreamName"));
+            setDefaultImportDisplay($("#txtAccessKey"));
+            setDefaultImportDisplay($("#txtSecretKey"));
+        } else {
+            setNormalImportDisplay($("#txtAppName"));
+            setNormalImportDisplay($("#txtProcedureKi"));
+            setNormalImportDisplay($("#txtStreamName"));
+            setNormalImportDisplay($("#txtAccessKey"));
+            setNormalImportDisplay($("#txtSecretKey"));
         }
     };
 
     var setDefaultImportDisplay = function (txtbox) {
-        if (txtbox.selector != "#selectRabbitMq")
-            txtbox.attr('disabled', 'disabled');
         var $row = txtbox.closest("tr");
-        $('#tblAddNewProperty tr.headerProperty').after($row);
+        $('#tblAddNewImportProperty tr.headerProperty').after($row);
         var $td = $row.find("td:last-child");
         $td.html('');
     };
@@ -3911,8 +4040,16 @@ function loadAdminPage() {
 
         this.newImportStreamMinPropertyName= {
             "metadata.broker.list": "#txtImportMetadataBrokerListValue",
+            "brokers": "#txtBrokersValue",
+            "procedure_KAFKA": "#txtProcedureValue",
+            "topics": "#txtTopicsValue",
+            "app.name": "#txtAppNameValue",
+            "procedure_KINESIS": "#txtProcedureKiValue",
+            "stream.name": "#txtStreamNameValue",
+            "access.key": "#txtAccessKeyValue",
+            "secret.key": "#txtSecretKeyValue",
         }
-
+        this.isImportConfigLoading = false;
         this.orgTypeValue = "";
         this.exportTypes = [];
 
@@ -4186,8 +4323,8 @@ function loadAdminPage() {
                 }
 
                 for (var i = 0; i < data.length; i++) {
-                    var module = VoltDbAdminConfig.escapeHtml(data[i].module);
-                    var type = data[i].type ? (" (" + VoltDbAdminConfig.escapeHtml(data[i].type) + ")") : "";
+                    //var module = VoltDbAdminConfig.escapeHtml(data[i].module);
+                    var type = data[i].type ? VoltDbAdminConfig.escapeHtml(data[i].type) : "";
                     var enabled = data[i].enabled;
                     var importProperty = data[i].property;
                     var rowId = 'row-5' + i;
@@ -4201,7 +4338,7 @@ function loadAdminPage() {
 
                     result += '<tr class="child-row-5 subLabelRow parentprop" id="' + rowId + '">' +
                             '   <td class="configLabel expoStream" onclick="toggleProperties(this);" title="Click to expand/collapse">' +
-                            '       <a href="javascript:void(0)" class="labelCollapsed ' + additionalCss + '"> ' + module + type + '</a>' +
+                            '       <a href="javascript:void(0)" class="labelCollapsed ' + additionalCss + '"> ' + type + '</a>' +
                             '   </td>' +
                             '   <td align="right">' +
                             '       <div class="' + getOnOffClass(enabled) + '"></div>' +
