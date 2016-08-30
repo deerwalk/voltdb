@@ -2646,7 +2646,7 @@ function loadAdminPage() {
                             adminEditObjects.importConfiguration.data("status", "value");
                             adminEditObjects.importConfiguration.html(currentConfig);
 
-                            var msg = '"Export Configuration". ';
+                            var msg = '"Import Configuration". ';
                             if (result.status == "-1" && result.statusstring == "Query timeout.") {
                                 msg += "The Database is either down, very slow to respond or the server refused connection. Please try to edit when the server is back online.";
                             } else if (result.statusstring != "") {
@@ -2655,9 +2655,9 @@ function loadAdminPage() {
                                 msg += "Please try again later.";
                             }
 
-                            $("#updateErrorFieldMsg").text(msg);
+                            $("#updateImportErrorFieldMsg").text(msg);
 
-                            $("#updateErrorPopupLink").trigger("click");
+                            $("#updateImportErrorPopupLink").trigger("click");
                         }, 3000);
                     }
                 });
@@ -3778,6 +3778,20 @@ function loadAdminPage() {
             });
         }
     });
+
+    $("#updateImportErrorPopupLink").popup({
+        open: function (event, ui, ele) {
+        },
+        afterOpen: function () {
+            var popup = $(this)[0];
+            $("#btnImportUpdateErrorOk").unbind("click");
+            $("#btnImportUpdateErrorOk").on("click", function () {
+                //Close the popup
+                popup.close();
+            });
+        }
+    });
+
 
     $("#sercurityUserPopupLink").popup({
         open: function (event, ui, ele) {
