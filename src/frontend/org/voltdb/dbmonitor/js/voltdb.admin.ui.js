@@ -3402,6 +3402,22 @@ function loadAdminPage() {
                 $('#txtProcedureKi').attr("disabled", "disabled");
             }
 
+            if (!$('#txtRegion').length) {
+                exportProperties += '<tr class="newImportStreamMinProperty">' +
+                    '   <td>' +
+                    '       <input size="15" id="txtRegion" name="txtRegion" value="region" disabled="disabled" class="newImportStreamPropertyName newImportStreamProperty requiredImportProperty" type="text">' +
+                    '       <label id="errorRegion" for="txtRegion" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td>' +
+                    '       <input size="15" id="txtRegionValue" name="txtRegionValue" class="newImportStreamPropertyValue newImportStreamProperty" type="text">' +
+                    '       <label id="errorRegionValue" for="txtRegionValue" class="error" style="display: none;"></label>' +
+                    '   </td>' +
+                    '   <td></td>' +
+                    '</tr>';
+            } else {
+                $('#txtRegion').attr("disabled", "disabled");
+            }
+
             if (!$('#txtStreamName').length) {
                 exportProperties += '<tr class="newImportStreamMinProperty">' +
                     '   <td>' +
@@ -3472,6 +3488,8 @@ function loadAdminPage() {
                 removeDuplicateImport(this, "access.key");
             } else if ($(this).val() == "secret.key") {
                 removeDuplicateImport(this, "secret.key");
+            } else if ($(this).val() == "region") {
+                removeDuplicateImport(this, "region");
             }
         });
     };
@@ -3512,12 +3530,14 @@ function loadAdminPage() {
             setDefaultImportDisplay($("#txtStreamName"));
             setDefaultImportDisplay($("#txtAccessKey"));
             setDefaultImportDisplay($("#txtSecretKey"));
+            setDefaultImportDisplay($("#txtRegion"));
         } else {
             setNormalImportDisplay($("#txtAppName"));
             setNormalImportDisplay($("#txtProcedureKi"));
             setNormalImportDisplay($("#txtStreamName"));
             setNormalImportDisplay($("#txtAccessKey"));
             setNormalImportDisplay($("#txtSecretKey"));
+            setNormalImportDisplay($("#txtRegion"));
         }
     };
 
@@ -4045,6 +4065,7 @@ function loadAdminPage() {
             "topics": "#txtTopicsValue",
             "app.name": "#txtAppNameValue",
             "procedure_KINESIS": "#txtProcedureKiValue",
+            "region": "#txtRegionValue",
             "stream.name": "#txtStreamNameValue",
             "access.key": "#txtAccessKeyValue",
             "secret.key": "#txtSecretKeyValue",
