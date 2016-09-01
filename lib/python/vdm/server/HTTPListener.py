@@ -457,7 +457,7 @@ def map_deployment_users(request, user_id):
     if 'name' not in Global.DEPLOYMENT_USERS:
         Global.DEPLOYMENT_USERS[user_id] = {
             'userid': user_id,
-            'databaseid': request.json['databaseid'],
+            'serverid': request.json['serverid'],
             'name': request.json['name'],
             'password': urllib.unquote(str(request.json['password']).encode('ascii')).decode('utf-8'),
             'roles': request.json['roles'],
@@ -492,10 +492,10 @@ def get_port(ip_with_port):
 
 
 def check_port_valid(port_option, server):
-    # if port_option == "http-listener":
-    #     default_port = "8080"
-    # if port_option == "admin-listener":
-    #     default_port = "21211"
+    if port_option == "http-listener":
+        default_port = "8080"
+    if port_option == "admin-listener":
+        default_port = "21211"
     if port_option == "zookeeper-listener":
         default_port = "7181"
     if port_option == "replication-listener":
@@ -549,8 +549,6 @@ def validate_server_ports(database_id, server_id=-1):
             result = check_port_valid(option, server)
             if result is not None:
                 return result
-
-
 
 
 def sync_configuration():
@@ -1071,7 +1069,7 @@ class DeploymentUserAPI(MethodView):
     """Class to handle request related to deployment."""
 
     @staticmethod
-    def get(database_id):
+    def get(server_id):
         """
         Get the deployment with specified database_id.
         Args:
@@ -1081,19 +1079,25 @@ class DeploymentUserAPI(MethodView):
         """
         # deployment_user = Global.DEPLOYMENT_USERS.get(user_id)
 
-        current_database = Global.DATABASES.get(database_id)
-        if not current_database:
-            return make_response(jsonify({'status': 404, 'statusString': 'No database found for id: %u' % database_id}), 404)
+        current_server = Global.SERVERS.get(server_id)
+        if not current_server:
+            return make_response(jsonify({'status': 404, 'statusString': 'No server found for id: %u' % server_id}), 404)
+
+        # current_database = Global.DATABASES.get(database_id)
+        # if not current_database:
+        #     return make_response(jsonify({'status': 404, 'statusString': 'No database found for id: %u' % database_id}), 404)
 
         deployment_user = []
         for key, value in Global.DEPLOYMENT_USERS.iteritems():
-            if value["databaseid"] == database_id:
+            if value["serverid"] == server_id:
                 deployment_user.append(value)
+            # if value["databaseid"] == database_id:
+            #     deployment_user.append(value)
 
-        return jsonify({'deployment': deployment_user})
+        return jsonify({'users': deployment_user})
 
     @staticmethod
-    def post(database_id):
+    def post(server_id):
         """
         #     Add user information with specified username.
         #     Args:
@@ -1105,16 +1109,20 @@ class DeploymentUserAPI(MethodView):
         if not inputs.validate():
             return jsonify(status=401, statusString=inputs.errors)
 
-        current_database = Global.DATABASES.get(database_id)
-        if not current_database:
-            return make_response(jsonify({'status': 404, 'statusString': 'No database found for id: %u' % database_id}), 404)
+        current_server = Global.SERVERS.get(server_id)
+        if not current_server:
+            return make_response(jsonify({'status': 404, 'statusString': 'No server found for id: %u' % server_id}), 404)
+
+        # current_database = Global.DATABASES.get(database_id)
+        # if not current_database:
+        #     return make_response(jsonify({'status': 404, 'statusString': 'No database found for id: %u' % database_id}), 404)
 
         is_invalid_roles = check_invalid_roles(request.json['roles'])
         if not is_invalid_roles:
             return make_response(jsonify({'status': 404, 'statusString': 'Invalid user roles.'}))
 
         user = [v if type(v) is list else [v] for v in Global.DEPLOYMENT_USERS.values()]
-        if request.json['name'] in [(d["name"]) for item in user for d in item] and d["databaseid"] == database_id:
+        if request.json['name'] in [(d["name"]) for item in user for d in item] and d["serverid"] == server_id:
             return make_response(jsonify({'status': 404,  'statusString': 'user name already exists'}), 404)
 
         user_roles = ','.join(set(request.json['roles'].split(',')))
@@ -1127,7 +1135,7 @@ class DeploymentUserAPI(MethodView):
 
             Global.DEPLOYMENT_USERS[user_id] = {
                 'userid': user_id,
-                'databaseid': database_id,
+                'serverid': server_id,
                 'name': request.json['name'],
                 'password': urllib.unquote(str(request.json['password']).encode('ascii')).decode('utf-8'),
                 'roles': user_roles,
@@ -1142,7 +1150,7 @@ class DeploymentUserAPI(MethodView):
         return jsonify({'user': Global.DEPLOYMENT_USERS.get(user_id), 'status': 1, 'statusstring': 'User Created'})
 
     @staticmethod
-    def put(database_id, user_id):
+    def put(server_id, user_id):
         #     """
         #     Add user information with specified username.
         #     Args:
@@ -1164,7 +1172,7 @@ class DeploymentUserAPI(MethodView):
             return make_response(jsonify({'status': 404, 'statusString': 'Invalid user roles.'}))
 
         user = [v if type(v) is list else [v] for v in Global.DEPLOYMENT_USERS.values()]
-        if request.json['name'] in [(d["name"]) for item in user for d in item] and d["databaseid"] == database_id \
+        if request.json['name'] in [(d["name"]) for item in user for d in item] and d["serverid"] == server_id \
                 and request.json["name"] != current_user["name"]:
             return make_response(jsonify({'status': 404, 'statusString': 'user name already exists'}), 404)
         user_roles = ','.join(set(request.json.get('roles', current_user['roles']).split(',')))
@@ -1180,7 +1188,7 @@ class DeploymentUserAPI(MethodView):
         return jsonify({'user': current_user, 'status': 1, 'statusstring': "User Updated"})
 
     @staticmethod
-    def delete(database_id, user_id):
+    def delete(server_id, user_id):
         """
         Delete the user with specified user_id.
         Args:
@@ -1192,9 +1200,9 @@ class DeploymentUserAPI(MethodView):
         if current_user is None:
             return make_response(jsonify({'statusstring': 'No user found for id: %u' % user_id}), 404)
 
-        current_database = Global.DATABASES.get(database_id)
-        if not current_database:
-            return make_response(jsonify({'status': 404, 'statusString': 'No database found for id: %u' % database_id}), 404)
+        current_server = Global.SERVERS.get(server_id)
+        if not current_server:
+            return make_response(jsonify({'status': 404, 'statusString': 'No server found for id: %u' % server_id}), 404)
 
         del Global.DEPLOYMENT_USERS[user_id]
 
@@ -1593,7 +1601,7 @@ class DatabaseDeploymentAPI(MethodView):
     """
 
     @staticmethod
-    def get(database_id, server_id):
+    def get(server_id, database_id):
         if 'Accept' in request.headers and 'application/json' in request.headers['Accept']:
             deployment = Global.DEPLOYMENT.get(server_id)
 
@@ -1606,7 +1614,7 @@ class DatabaseDeploymentAPI(MethodView):
 
             if deployment_user is not None:
                 for user in deployment_user:
-                    if user[0]['database_id'] == database_id:
+                    if user[0]['serverid'] == server_id:
                         new_deployment['users']['user'].append({
                             'name': user[0]['name'],
                             'roles': user[0]['roles'],
@@ -1622,7 +1630,7 @@ class DatabaseDeploymentAPI(MethodView):
             return Response(deployment_content, mimetype='text/xml')
 
     @staticmethod
-    def put(database_id, server_id):
+    def put(server_id, database_id):
         if 'application/json' in request.headers['Content-Type']:
             inputs = JsonInputs(request)
             if not inputs.validate():
@@ -1632,12 +1640,12 @@ class DatabaseDeploymentAPI(MethodView):
                 return jsonify(result)
             if 'dr' in request.json and request.json['dr'] and 'id' not in request.json['dr']:
                 return jsonify({'status': '401', 'statusString': 'DR id is required.'})
-            deployment = map_deployment(request, database_id)
+            deployment = map_deployment(request, server_id)
             sync_configuration()
             Configuration.write_configuration_file()
             return jsonify({'status': 200, 'statusString': 'Ok', 'deployment': deployment})
         else:
-            result = Configuration.set_deployment_for_upload(database_id, request)
+            result = Configuration.set_deployment_for_upload(server_id, request)
             if 'status' in result and result['status'] == 401:
                 return jsonify({'status': 401, 'statusString': result['statusString']})
             else:
@@ -1890,9 +1898,9 @@ def main(runner, amodule, config_dir, data_dir, server):
                      view_func=STATUS_DATABASE_VIEW, methods=['GET'])
     APP.add_url_rule('/api/1.0/databases/<int:database_id>/servers/<int:server_id>/status/', strict_slashes=False,
                      view_func=STATUS_DATABASE_SERVER_VIEW, methods=['GET'])
-    APP.add_url_rule('/api/1.0/databases/<int:database_id>/users/<int:user_id>/', strict_slashes=False,
+    APP.add_url_rule('/api/1.0/servers/<int:server_id>/users/<int:user_id>/', strict_slashes=False,
                      view_func=DEPLOYMENT_USER_VIEW, methods=['PUT', 'DELETE'])
-    APP.add_url_rule('/api/1.0/databases/<int:database_id>/users/', strict_slashes=False,
+    APP.add_url_rule('/api/1.0/servers/<int:server_id>/users/', strict_slashes=False,
                      view_func=DEPLOYMENT_USER_VIEW, methods=['GET', 'POST'])
     APP.add_url_rule('/api/1.0/voltdeploy/status/', strict_slashes=False,
                      view_func=VDM_STATUS_VIEW, methods=['GET'])
@@ -1903,7 +1911,7 @@ def main(runner, amodule, config_dir, data_dir, server):
     # APP.add_url_rule('/api/1.0/databases/<int:database_id>/deployment/', strict_slashes=False,
     #                  view_func=DATABASE_DEPLOYMENT_VIEW,
     #                  methods=['GET', 'PUT'])
-    APP.add_url_rule('/api/1.0/databases/<int:database_id>/servers/<int:server_id>/deployment/', strict_slashes=False,
+    APP.add_url_rule('/api/1.0/databases/<int:database_id>servers/<int:server_id>/deployment/', strict_slashes=False,
                      view_func=DATABASE_DEPLOYMENT_VIEW,
                      methods=['GET', 'PUT'])
     APP.add_url_rule('/api/1.0/voltdeploy/', strict_slashes=False, view_func=VDM_VIEW,
