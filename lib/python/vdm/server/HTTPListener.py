@@ -1078,7 +1078,6 @@ class DeploymentUserAPI(MethodView):
             List of deployment information with specified database.
         """
         # deployment_user = Global.DEPLOYMENT_USERS.get(user_id)
-
         current_server = Global.SERVERS.get(server_id)
         if not current_server:
             return make_response(jsonify({'status': 404, 'statusString': 'No server found for id: %u' % server_id}), 404)
@@ -1601,7 +1600,7 @@ class DatabaseDeploymentAPI(MethodView):
     """
 
     @staticmethod
-    def get(server_id, database_id):
+    def get(database_id, server_id):
         if 'Accept' in request.headers and 'application/json' in request.headers['Accept']:
             deployment = Global.DEPLOYMENT.get(server_id)
 
@@ -1911,7 +1910,7 @@ def main(runner, amodule, config_dir, data_dir, server):
     # APP.add_url_rule('/api/1.0/databases/<int:database_id>/deployment/', strict_slashes=False,
     #                  view_func=DATABASE_DEPLOYMENT_VIEW,
     #                  methods=['GET', 'PUT'])
-    APP.add_url_rule('/api/1.0/databases/<int:database_id>servers/<int:server_id>/deployment/', strict_slashes=False,
+    APP.add_url_rule('/api/1.0/databases/<int:database_id>/servers/<int:server_id>/deployment/', strict_slashes=False,
                      view_func=DATABASE_DEPLOYMENT_VIEW,
                      methods=['GET', 'PUT'])
     APP.add_url_rule('/api/1.0/voltdeploy/', strict_slashes=False, view_func=VDM_VIEW,
