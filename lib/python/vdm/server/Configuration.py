@@ -1137,12 +1137,12 @@ def make_configuration_file():
 
         d = HTTPListener.Global.DEPLOYMENT_USERS
         for user_key, user_value in d.iteritems():
-            HTTPListener.Global.DEPLOYMENT[user_value['serverid']]['users']['user'].append({
+            HTTPListener.Global.DEPLOYMENT[user_value['databaseid']]['users']['user'].append({
                 'name': d[user_key]['name'],
                 'roles': d[user_key]['roles'],
                 'plaintext': d[user_key]['plaintext'],
                 'password': d[user_key]['password'],
-                'serverid': d[user_key]['serverid'],
+                'databaseid': d[user_key]['databaseid'],
                 'userid': d[user_key]['userid']
             })
 

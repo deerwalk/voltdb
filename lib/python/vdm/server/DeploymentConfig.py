@@ -110,7 +110,7 @@ class DeploymentConfiguration():
         # Add users
         addTop = False
         for key, duser in HTTPListener.Global.DEPLOYMENT_USERS.items():
-            if duser['serverid'] == serverid:
+            if duser['databaseid'] == dbid:
                 # Only create subelement if users have anything in this database.
                 if addTop != True:
                     users_top = SubElement(deployment_top, 'users')
