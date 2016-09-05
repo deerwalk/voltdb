@@ -2343,8 +2343,8 @@ function loadAdminPage() {
                 '    <td style="width:25%">Type </td>' +
                 '    <td style="width:60%">' +
                 '       <select id="txtImportType" name="txtImportType"> '+
-                '           <option>KAFKA</option> ' +
-                '           <option>KINESIS</option> ' +
+                '           <option value="KAFKA">KAFKA</option> ' +
+                '           <option value="KINESIS">KINESIS</option> ' +
                 '       </select>' +
                 '    </td>' +
                 '    <td width="8%" align="right"><input type="checkbox" checked="true" id="chkImportStream" class="chkStream"/></td>' +
@@ -3495,7 +3495,7 @@ function loadAdminPage() {
     };
 
     var removeDuplicateImport = function (object, propertyName) {
-        var exportType = $('#txtImportType').val();
+        var importType = $('#txtImportType').val();
         if (!$(object).hasClass("requiredImportProperty")) {
             var val = $(':input:eq(' + ($(':input').index(object) + 1) + ')').val();
             if ($(VoltDbAdminConfig.newImportStreamMinPropertyName[propertyName]).length) {
@@ -3503,8 +3503,8 @@ function loadAdminPage() {
                 $(".newImportStreamMinProperty").addClass("addedImportProperty");
                 var $row = $(object).closest("tr");
                 $row.remove();
-            } else if ($(VoltDbAdminConfig.newImportStreamMinPropertyName[propertyName + '_' + exportType]).length) {
-                $(VoltDbAdminConfig.newImportStreamMinPropertyName[propertyName + '_' + exportType]).val(val);
+            } else if ($(VoltDbAdminConfig.newImportStreamMinPropertyName[propertyName + '_' + importType]).length) {
+                $(VoltDbAdminConfig.newImportStreamMinPropertyName[propertyName + '_' + importType]).val(val);
                 $(".newImportStreamMinProperty").addClass("addedImportProperty");
                 var $row1 = $(object).closest("tr");
                 $row1.remove();
@@ -3514,31 +3514,18 @@ function loadAdminPage() {
 
     var setDefaultImportProperty = function () {
         var importType = $('#txtImportType').val();
-        if (importType.toUpperCase() == "KAFKA") {
-            setDefaultImportDisplay($("#txtBrokers"));
-            setDefaultImportDisplay($("#txtProcedure"));
-            setDefaultImportDisplay($("#txtTopics"));
-        } else {
-            setNormalImportDisplay($("#txtBrokers"));
-            setNormalImportDisplay($("#txtProcedure"));
-            setNormalImportDisplay($("#txtTopics"));
-        }
+        var isKafka = importType.toUpperCase() == "KAFKA"
+        setDefaultNormalImportDisplay(isKafka, $("#txtBrokers"));
+        setDefaultNormalImportDisplay(isKafka, $("#txtProcedure"));
+        setDefaultNormalImportDisplay(isKafka, $("#txtTopics"));
 
-        if (importType.toUpperCase() == "KINESIS") {
-            setDefaultImportDisplay($("#txtAppName"));
-            setDefaultImportDisplay($("#txtProcedureKi"));
-            setDefaultImportDisplay($("#txtStreamName"));
-            setDefaultImportDisplay($("#txtAccessKey"));
-            setDefaultImportDisplay($("#txtSecretKey"));
-            setDefaultImportDisplay($("#txtRegion"));
-        } else {
-            setNormalImportDisplay($("#txtAppName"));
-            setNormalImportDisplay($("#txtProcedureKi"));
-            setNormalImportDisplay($("#txtStreamName"));
-            setNormalImportDisplay($("#txtAccessKey"));
-            setNormalImportDisplay($("#txtSecretKey"));
-            setNormalImportDisplay($("#txtRegion"));
-        }
+        var isKinesis = importType.toUpperCase() == "KINESIS"
+        setDefaultNormalImportDisplay(isKinesis, $("#txtAppName"));
+        setDefaultNormalImportDisplay(isKinesis, $("#txtProcedureKi"));
+        setDefaultNormalImportDisplay(isKinesis, $("#txtStreamName"));
+        setDefaultNormalImportDisplay(isKinesis, $("#txtAccessKey"));
+        setDefaultNormalImportDisplay(isKinesis, $("#txtSecretKey"));
+        setDefaultNormalImportDisplay(isKinesis, $("#txtRegion"));
     };
 
     var setDefaultImportDisplay = function (txtbox) {
@@ -3555,6 +3542,13 @@ function loadAdminPage() {
         $td.html('<div class="securityDelete" onclick="deleteRow(this)"></div>');
     };
 
+    var setDefaultNormalImportDisplay = function(isType, txtBox){
+        if(isType){
+            setDefaultImportDisplay(txtBox)
+        } else {
+            setNormalImportDisplay(txtBox)
+        }
+    }
     //
 
     var editUserState = -1;
@@ -4381,7 +4375,7 @@ function loadAdminPage() {
                             '   <td>' + getOnOffText(enabled) + '</td>' +
                             '   <td>' +
                             '       <div class="exportDelete" style="display:none;"></div>' +
-                            '       <a href="javascript:void(0)" id="exportEdit' + i + '" class="edit" onclick="editImportStream(' + i + ')" title="Edit">&nbsp;</a>' +
+                            '       <a href="javascript:void(0)" id="importEdit' + i + '" class="edit" onclick="editImportStream(' + i + ')" title="Edit">&nbsp;</a>' +
                             '   </td>' +
                             '</tr>';
 
