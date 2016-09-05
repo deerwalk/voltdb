@@ -2343,8 +2343,8 @@ function loadAdminPage() {
                 '    <td style="width:25%">Type </td>' +
                 '    <td style="width:60%">' +
                 '       <select id="txtImportType" name="txtImportType"> '+
-                '           <option>KAFKA</option> ' +
-                '           <option>KINESIS</option> ' +
+                '           <option value="KAFKA">KAFKA</option> ' +
+                '           <option value="KINESIS">KINESIS</option> ' +
                 '       </select>' +
                 '    </td>' +
                 '    <td width="8%" align="right"><input type="checkbox" checked="true" id="chkImportStream" class="chkStream"/></td>' +
@@ -4375,7 +4375,7 @@ function loadAdminPage() {
                             '   <td>' + getOnOffText(enabled) + '</td>' +
                             '   <td>' +
                             '       <div class="exportDelete" style="display:none;"></div>' +
-                            '       <a href="javascript:void(0)" id="exportEdit' + i + '" class="edit" onclick="editImportStream(' + i + ')" title="Edit">&nbsp;</a>' +
+                            '       <a href="javascript:void(0)" id="importEdit' + i + '" class="edit" onclick="editImportStream(' + i + ')" title="Edit">&nbsp;</a>' +
                             '   </td>' +
                             '</tr>';
 
