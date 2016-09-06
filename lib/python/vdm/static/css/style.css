@@ -1054,7 +1054,7 @@ table.tblPopup {
 	padding: 10px 25px 10px 10px;
 }
 .serverMainPanel, .serverMainPanelInside{ padding:0;}
-.formServer { border-bottom:1px solid #cccccc;overflow:hidden; padding:10px 0 10px 0; margin:0;}
+.formServer { overflow:hidden; padding:10px 0 10px 0; margin:0;}
 .formServer input[type="text"] {
 	width: 80%;
 }
@@ -1133,6 +1133,8 @@ table.tblPopup {
 .servertbl tr td:nth-child(1) {
 	font-weight: bold;
 }
+.serverListTbl { margin:0; padding:0}
+.serverListTbl tr td { margin:0; padding:20px;}
 /*************fixed column table*************/
 .mainServ {
 	overflow: auto;
@@ -1764,9 +1766,12 @@ color: grey;
 .detailsWrapper {margin:15px 15px 0 15px;}
 .databaseDetails {background: #e4e4e4;margin: 0 15px 0 15px;padding-bottom: 15px;border-left: 1px solid #CCCCCC;
 	border-right: 1px solid #CCCCCC; border-bottom: 1px solid #CCCCCC;}
-.databseDetailsContainer { padding:10px; background:#ffffff; margin-top:10px; overflow:hidden;}
+.databaseDetailsContainer { margin-top:10px; overflow:hidden;}
 .dataDetailsLeft { float:left; margin-top:5px; font-weight:bold;}
 .dataDetailsRight {float:right;}
+.dataBaseLeftWrapper {float:left; background:#FFF; padding:0; width:49.4%; }
+.dataBaseRightWrapper {float:right;background:#FFF;  width:49.4%;}
+.dataBaseRightWrapper .insideWrap { padding:10px 15px; border-bottom:1px solid #CCC;}
 /************Media Queries for mobile compatibility***************/
 @media (min-width: 768px) {
 .form-horizontal .control-label {

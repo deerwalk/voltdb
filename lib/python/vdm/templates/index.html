@@ -176,7 +176,7 @@
               <div class="clear"></div>
             </div>
             <div class="ContentServerBody">
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tblCluster" id="serverList">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tblCluster serverList">
               </table>
             </div>
           </div>
@@ -193,17 +193,42 @@
       </div>
       <div class="row">
         <div class="container-fluid databaseDetails">
-          <div class="databseDetailsContainer">
-            <div class="col-md-6"> <span class="dataDetailsLeft"> Site per host</span> <span class="dataDetailsRight">
-              <input type="text" class="inputText"/>
-              </span>
-              <div class="clear"></div>
+          <div class="databaseDetailsContainer">
+            <div class="dataBaseLeftWrapper">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" id="adminTbl1" class="adminTbl">
+                <tr class="hasSubLabel parent" id="row-6">
+                        <td class="configLabel"><a href="javascript:void(0)" class="glyphicon-triangle-right"><span class="fontFamily">Security</span></a></td>
+                        <td align="right"><input id="chkSecurity" tabindex="1" type="checkbox" ></td>
+                        <td class="onOff" id="txtSecurity">On</td>
+                        <td>&nbsp;</td>
+                      </tr>
+                      <tr class="child-row-6 subLabelRow thead secTbl1">
+                                 <td class="configLabel">Username</td>
+                                 <td>Role</td>
+                                 <td>&nbsp;</td>
+                                <td>
+                                <a id="btnAddSecurity" class="plusIcon" href="javascript:void(0);" data-toggle="modal" data-target="#plusSecurity"></a>
+                                </td>
+
+                      </tr>
+              </table>
+
             </div>
-            <div class="col-md-6"> <span class="dataDetailsLeft">K-safety</span> <span class="dataDetailsRight">
-              <input type="text" class="inputText"/>
-              </span>
-              <div class="clear"></div>
+            <div class="dataBaseRightWrapper ">
+              <div class="insideWrap">
+                  <span class="dataDetailsLeft"> Site per host</span> <span class="dataDetailsRight">
+                  <input type="text" class="inputText"/>
+                  </span>
+                  <div class="clear"></div>
+              </div>
+              <div class="insideWrap">
+                <span class="dataDetailsLeft">K-safety</span> <span class="dataDetailsRight">
+                <input type="text" class="inputText"/>
+                </span>
+                <div class="clear"></div>
+              </div>
             </div>
+            <div class="clear"></div>
           </div>
         </div>
       </div>
@@ -215,104 +240,13 @@
                 <div class="clusterName"> Server </div>
                 <div class="clear"></div>
               </h4>
-              <a class="createDB" data-toggle="modal" data-target="#createServer" id="btnDatabaseLink1"> <span class="clusterDBName" id="clusterName"> </span> <span class="glyphicon glyphicon-triangle-bottom"></span> </a>
+              <a class="createDB" data-toggle="modal" data-target="#createServer" id="btnServerLink"> <span class="clusterDBName" id="selectedServerName"> </span> <span class="glyphicon glyphicon-triangle-bottom"></span> </a>
               <div class="clear"></div>
             </div>
           </div>
         </div>
         <div class="row">
           <div class="container-fluid databaseDetails">
-            <div class="panel-group" id="accordion" style="margin-top:20px;">
-              <div class="panel panel-default">
-                <div class="panel-heading" style="padding:20px 15px;"> <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
-                  <h4 class="panel-title showMore"> <span id="colExpIcon" class="glyphicon-triangle-right"></span> Details </h4></a>
-                </div>
-                <div id="collapseOne" class="panel-collapse collapse">
-                  <div class="panel-body serverMainPanel">
-                       <div class="col-md-6 serverMainPanelInside">
-                        <div class="form-group formServer">
-                          <label for="txtClientPort" class="col-sm-6 control-label" >Client Listener:</label>
-                          <div class="col-sm-6">
-                            <input type="text"  id="txtClientPort" name="txtClientPort" >
-                            <label id="errorClientPort" for="txtClientPort" class="error" style="display:none">This field is required</label>
-                          </div>
-                          
-                        </div>
-                        <div class="form-group formServer">
-                          <label for="txtAdminPort" class="col-sm-6 control-label" >Admin Listener:</label>
-                          <div class="col-sm-6">
-                            <input type="text"  id="txtAdminPort" name="txtAdminPort" >
-                            <label id="errorAdminPort" for="txtAdminPort" class="error" style="display:none">This field is required</label>
-                          </div>
-                        </div>
-                        <div class="form-group formServer">
-                          <label for="txtInternalPort" class="col-sm-6 control-label" >Internal Listener:</label>
-                          <div class="col-sm-6">
-                            <input type="text"  id="txtInternalPort" name="txtInternalPort" >
-                            <label id="errorInternalPort" for="txtInternalPort" class="error" style="display:none">This field is required</label>
-                          </div>
-                        </div>
-                        <div class="form-group formServer">
-                          <label for="txtHttpPort" class="col-sm-6 control-label" >HTTP Listener:</label>
-                          <div class="col-sm-6">
-                            <input type="text"  id="txtHttpPort" name="txtHttpPort" >
-                            <label id="errorHttpPort" for="txtHttpPort" class="error" style="display:none">This field is required</label>
-                          </div>
-                        </div>
-                        <div class="form-group formServer">
-                          <label for="txtZookeeper" class="col-sm-6 control-label" >Zookeeper Listener:</label>
-                          <div class="col-sm-6">
-                            <input type="text"  id="txtZookeeper" name="txtZookeeper" >
-                            <label id="errorZookeeper" for="txtZookeeper" class="error" style="display:none">This field is required</label>
-                          </div>
-                        </div>
-                        </div>
-                        <div class="col-md-6 serverMainPanelInside">
-                        <div class="form-group formServer">
-                          <label for="txtReplicationPort" class="col-sm-6 control-label" >Replication Listener:</label>
-                          <div class="col-sm-6">
-                            <input type="text"  id="txtReplicationPort" name="txtReplicationPort" >
-                            <label id="errorReplicationPort" for="txtReplicationPort" class="error" style="display:none">This field is required</label>
-                          </div>
-                        </div>
-                        <div class="form-group formServer">
-                          <label for="txtInternalInterface" class="col-sm-6 control-label" >Internal Interface:</label>
-                          <div class="col-sm-6">
-                            <input type="text"  id="txtInternalInterface" name="txtInternalInterface" >
-                            <label id="errorInternalInterface" for="txtInternalInterface" class="error" style="display:none">This field is required</label>
-                          </div>
-                        </div>
-                        <div class="form-group formServer">
-                          <label for="txtExternalInterface" class="col-sm-6 control-label" >External Interface:</label>
-                          <div class="col-sm-6">
-                            <input type="text"  id="txtExternalInterface" name="txtExternalInterface" >
-                            <label id="errorExternalInterface" for="txtExternalInterface" class="error" style="display:none">This field is required</label>
-                          </div>
-                        </div>
-                        <div class="form-group formServer">
-                          <label for="txtPublicInterface" class="col-sm-6 control-label" >Public Interface:</label>
-                          <div class="col-sm-6">
-                            <input type="text"  id="txtPublicInterface" name="txtPublicInterface" >
-                            <label id="errorPublicInterface" for="txtPublicInterface" class="error" style="display:none">This field is required</label>
-                          </div>
-                        </div>
-                        <div class="form-group formServer">
-                          <label for="txtPlacementGroup" class="col-sm-6 control-label" >Placement Group:</label>
-                          <div class="col-sm-6">
-                            <input type="text"  id="txtPlacementGroup" name="txtPlacementGroup" >
-                            <label id="errorPlacementGroup" for="txtPlacementGroup" class="error" style="display:none">This field is required</label>
-                          </div>
-                        </div>
-                        <div class="">
-                  </div>
-                </div>
-              </div>
-            </div>
-                
-          </div>
-       
-          
-        </div>
         <div class="deploymentHeader">
               <div class="clusterConfigWrapper">
                 <div class="leftSide"> <span class="clusterConfigIcon" ></span> <span class="clustHeadText">Deployment Configuration</span></div>
@@ -343,7 +277,7 @@
 
                 <div class="clear"></div>
               </div>
-            </div>            
+            </div>
              <div class="container-fluid deploymentInside">
               <div class="col-md-6 clusterConfigLeft" >
                 <div class="main">
@@ -352,31 +286,31 @@
                   </div>
                   <div class="mainTbl">
                     <table width="100%" border="0" cellspacing="0" cellpadding="0" id="adminTbl" class="adminTbl">
-    
+
                       <tr class="security">
                         <td class="configLabel">Partition detection </td>
-    
+
                           <td align="right">
                             <input id="chkPartitionDetection" tabindex="8" type="checkbox" >
                           </td>
                           <td class="onOff" id="txtPartitionDetection"></td>
                         <td>&nbsp;</td>
                       </tr>
-                      <tr class="hasSubLabel parent" id="row-6">
-                        <td class="configLabel"><a href="javascript:void(0)" class="glyphicon-triangle-right"><span class="fontFamily">Security</span></a></td>
-                        <td align="right"><input id="chkSecurity" tabindex="1" type="checkbox" ></td>
-                        <td class="onOff" id="txtSecurity">On</td>
-                        <td>&nbsp;</td>
-                      </tr>
-                      <tr class="child-row-6 subLabelRow thead secTbl1">
-                                 <td class="configLabel">Username</td>
-                                 <td>Role</td>
-                                 <td>&nbsp;</td>
-                                <td>
-                                <a id="btnAddSecurity" class="plusIcon" href="javascript:void(0);" data-toggle="modal" data-target="#plusSecurity"></a>
-                                </td>
-    
-                      </tr>
+                      <!--<tr class="hasSubLabel parent" id="row-6">-->
+                        <!--<td class="configLabel"><a href="javascript:void(0)" class="glyphicon-triangle-right"><span class="fontFamily">Security</span></a></td>-->
+                        <!--<td align="right"><input id="chkSecurity" tabindex="1" type="checkbox" ></td>-->
+                        <!--<td class="onOff" id="txtSecurity">On</td>-->
+                        <!--<td>&nbsp;</td>-->
+                      <!--</tr>-->
+                      <!--<tr class="child-row-6 subLabelRow thead secTbl1">-->
+                                 <!--<td class="configLabel">Username</td>-->
+                                 <!--<td>Role</td>-->
+                                 <!--<td>&nbsp;</td>-->
+                                <!--<td>-->
+                                <!--<a id="btnAddSecurity" class="plusIcon" href="javascript:void(0);" data-toggle="modal" data-target="#plusSecurity"></a>-->
+                                <!--</td>-->
+
+                      <!--</tr>-->
                       <tr class="hasSubLabel parent" id="row-1">
                         <td class="configLabel"><a href="javascript:void(0)" class="glyphicon-triangle-right"><span class="fontFamily">HTTP Access</span></a></td>
                         <td align="right"><input tabindex="9" type="checkbox" id="chkHttpAccess" ></td>
@@ -556,20 +490,20 @@
                       </tr>
                       <tr class="child-row-5 subLabelRow diskLimitParentProp" id="row-51">
                        <td class="configLabel"><a href="javascript:void(0)" class="glyphicon-triangle-right"><span class="fontFamily">Disk Limit</span></a></td>
-    
+
                         <td id="DiskLimit" align="right"> </td>
                         <td>&nbsp;</td>
                         <td><a data-target="#diskLimit" data-toggle="modal" href="javascript:void(0);" id="btnEditDiskLimit" class="">
                           <span class="editIcon"></span></a></td>
-    
+
                       </tr>
                     </table>
                   </div>
                 </div>
-    
+
               </div>
               <div class="col-md-6 clusterConfigRight" >
-    
+
                 <div class="main">
                   <div class="mainContent">
                     <h1>Directories</h1>
@@ -583,7 +517,7 @@
                           <input type="text" id="txtVoltdbRootDir" name="txtVoltdbRootDir" value="" class="inputText">
                         </form>
                         </td>
-    
+
                       </tr>
                       <tr>
                         <td>Snapshot</td>
@@ -600,7 +534,7 @@
                           <input type="text" id="txtExportOverflowDir" name="txtExportOverflowDir" value="" class="inputText">
                         </form>
                         </td>
-    
+
                       </tr>
                       <tr>
                         <td>Command Log</td>
@@ -629,7 +563,7 @@
                     </table>
                   </div>
                 </div>
-    
+
                  <div class="drWrapperAdmin" id="divDrWrapperAdmin" >
                   <div class="headerAdminContent">
                     <h1>
@@ -670,7 +604,7 @@
               </div>
               </div>
       </div>
-       
+
     </div>
   </div>
 </div>
@@ -695,8 +629,8 @@
 <script src="{{ url_for('static', filename='js/icheck.js') }}"></script>
 <script>
           $(document).ready(function(){
-			 
-			  
+
+
             var callbacks_list = $('.mainContent');
             $('.hasSubLabel td input, .security td input, .rowDr td input, .subLabelRow td ').on('ifCreated ifClicked ifChanged ifChecked ifUnchecked ifDisabled ifEnabled ifDestroyed', function(event){
               callbacks_list.prepend();
@@ -706,7 +640,7 @@
               increaseArea: '20%'
             });
 			 // $("#input-4").fileinput({showCaption: false});
-			  
+
 			 $("#navbar li").click(function () {
        $("#navbar li").removeClass('active');
        $(this).addClass('active');
@@ -732,24 +666,24 @@
        //        return NavigationTabs.Schema;
    });
           });
-		  
-		  
- 
 
-$("[rel=top]").tooltip({ placement: 'top'}); 
-$("[rel=left]").tooltip({ placement: 'left'}); 
-$("[rel=right]").tooltip({ placement: 'right'}); 
-$("[rel=bottom]").tooltip({ placement: 'bottom'}); 
 
-		
 
-		  </script> 
 
-<!---overlay---> 
+$("[rel=top]").tooltip({ placement: 'top'});
+$("[rel=left]").tooltip({ placement: 'left'});
+$("[rel=right]").tooltip({ placement: 'right'});
+$("[rel=bottom]").tooltip({ placement: 'bottom'});
+
+
+
+		  </script>
+
+<!---overlay--->
 
 <!--Update Server List -->
 <div id="updateServerList" class="modal custom fade" role="dialog">
-  <div class="modal-dialog modal-dialog-center updateServerlistWrap"> 
+  <div class="modal-dialog modal-dialog-center updateServerlistWrap">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-body">
@@ -762,11 +696,11 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Add Server List End --> 
+<!-- Add Server List End -->
 
 <!-- Create Database -->
 <div id="createDatabase" class="modal custom fade" role="dialog">
-  <div class="modal-dialog modal-dialog-center modifiedModalCreateDB"> 
+  <div class="modal-dialog modal-dialog-center modifiedModalCreateDB">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -783,20 +717,20 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Create Database End --> 
+<!-- Create Database End -->
 
 <!-- Create Server -->
 <div id="createServer" class="modal custom fade" role="dialog">
-  <div class="modal-dialog modal-dialog-center modifiedModalCreateDB"> 
+  <div class="modal-dialog modal-dialog-center modifiedModalCreateDB">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Server <a id="btnAddDatabase" data-toggle="modal" data-target="#addServer" class="addDatabase"> <span class="plus"></span>Add Server</a> </h4>
+        <h4 class="modal-title">Server</h4>
       </div>
       <div class="modal-body">
         <div class="col-md-12 databaseContainer">
-          <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tblDatabase" id="tblDatabaseList">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tblDatabase serverListTbl" id="serverList1">
           </table>
         </div>
       </div>
@@ -808,13 +742,13 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
 
 <!-- Add Server -->
 <div id="addServer" class="modal custom fade" role="dialog" data-serverid="">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title" id="addServerTitle">Add Server</h4>
-      </div>
+      <!--<div class="modal-header">-->
+        <!--<button type="button" class="close" data-dismiss="modal">&times;</button>-->
+        <!--<h4 class="modal-title" id="addServerTitle">Add Server</h4>-->
+      <!--</div>-->
       <div class="modal-body" style="overflow:auto; height:300px;">
         <form id="frmCreateServer" action="" method="get" class="form-horizontal">
           <div class="form-group formServer">
@@ -838,6 +772,94 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
               <label id="errorDescription" for="txtDescription" class="error" style="display:none">This field is required</label>
             </div>
           </div>
+           <div class="panel-group" id="accordion" style="margin-top: 20px;">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h4 class="panel-title showMore">
+                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                    <span id="colExpIcon" class="glyphicon-triangle-right"></span>
+                      Details
+                  </a>
+                </h4>
+              </div>
+              <div id="collapseOne" class="panel-collapse collapse">
+                <div class="panel-body">
+                  <div class="form-group formServer">
+                      <label for="txtClientPort" class="col-sm-4 control-label" >Client Listener:</label>
+                      <div class="col-sm-8">
+                        <input type="text"  id="txtClientPort" name="txtClientPort" >
+                        <label id="errorClientPort" for="txtClientPort" class="error" style="display:none">This field is required</label>
+                      </div>
+                    </div>
+                    <div class="form-group formServer">
+                      <label for="txtAdminPort" class="col-sm-4 control-label" >Admin Listener:</label>
+                      <div class="col-sm-8">
+                        <input type="text"  id="txtAdminPort" name="txtAdminPort" >
+                        <label id="errorAdminPort" for="txtAdminPort" class="error" style="display:none">This field is required</label>
+                      </div>
+                    </div>
+                    <div class="form-group formServer">
+                      <label for="txtInternalPort" class="col-sm-4 control-label" >Internal Listener:</label>
+                      <div class="col-sm-8">
+                        <input type="text"  id="txtInternalPort" name="txtInternalPort" >
+                        <label id="errorInternalPort" for="txtInternalPort" class="error" style="display:none">This field is required</label>
+                      </div>
+                    </div>
+                    <div class="form-group formServer">
+                      <label for="txtHttpPort" class="col-sm-4 control-label" >HTTP Listener:</label>
+                      <div class="col-sm-8">
+                        <input type="text"  id="txtHttpPort" name="txtHttpPort" >
+                        <label id="errorHttpPort" for="txtHttpPort" class="error" style="display:none">This field is required</label>
+                      </div>
+                    </div>
+                    <div class="form-group formServer">
+                      <label for="txtZookeeper" class="col-sm-4 control-label" >Zookeeper Listener:</label>
+                      <div class="col-sm-8">
+                        <input type="text"  id="txtZookeeper" name="txtZookeeper" >
+                        <label id="errorZookeeper" for="txtZookeeper" class="error" style="display:none">This field is required</label>
+                      </div>
+                    </div>
+                    <div class="form-group formServer">
+                      <label for="txtReplicationPort" class="col-sm-4 control-label" >Replication Listener:</label>
+                      <div class="col-sm-8">
+                        <input type="text"  id="txtReplicationPort" name="txtReplicationPort" >
+                        <label id="errorReplicationPort" for="txtReplicationPort" class="error" style="display:none">This field is required</label>
+                      </div>
+                    </div>
+
+                    <div class="form-group formServer">
+                      <label for="txtInternalInterface" class="col-sm-4 control-label" >Internal Interface:</label>
+                      <div class="col-sm-8">
+                        <input type="text"  id="txtInternalInterface" name="txtInternalInterface" >
+                        <label id="errorInternalInterface" for="txtInternalInterface" class="error" style="display:none">This field is required</label>
+                      </div>
+                    </div>
+                    <div class="form-group formServer">
+                      <label for="txtExternalInterface" class="col-sm-4 control-label" >External Interface:</label>
+                      <div class="col-sm-8">
+                        <input type="text"  id="txtExternalInterface" name="txtExternalInterface" >
+                        <label id="errorExternalInterface" for="txtExternalInterface" class="error" style="display:none">This field is required</label>
+                      </div>
+                    </div>
+                    <div class="form-group formServer">
+                      <label for="txtPublicInterface" class="col-sm-4 control-label" >Public Interface:</label>
+                      <div class="col-sm-8">
+                        <input type="text"  id="txtPublicInterface" name="txtPublicInterface" >
+                        <label id="errorPublicInterface" for="txtPublicInterface" class="error" style="display:none">This field is required</label>
+                      </div>
+                    </div>
+                    <div class="form-group formServer">
+                      <label for="txtPlacementGroup" class="col-sm-4 control-label" >Placement Group:</label>
+                      <div class="col-sm-8">
+                        <input type="text"  id="txtPlacementGroup" name="txtPlacementGroup" >
+                        <label id="errorPlacementGroup" for="txtPlacementGroup" class="error" style="display:none">This field is required</label>
+                      </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -847,10 +869,10 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Add Server End --> 
+<!-- Add Server End -->
 <!-- Save Confirmation -->
 <div id="saveConfirmation" class="modal fade" role="dialog">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -867,11 +889,11 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Save Confirmation End --> 
+<!-- Save Confirmation End -->
 
 <!-- Stop Confirmation -->
 <div id="stopClusterConfirmation" class="modal fade" role="dialog">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -888,10 +910,10 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Stop Confirmation End --> 
+<!-- Stop Confirmation End -->
 <!-- Delete Confirmation -->
 <div id="deleteConfirmation" class="modal fade" role="dialog" data-serverid="">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -915,11 +937,11 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
   <div class="overlay-content confirmationHeight"> </div>
   <div class="overlay-btns"><a  class="btn closeBtn">Ok</a> <a id="close" class="btn btn-gray closeBtn">Cancel</a></div>
 </div>
-<!-- Delete Confirmation End --> 
+<!-- Delete Confirmation End -->
 
 <!-- Save server Setting -->
 <div id="serverSaveCon" class="modal fade" role="dialog">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -936,11 +958,11 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Save Server Setting End --> 
+<!-- Save Server Setting End -->
 
 <!-- Export table -->
 <div id="expTable" class="modal fade" role="dialog">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -956,11 +978,11 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Export table End --> 
+<!-- Export table End -->
 
 <!--Error -->
 <div id="errorDialog" class="modal fade" role="dialog" >
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -976,11 +998,11 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!--Error --> 
+<!--Error -->
 
 <!--Success -->
 <div id="successDialog" class="modal fade" role="dialog">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -996,11 +1018,11 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!--Success --> 
+<!--Success -->
 
 <!-- Add Database -->
 <div id="addDatabase" class="modal custom fade" role="dialog" data-id="">
-  <div class="modal-dialog modal-dialog-center addDatabaseModal"> 
+  <div class="modal-dialog modal-dialog-center addDatabaseModal">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -1016,14 +1038,14 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
               <label id="errorDbName" for="txtDbName" class="error" style="display:none">This field is required</label>
             </div>
           </div>
-          <!--<div class="form-group formDB">--> 
-          <!--<label for="txtDeployment" class="col-sm-3 control-label">Deployment:</label>--> 
-          <!--<div class="col-sm-9">--> 
-          <!--<input type="text" id="txtDeployment" name="txtDeployment">--> 
-          <!--</div>--> 
+          <!--<div class="form-group formDB">-->
+          <!--<label for="txtDeployment" class="col-sm-3 control-label">Deployment:</label>-->
+          <!--<div class="col-sm-9">-->
+          <!--<input type="text" id="txtDeployment" name="txtDeployment">-->
+          <!--</div>-->
           <!--</div>-->
         </form>
-        <!--<div class="noteDb" ><p>Note: <span class="txt-bold">Server can only be added after creating Database</span></p></div>--> 
+        <!--<div class="noteDb" ><p>Note: <span class="txt-bold">Server can only be added after creating Database</span></p></div>-->
       </div>
       <div class="modal-footer">
         <button id="btnAddDatabaseOk" type="button" class="btn" data-dismiss="modal">Ok</button>
@@ -1032,11 +1054,11 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Add Database End --> 
+<!-- Add Database End -->
 
 <!-- Add Server -->
 <div id="addServer" class="modal custom fade" role="dialog" data-id="">
-  <div class="modal-dialog modal-dialog-center addDatabaseModal"> 
+  <div class="modal-dialog modal-dialog-center addDatabaseModal">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -1052,14 +1074,14 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
               <label id="errorDbName" for="txtDbName" class="error" style="display:none">This field is required</label>
             </div>
           </div>
-          <!--<div class="form-group formDB">--> 
-          <!--<label for="txtDeployment" class="col-sm-3 control-label">Deployment:</label>--> 
-          <!--<div class="col-sm-9">--> 
-          <!--<input type="text" id="txtDeployment" name="txtDeployment">--> 
-          <!--</div>--> 
+          <!--<div class="form-group formDB">-->
+          <!--<label for="txtDeployment" class="col-sm-3 control-label">Deployment:</label>-->
+          <!--<div class="col-sm-9">-->
+          <!--<input type="text" id="txtDeployment" name="txtDeployment">-->
+          <!--</div>-->
           <!--</div>-->
         </form>
-        <!--<div class="noteDb" ><p>Note: <span class="txt-bold">Server can only be added after creating Database</span></p></div>--> 
+        <!--<div class="noteDb" ><p>Note: <span class="txt-bold">Server can only be added after creating Database</span></p></div>-->
       </div>
       <div class="modal-footer">
         <button id="btnAddDatabaseOk" type="button" class="btn" data-dismiss="modal">Ok</button>
@@ -1072,7 +1094,7 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
 
 <!-- Edit Database -->
 <div id="editDatabase" class="modal fade" role="dialog">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -1089,10 +1111,10 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- End edit Database --> 
+<!-- End edit Database -->
 <!-- Delete Database -->
 <div id="deleteDatabase" class="modal fade" role="dialog" data-id="">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -1109,11 +1131,11 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Delete Database --> 
+<!-- Delete Database -->
 
 <!--addExistingServer -->
 <div id="addExistingServer" class="modal custom fade" role="dialog">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -1123,16 +1145,16 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
       <div class="modal-body">
         <form action="">
           <select multiple="multiple" id="selectServers" name="selectServers[]">
-            <!--<option value='elem_1'>elem 1</option>--> 
-            <!--<option value='elem_2'>elem 2</option>--> 
-            <!--<option value='elem_3'>elem 3</option>--> 
-            <!--<option value='elem_4'>elem 4</option>--> 
-            <!--<option value='elem_5'>elem 5</option>--> 
-            <!--<option value='elem_6'>elem 6</option>--> 
-            <!--<option value='elem_7'>elem 7</option>--> 
-            <!--<option value='elem_8'>elem 8</option>--> 
-            <!--<option value='elem_9'>elem 9</option>--> 
-            <!--<option value='elem_10'>elem 10</option>--> 
+            <!--<option value='elem_1'>elem 1</option>-->
+            <!--<option value='elem_2'>elem 2</option>-->
+            <!--<option value='elem_3'>elem 3</option>-->
+            <!--<option value='elem_4'>elem 4</option>-->
+            <!--<option value='elem_5'>elem 5</option>-->
+            <!--<option value='elem_6'>elem 6</option>-->
+            <!--<option value='elem_7'>elem 7</option>-->
+            <!--<option value='elem_8'>elem 8</option>-->
+            <!--<option value='elem_9'>elem 9</option>-->
+            <!--<option value='elem_10'>elem 10</option>-->
             <!--<option value='elem_11'>elem 11</option>-->
           </select>
         </form>
@@ -1144,11 +1166,11 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- addExistingServer End --> 
+<!-- addExistingServer End -->
 
 <!-- Plus Export table -->
 <div id="plusExport" class="modal fade" role="dialog" data-id="">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -1168,11 +1190,11 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!--  Plus Export End --> 
+<!--  Plus Export End -->
 
 <!-- Plus Import table -->
 <div id="plusImport" class="modal fade" role="dialog" data-id="">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -1192,11 +1214,11 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Plus Import table End --> 
+<!-- Plus Import table End -->
 <!-- Plus Security table -->
 <div id="plusSecurity" class="modal fade" role="dialog">
   <div id="addUserInnerPopup" data-isupdate="" data-username="" data-role="">
-    <div class="modal-dialog modal-dialog-center modal-add-user"> 
+    <div class="modal-dialog modal-dialog-center modal-add-user">
       <!-- Modal content-->
       <div class="modal-content">
         <div class="modal-header">
@@ -1217,11 +1239,11 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Plus Security table End --> 
+<!-- Plus Security table End -->
 
 <!-- Connection Source table -->
 <div id="connectionSource" class="modal fade" role="dialog" data-id="">
-  <div class="modal-dialog modal-dialog-center connectionSourceModel"> 
+  <div class="modal-dialog modal-dialog-center connectionSourceModel">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -1268,10 +1290,10 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Connection Source End --> 
+<!-- Connection Source End -->
 <!-- Disk Limit -->
 <div id="diskLimit" class="modal fade" role="dialog" data-id="">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -1290,7 +1312,7 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Disk Limit End--> 
+<!-- Disk Limit End-->
 <!-- Log View -->
 <div id="divServerLogPopup" class="errorLogPopup modal fadein  in" role="dialog" style="display: none;">
   <div class="modal-dialog modal-dialog-center modal-add-user">
@@ -1307,7 +1329,7 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Log View End --> 
+<!-- Log View End -->
 <!-- Stop Confirmation -->
 <div id="divStopServerPopup" class="errorLogPopup modal fadein  in" role="dialog" style="display: none;" data-ip="" data-serverid="">
   <div class="modal-dialog modal-dialog-center modal-add-user">
@@ -1325,10 +1347,10 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Stop Confirmation End --> 
+<!-- Stop Confirmation End -->
 <!-- Overwrite data confirmation during starting database-->
 <div id="overwriteConfirmation" class="modal fade" role="dialog">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -1348,7 +1370,7 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
 </div>
 <!-- Shutdown Cluster Confirmation -->
 <div id="divClusterShutdown" class="modal fade" role="dialog" data-id="">
-  <div class="modal-dialog modal-dialog-center"> 
+  <div class="modal-dialog modal-dialog-center">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -1365,10 +1387,10 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
     </div>
   </div>
 </div>
-<!-- Delete Database --> 
+<!-- Delete Database -->
 <!-- View Server Details -->
 <div id="viewServerDetails" class="modal custom fade" role="dialog">
-  <div class="modal-dialog modal-dialog-center modelServerDetails"> 
+  <div class="modal-dialog modal-dialog-center modelServerDetails">
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
@@ -1469,3 +1491,4 @@ $("[rel=bottom]").tooltip({ placement: 'bottom'});
 </div>
 </body>
 </html>
+
