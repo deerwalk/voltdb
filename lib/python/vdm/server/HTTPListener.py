@@ -647,7 +647,7 @@ class DictClass(dict):
 
 IS_CURRENT_NODE_ADDED = False
 IS_CURRENT_DATABASE_ADDED = False
-IGNORETOP = {"databaseid": True, "users": True}
+IGNORETOP = {"serverid": True, "users": True}
 
 
 class Global:
@@ -1221,7 +1221,7 @@ class StartDatabaseAPI(MethodView):
         try:
 
             if 'pause' in request.args:
-                is_pause = request.json.get('pause').lower()
+                is_pause = request.args.get('pause').lower()
             else:
                 is_pause = "false"
 
@@ -1249,7 +1249,7 @@ class RecoverDatabaseAPI(MethodView):
 
         try:
             if 'pause' in request.args:
-                pause = request.json.get('pause')
+                pause = request.args.get('pause')
             else:
                 pause = "false"
 
@@ -1275,7 +1275,7 @@ class StopDatabaseAPI(MethodView):
             Status string indicating if the stop request was sent successfully
         """
         if 'force' in request.args:
-            is_force = request.json.get('force').lower()
+            is_force = request.args.get('force').lower()
         else:
             is_force = "false"
 
@@ -1319,7 +1319,7 @@ class StopServerAPI(MethodView):
         """
 
         if 'force' in request.args:
-            is_force = request.json.get('force').lower()
+            is_force = request.args.get('force').lower()
         else:
             is_force = 'false'
 
@@ -1366,12 +1366,12 @@ class StartServerAPI(MethodView):
 
         try:
             if 'pause' in request.args:
-                pause = request.json.get('pause')
+                pause = request.args.get('pause')
             else:
                 pause = "false"
 
             if 'blocking' in request.args:
-                is_blocking = int(request.json.get('blocking'))
+                is_blocking = int(request.args.get('blocking'))
             else:
                 is_blocking = -1
             server = voltdbserver.VoltDatabase(database_id)
@@ -1403,12 +1403,12 @@ class StartLocalServerAPI(MethodView):
         try:
             sid = -1
             if 'pause' in request.args:
-                pause = request.json.get('pause')
+                pause = request.args.get('pause')
 
             if 'id' in request.args:
-                sid = int(request.json.get('id'))
+                sid = int(request.args.get('id'))
             if 'blocking' in request.args:
-                is_blocking = int(request.json.get('blocking'))
+                is_blocking = int(request.args.get('blocking'))
             else:
                 is_blocking = -1
             server = voltdbserver.VoltDatabase(database_id)
@@ -1435,10 +1435,10 @@ class RecoverServerAPI(MethodView):
         try:
             sid = -1
             if 'pause' in request.args:
-                pause = request.json.get('pause')
+                pause = request.args.get('pause')
 
             if 'id' in request.args:
-                sid = int(request.json.get('id'))
+                sid = int(request.args.get('id'))
             server = voltdbserver.VoltDatabase(database_id)
             response = server.check_and_start_local_server(sid, pause, database_id, True)
             return response
@@ -1490,7 +1490,7 @@ class AddLocalServerAPI(MethodView):
         try:
             sid = -1
             if 'id' in request.args:
-                sid = int(request.json.get('id'))
+                sid = int(request.args.get('id'))
             server = voltdbserver.VoltDatabase(database_id)
             return server.check_and_start_local_server(sid, 'False', database_id, False, -1, True)
         except Exception, err:
