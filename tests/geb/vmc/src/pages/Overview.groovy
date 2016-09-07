@@ -290,7 +290,7 @@ class Overview extends Module {
 
         KafkaImportName             { $(class:"labelCollapsed", text: "KAFKA") }
         KinesisImportName           { $(class:"labelCollapsed", text: "KINESIS") }
-        deleteImportConfiguration         { $("#deleteImportConfig > a") }
+        deleteImportConfiguration   { $("#deleteImportConfig > a") }
 
         newImportTextField          { $("#txtImportName1") }
         newImportValueField         { $("#txtImportValue1") }
@@ -967,7 +967,7 @@ class Overview extends Module {
      */
     def boolean checkIfImportIsExpanded() {
         try {
-            exportExpanded.isDisplayed()
+            importExpanded.isDisplayed()
             return true
         } catch(geb.error.RequiredPageContentNotPresent e) {
             return false
