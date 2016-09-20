@@ -50,7 +50,8 @@ function QueryUI(queryTab) {
                 }
                 nonceNum = parseInt(nextNonce[1], 10);
                 src = src.replace(QuotedStringNonceLiteral + nonceNum,
-                                  stringBank[nonceNum - QuotedStringNonceBase]);
+                                  encodeURIComponent(stringBank[nonceNum - QuotedStringNonceBase]));
+                src = decodeURIComponent(src)
             }
             return src;
         }
@@ -61,7 +62,9 @@ function QueryUI(queryTab) {
                 stringBank = [],
                 statementBank = [];
             // Eliminate line comments permanently.
+            src = encodeURIComponent(src);
             src = src.replace(MatchEndOfLineComments, '');
+            src = decodeURIComponent(src);
 
             // Extract quoted strings to keep their content from getting confused with
             // interesting statement syntax. This is required for statement splitting at 
