@@ -2,7 +2,7 @@
 (function (window) {
 
     var IMonitorGraphUI = (function () {
-
+        var RETAINED_TIME_INTERVAL = 60; //60 means graph data within 60 minutes time interval will be stored in local storage.
         var currentView = "Seconds";
         var cpuSecCount = 0;
         var cpuMinCount = 0;
@@ -41,7 +41,6 @@
         var ChartDrReplicationRate = nv.models.lineChart();        var ChartCommandlog = nv.models.lineChart();        var dataMapperSec = {};
         var dataMapperMin = {};
         var dataMapperDay = {};
-        var globalTimeInterval = 60; //60 means graph data within 60 minutes time interval will be stored in local storage.
         this.enumPartitionColor = {
             localPartition: "#D3D3D3",
             maxMinPartition: "#4C76B0",
@@ -1575,7 +1574,7 @@
         var saveLocalStorageInterval = function(rawDataArr, newItem){
             var interval_end = new Date()
             var interval_start = new Date()
-            interval_end.setMinutes(interval_end.getMinutes() - globalTimeInterval);
+            interval_end.setMinutes(interval_end.getMinutes() - RETAINED_TIME_INTERVAL);
             var dataArr = [];
             for(var i = 0; i < rawDataArr.length; i++){
                 var timeStamp =  new Date(rawDataArr[i].timestamp);
@@ -1590,7 +1589,7 @@
         var getFormattedDataFromLocalStorage = function(rawDataArr){
             var interval_end = new Date()
             var interval_start = new Date()
-            interval_end.setMinutes(interval_end.getMinutes() - globalTimeInterval);
+            interval_end.setMinutes(interval_end.getMinutes() - RETAINED_TIME_INTERVAL);
             var dataArr = [];
             for(var i = 0; i < rawDataArr.length; i++){
                 var timeStamp =  new Date(rawDataArr[i].timestamp);
@@ -1604,7 +1603,7 @@
         var getFormattedPartitionDataFromLocalStorage = function(rawDataArr){
             var interval_end = new Date()
             var interval_start = new Date()
-            interval_end.setMinutes(interval_end.getMinutes() - globalTimeInterval);
+            interval_end.setMinutes(interval_end.getMinutes() - RETAINED_TIME_INTERVAL);
             var partitionData = []
             for(var i = 0; i< rawDataArr.length; i++){
                 var keyIndex =  i;
@@ -1625,7 +1624,7 @@
         var savePartitionDataToLocalStorage = function(data, newItem, keyIndex){
             var interval_end = new Date()
             var interval_start = new Date()
-            interval_end.setMinutes(interval_end.getMinutes() - globalTimeInterval);
+            interval_end.setMinutes(interval_end.getMinutes() - RETAINED_TIME_INTERVAL);
             var values = data[keyIndex].values
             var dataArr = [];
             for(var i = 0; i < values.length; i++){
@@ -2221,7 +2220,7 @@
         var GetSnapshotOverlay = function(snapshotData, timeInterval){
             var interval_end = new Date()
             var interval_start = new Date()
-            var interval = timeInterval == undefined ? globalTimeInterval : timeInterval;
+            var interval = timeInterval == undefined ? RETAINED_TIME_INTERVAL : timeInterval;
             interval_end.setMinutes(interval_end.getMinutes() - interval);
             var snapshotDataArr = [];
             for(var i = 0; i < snapshotData.length; i++){
