@@ -2133,32 +2133,28 @@ function alertNodeClicked(obj) {
         };
 
         var getLiveClientData = function (connection, clientInfo) {
-            var colIndex = {};
-            var counter = 0;
+            var trans = 0
+            var bytes = 0
+            var msgs  = 0
+            if(!clientInfo.hasOwnProperty('CLIENTS'))
+                clientInfo['CLIENTS'] = {}
 
-            if (connection.Metadata['@Statistics_LIVECLIENTS'] == null) {
+            if (connection.Metadata['@Statistics_LIVECLIENTS'] == undefined || $.isEmptyObject(connection.Metadata['@Statistics_LIVECLIENTS'].data)) {
+                clientInfo['CLIENTS']['bytes'] = 0;
+                clientInfo['CLIENTS']['msgs'] = 0;
+                clientInfo['CLIENTS']['trans'] = 0;
                 return;
             }
 
-            connection.Metadata['@Statistics_LIVECLIENTS'].schema.forEach(function (columnInfo) {
-                if (columnInfo["name"] == "TIMESTAMP" || columnInfo["name"] == "HOSTNAME" ||
-                columnInfo["name"] == "OUTSTANDING_REQUEST_BYTES" || columnInfo["name"] == "OUTSTANDING_RESPONSE_MESSAGES" ||
-                columnInfo["name"] == "OUTSTANDING_TRANSACTIONS")
-                    colIndex[columnInfo["name"]] = counter;
-                counter++;
-            });
-
-
             connection.Metadata['@Statistics_LIVECLIENTS'].data.forEach(function (info) {
-                var hostName = info[colIndex["HOSTNAME"]];
-                if (!clientInfo.hasOwnProperty(hostName)) {
-                    clientInfo[hostName] = {};
-                }
-                clientInfo[hostName]["TIMESTAMP"] = info[colIndex["TIMESTAMP"]];
-                clientInfo[hostName]["OUTSTANDING_REQUEST_BYTES"] = info[colIndex["OUTSTANDING_REQUEST_BYTES"]];
-                clientInfo[hostName]["OUTSTANDING_RESPONSE_MESSAGES"] = info[colIndex["OUTSTANDING_RESPONSE_MESSAGES"]];
-                clientInfo[hostName]["OUTSTANDING_TRANSACTIONS"] = info[colIndex["OUTSTANDING_TRANSACTIONS"]];
+                bytes += info[6]
+                msgs += info[7]
+                trans += info[8]
             });
+
+            clientInfo['CLIENTS']['bytes'] = bytes;
+            clientInfo['CLIENTS']['msgs'] = msgs;
+            clientInfo['CLIENTS']['trans'] = trans;
         };
 
         //Get DR Status Information
@@ -3097,6 +3093,17 @@ function alertNodeClicked(obj) {
             VoltDBService.GetExportTablesInformation(function (connection) {
                 getExportTableInfo(connection, tableDetails);
                 onInformationLoaded(tableDetails);
+            });
+        };
+
+        this.GetImportRequestInformation = function (onInformationLoaded, tableDetails) {
+            VoltDBService.GetImportRequestInformation(function (connection) {
+                var data = connection.Metadata['@Statistics_IMPORTER']
+                if(data == undefined || $.isEmptyObject(data['data']))
+                    outstanding = 0;
+                else
+                    outstanding = connection.Metadata['@Statistics_IMPORTER']['data'][0][0]
+                onInformationLoaded(outstanding);
             });
         };
 

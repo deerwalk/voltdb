@@ -443,20 +443,8 @@ function loadAdminPage() {
             var popup = $(this)[0];
             $("#btnShutdownConfirmationOk").unbind("click");
             $("#btnShutdownConfirmationOk").on("click", function () {
-//                var shutdownTimeout = setTimeout(function () {
-//                    $('#serverShutdownPopup').click();
-//                    VoltDBCore.isServerConnected = false;
-//                    window.clearInterval(VoltDbUI.connectionTimeInterval);
-//                }, 10000);
-//
-//                voltDbRenderer.shutdownCluster(function (success) {
-//                    if (!success) {
-//                        clearTimeout(shutdownTimeout);
-//                        alert("Unable to shutdown cluster.");
-//                    }
-//                    $("#overlay").hide();
-//                });
-                serverShutdown()
+                $("#btnPrepareShutdown").trigger("click")
+                $(".popup_close").hide();
                 //Close the popup
                 popup.close();
             });
@@ -468,21 +456,73 @@ function loadAdminPage() {
         }
     });
 
-    var serverShutdown = function(){
+
+    var displayShutdownStatus = function(btnId, status){
+        if(status == "normal"){
+            $("#" + btnId + "Normal").show()
+            $("#" + btnId + "Load").hide()
+            $("#" + btnId + "Ok").hide()
+            $("#" + btnId + "Failure").hide()
+        } else if(status == "load"){
+            $("#" + btnId + "Normal").hide()
+            $("#" + btnId + "Load").show()
+            $("#" + btnId + "Ok").hide()
+            $("#" + btnId + "Failure").hide()
+        } else if(status == "failure"){
+            $("#" + btnId + "Normal").hide()
+            $("#" + btnId + "Load").hide()
+            $("#" + btnId + "Ok").hide()
+            $("#" + btnId + "Failure").show()
+        } else {
+            $("#" + btnId + "Normal").hide()
+            $("#" + btnId + "Load").hide()
+            $("#" + btnId + "Ok").show()
+            $("#" + btnId + "Failure").hide()
+        }
+    }
+
+    var showHideShutdownErrMsg = function(status, msg){
+        if(!status){
+            $("#shutdownErrMsg").html(msg);
+            $("#divRetryBtn").show()
+            $("#divShutdownErrMsg").show()
+        } else {
+            $("#divRetryBtn").hide()
+            $("#divShutdownErrMsg").hide()
+        }
+    }
+
+    var serverShutdown = function(popup){
         voltDbRenderer.prepareShutdownCluster(function (status) {
             console.log("Preparing for shutdown.");
+            displayShutdownStatus("liPrepareShutdown", "load");
+            displayShutdownStatus("liQueueExpData", "normal");
+            displayShutdownStatus("liCompleteOutstandingExpDr", "normal");
+            displayShutdownStatus("liCompleteClientTrans", "normal");
+            displayShutdownStatus("liCompleteOutstandingImp", "normal");
+            displayShutdownStatus("liShutdownReady", "normal");
             if (status != 0) {
-                console.log("The preparation for shutdown failed with status: " + status + ".")
+                console.log("The preparation for shutdown failed with status: " + status + ".");
+                displayShutdownStatus("liPrepareShutdown", "failure");
+                showHideShutdownErrMsg(false, "The preparation for shutdown failed with status: " + status + ".")
+                $(".popup_close").show();
                 return;
             } else {
                 console.log('The cluster is paused prior to shutdown.')
                 console.log('Writing out all queued export data.')
+                displayShutdownStatus("liPrepareShutdown", "ok");
+                displayShutdownStatus("liQueueExpData", "load")
                 voltDbRenderer.QuiesceCluster(function (quiesceStatus) {
-                    if(quiesceStatus != 0){
+                    if(quiesceStatus != 1){
                         console.log("The cluster has failed to be quiesce with status: " + quiesceStatus + ".")
+                        displayShutdownStatus("liQueueExpData", "failure");
+                        showHideShutdownErrMsg(false, "The cluster has failed to be quiesce with status: " + quiesceStatus + ".")
+                        $(".popup_close").show();
                         return;
                     } else {
-                        console.log('Completing outstanding export and DR transactions...')
+                        console.log('Completing outstanding export and DR transactions.')
+                        displayShutdownStatus("liQueueExpData", "ok")
+                        displayShutdownStatus("liCompleteOutstandingExpDr", "load")
                         var drDetails = {"DrProducer": {
                                 "partition_min": {},
                                 "partition_max": {},
@@ -503,7 +543,7 @@ function loadAdminPage() {
                                     if((drDetails["DrProducer"].partition_min == undefined || $.isEmptyObject(drDetails["DrProducer"].partition_min)) &&
                                         exportTableDetails["ExportTables"]["last_table_stat_time"] == 1){
                                         // there are no outstanding export or dr transactions
-                                        console.log('All export and DR transactions have been processed.')
+                                        continueShutdown(popup)
                                         return
                                     }
                                     // after 10 seconds notify admin of what transactions have not drained
@@ -523,15 +563,19 @@ function loadAdminPage() {
                                                         result = checkExportAndDr(exportTableDetails["ExportTables"]["last_table_stat_time"],
                                                                                   curr_table_stat_time, exportTableDetails["ExportTables"]["export_tables_with_data"],
                                                                                   drDetails["DrProducer"].partition_min, drDetails["DrProducer"].partition_max);
-                                                        if(result)
+                                                        if(result){
+                                                            continueShutdown(popup)
                                                             return;
+                                                        }
                                                     });
                                                 } else {
                                                     result = checkExportAndDr(exportTableDetails["ExportTables"]["last_table_stat_time"],
                                                                               curr_table_stat_time, exportTableDetails["ExportTables"]["export_tables_with_data"],
                                                                               drDetails["DrProducer"].partition_min, drDetails["DrProducer"].partition_max);
-                                                    if(result)
+                                                    if(result){
+                                                        continueShutdown(popup)
                                                         return;
+                                                    }
                                                 }
 
                                             }, drDetails);
@@ -542,15 +586,19 @@ function loadAdminPage() {
                                                     result = checkExportAndDr(exportTableDetails["ExportTables"]["last_table_stat_time"],
                                                                      curr_table_stat_time, exportTableDetails["ExportTables"]["export_tables_with_data"],
                                                                      drDetails["DrProducer"].partition_min, drDetails["DrProducer"].partition_max);
-                                                    if(result)
+                                                    if(result){
+                                                        continueShutdown(popup)
                                                         return;
+                                                    }
                                                 });
                                             } else{
                                                 result = checkExportAndDr(exportTableDetails["ExportTables"]["last_table_stat_time"],
                                                                  curr_table_stat_time, exportTableDetails["ExportTables"]["export_tables_with_data"],
                                                                  drDetails["DrProducer"].partition_min, drDetails["DrProducer"].partition_max);
-                                                if(result)
+                                                if(result){
+                                                    continueShutdown(popup)
                                                     return;
+                                                }
                                             }
                                         }
                                     }
@@ -571,31 +619,100 @@ function loadAdminPage() {
         });
     }
 
-//    var continueShutdown = function(){
-//        console.log('Completing outstanding client transactions.');
-//        voltDbRenderer.GetLiveClientsInfo(function (connection) {
-//            while(true){
-//                trans = 0
-//                bytes = 0
-//                msgs  = 0
-//                for r in resp.table(0).tuples():
-//                    bytes += r[6]
-//                    msgs += r[7]
-//                    trans += r[8]
-//                runner.info('Outstanding transactions=%d, Outstanding request bytes=%d, Outstanding response messages=%d' %(trans, bytes,msgs))
-//                if trans == 0 and bytes == 0 and msgs == 0:
-//                    return
-//                time.sleep(1)
-//            }
-//        });
-//    }
+    var isClientTransFinish = false;
+    var isImportRequestFinish = false
+
+    var continueShutdown = function(popup){
+        displayShutdownStatus("liCompleteOutstandingExpDr", "ok")
+        console.log('All export and DR transactions have been processed.')
+        isClientTransFinish = false;
+        check_client();
+        var clientTransInterval = setInterval(function(){
+            if(isClientTransFinish){
+                clearInterval(clientTransInterval);
+                isImportRequestFinish = false;
+                check_importer()
+
+                var importReqInterval = setInterval(function(){
+                    if(isImportRequestFinish){
+                        clearInterval(importReqInterval);
+                        console.log('Cluster is ready for shutdown.')
+                        displayShutdownStatus("liShutdownReady", "ok")
+                        var shutdownTimeout = setTimeout(function () {
+                            $('#serverShutdownPopup').click();
+                            VoltDBCore.isServerConnected = false;
+                            window.clearInterval(VoltDbUI.connectionTimeInterval);
+                        }, 10000);
+                        $(".popup_close").show();
+                        voltDbRenderer.shutdownCluster(function (success) {
+                            if (!success) {
+                                clearTimeout(shutdownTimeout);
+                                console.log("Unable to shutdown cluster.");
+                            }
+                            $("#overlay").hide();
+
+                        });
+
+                        setTimeout( function(){
+                            popup.close()
+                        },4000)
+                    }
+                },2000)
+            }
+        },2000)
+
+
+    }
+
+    var check_client = function(){
+        console.log('Completing outstanding client transactions.');
+        displayShutdownStatus("liCompleteClientTrans", "load")
+        voltDbRenderer.GetLiveClientsInfo(function (clientInfo) {
+            trans = clientInfo['CLIENTS']['bytes'];
+            bytes = clientInfo['CLIENTS']['msgs'];
+            msgs  = clientInfo['CLIENTS']['trans'];
+
+            console.log('Outstanding transactions= ' + trans + ', Outstanding request bytes= ' + bytes + ', Outstanding response messages= ' + msgs)
+            if(trans == 0 && bytes == 0 && msgs == 0){
+                isClientTransFinish = true
+                displayShutdownStatus("liCompleteClientTrans", "ok")
+                return
+            } else {
+                sleepTime(1000);
+                check_Client();
+            }
+            if(isClientTransFinish)
+                return
+        });
+    }
+
+
+    var check_importer = function(){
+        console.log('Completing outstanding importer requests.')
+        displayShutdownStatus("liCompleteOutstandingImp", "load")
+        voltDbRenderer.GetImportRequestInformation(function (outstanding) {
+            console.log('Outstanding importer requests= ' + outstanding)
+            if(outstanding == 0){
+                isImportRequestFinish = true
+                displayShutdownStatus("liCompleteOutstandingImp", "ok")
+                return;
+            } else {
+                sleepTime(1000);
+                check_importer();
+            }
+            if(isImportRequestFinish)
+                return
+        });
+
+
+    }
 
     var checkExportAndDr = function(last_table_stat_time, curr_table_stat_time,export_tables_with_data, partition_min, partition_max,
                                     partition_min_host, notifyInterval){
         if(last_table_stat_time == 1 || curr_table_stat_time > last_table_stat_time){
             // have a new sample from table stat cache or there are no tables
             if(!$.isEmptyObject(export_tables_with_data) && !$.isEmptyObject(partition_min)){
-                console.log('All export and DR transactions have been processed.')
+                 $("#shutdownMsg").append('<li>All export and DR transactions have been processed.</li>')
                 return true;
             }
         }
@@ -612,8 +729,8 @@ function loadAdminPage() {
     }
 
     var print_export_pending = function(export_tables_with_data){
-        console.log('The following export tables have unacknowledged transactions:');
-        var summaryline = "    {0} needs acknowledgement on host(s) {1} for partition(s) {2}."
+        $("#shutdownMsg").append('<li>The following export tables have unacknowledged transactions:</li>');
+        var summaryline = "<li>    {0} needs acknowledgement on host(s) {1} for partition(s) {2}.</li>"
         $.each(export_tables_with_data, function(key, value){
             var pidlist = []
             hostlist = Object.keys(export_tables_with_data[key])
@@ -629,13 +746,13 @@ function loadAdminPage() {
                     partlist = partlist + "," + pidlist[j].toString()
             }
 
-            console.log(summaryline.format(table, hostlist.join(), partlist))
+             $("#shutdownMsg").append(summaryline.format(table, hostlist.join(), partlist))
         });
     }
 
     var print_dr_pending = function(partition_min_host, partition_min, partition_max){
-        console.log('The following partitions have pending DR transactions that the consumer cluster has not processed:')
-        var summaryline = "    Partition {0} needs acknowledgement for drIds {1} to {2} on hosts: {3}."
+        $("#shutdownMsg").append('<li>The following partitions have pending DR transactions that the consumer cluster has not processed:</li>')
+        var summaryline = "<li>    Partition {0} needs acknowledgement for drIds {1} to {2} on hosts: {3}.</li>"
         for(var i = 0; i < partition_min_host.length; i++){
             pid = partition_min_host[i];
             console.log(summaryline.format(pid, partition_min[pid]+1, partition_max[pid], partition_min_host[pid].join()))
@@ -659,6 +776,24 @@ function loadAdminPage() {
             return args[n];
         });
     };
+
+    $('#btnPrepareShutdown').popup({
+        open: function (event, ui, ele) {
+            var popup = $(this)[0];
+            serverShutdown(popup)
+        },
+        afterOpen: function () {
+            var popup = $(this)[0];
+            $("#btnPrepareShutdownOk").unbind("click");
+            $("#btnPrepareShutdownOk").on("click", function(){
+                popup.close();
+                setTimeout(function(){
+                    $("#btnPrepareShutdown").trigger("click")
+                },2000)
+                //$("#btnPrepareShutdown").trigger("click")
+            })
+        }
+    });
 
     $("#serverShutdownPopup").popup({
         closeDialog: function () {
