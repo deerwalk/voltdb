@@ -513,7 +513,7 @@ function loadAdminPage() {
                 displayShutdownStatus("liPrepareShutdown", "ok");
                 displayShutdownStatus("liQueueExpData", "load")
                 voltDbRenderer.QuiesceCluster(function (quiesceStatus) {
-                    if(quiesceStatus != 1){
+                    if(quiesceStatus != 0){
                         console.log("The cluster has failed to be quiesce with status: " + quiesceStatus + ".")
                         displayShutdownStatus("liQueueExpData", "failure");
                         showHideShutdownErrMsg(false, "The cluster has failed to be quiesce with status: " + quiesceStatus + ".")
@@ -648,14 +648,13 @@ function loadAdminPage() {
                             if (!success) {
                                 clearTimeout(shutdownTimeout);
                                 console.log("Unable to shutdown cluster.");
+                                displayShutdownStatus("liShutdownReady", "failure");
+                                showHideShutdownErrMsg(false, "Unable to shutdown cluster.")
+                                $(".popup_close").show();
                             }
                             $("#overlay").hide();
 
                         });
-
-                        setTimeout( function(){
-                            popup.close()
-                        },4000)
                     }
                 },2000)
             }
@@ -685,7 +684,6 @@ function loadAdminPage() {
                 return
         });
     }
-
 
     var check_importer = function(){
         console.log('Completing outstanding importer requests.')
@@ -784,12 +782,12 @@ function loadAdminPage() {
         },
         afterOpen: function () {
             var popup = $(this)[0];
-            $("#btnPrepareShutdownOk").unbind("click");
-            $("#btnPrepareShutdownOk").on("click", function(){
+            $("#btnPrepareShutdownRetryOk").unbind("click");
+            $("#btnPrepareShutdownRetryOk").on("click", function(){
                 popup.close();
                 setTimeout(function(){
                     $("#btnPrepareShutdown").trigger("click")
-                },2000)
+                },500)
                 //$("#btnPrepareShutdown").trigger("click")
             })
         }

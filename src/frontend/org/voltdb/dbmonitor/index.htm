@@ -2156,7 +2156,7 @@
                 <img id="" src="css/resources/images/Information.png" class="imgError" /> <span>Shutting Down</span>
         </div>
         <div class="clear"></div>
-        <div class="overlay-content confirmationHeight">
+        <div class="overlay-content confirmationHeight" style="width:300px">
             <ul id="shutdownMsg">
                 <li id="liPrepareShutdownNormal"><span class='shutdownNormal'></span>Preparing for shutdown.</li>
                 <li id="liPrepareShutdownLoad" style="display:none"><span class='shutdownLoader'><img src='css/resources/images/shutdown-loader.gif'></span>Preparing for shutdown.</li>
@@ -2183,13 +2183,19 @@
                 <li id="liShutdownReadyNormal"><span class='shutdownNormal'></span>Cluster is ready for shutdown.</li>
                 <li id="liShutdownReadyLoad" style="display:none"><span class='shutdownLoader'><img src='css/resources/images/shutdown-loader.gif'></span>Cluster is ready for shutdown.</li>
                 <li id="liShutdownReadyOk" style="display:none"><span class='shutdownSuccess'><img src='css/resources/images/shutdown-success.png'></span>Cluster is ready for shutdown.</li>
+                <li id="liShutdownReadyFailure" style="display:none"><span class='shutdownFailure'><img src='css/resources/images/shutdown-failure.png'></span>Cluster is ready for shutdown.</li>
             </ul>
         </div>
         <div class="shutdownErrorMsg" id="divShutdownErrMsg" style="display:none">
             <h2>Error Occured</h2>
-            <p><span id="shutdownErrMsg"></span> Do you want to retry?</p>
+            <p><span id="shutdownErrMsg"></span></p>
         </div>
-        <div class="overlay-btns" id="divRetryBtn" style="display:none"><a id="btnPrepareShutdownOk" class="btn">Ok</a></div>
+         <div class="shutdownRetryMsg"><p> Do you want to retry?</p></div>
+        <div class="overlayShutdownBtn" id="divRetryBtn" style="display:none">
+
+            <a id="btnPrepareShutdownOk" class="btn">Ok</a>
+            <a id="btnPrepareShutdownCancel" class="btn btn-gray confirmNoSave">Cancel</a>
+        </div>
 
     </div>
     <!-- Prepare Shutdown popup -->
