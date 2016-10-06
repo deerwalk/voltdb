@@ -2370,8 +2370,10 @@ function alertNodeClicked(obj) {
 
             $.each(partition_min, function(key, value){
                 // reset all min values to find the new min
-                if($.inArray(key, partition_max_key) != -1)
+                if($.inArray(key, partition_max_key) != -1){
+                    var partition_max_key = Object.keys(partition_max);
                     partition_min[key] = partition_max[key]
+                }
             });
 
             connection.Metadata['@Statistics_DRPRODUCER_completeData'][0].data.forEach(function (info) {
@@ -2412,15 +2414,15 @@ function alertNodeClicked(obj) {
                     if($.inArray(pid, partition_min_key) != -1){
                         // it was not empty on a previous call
                         partition_min_host[pid] = $.grep(partition_min_host[pid], function(value) {
-                                                      return value != hostName;
+                                                      return value != hostname;
                                                     });
                         if (partition_min_host[pid] == undefined || partition_min_host[pid].length == 0){
                             delete partition_min_host[pid]
                             delete partition_min[pid]
                         }
                     }
-
                     if($.inArray(pid, partition_max_key) != -1){
+
                         if(partition_max[pid] > last_acked){
                             console.log("DR Producer reports no data for partition "+ pid +" on host "+ hostname +
                             " but last acked drId ("+ last_acked +

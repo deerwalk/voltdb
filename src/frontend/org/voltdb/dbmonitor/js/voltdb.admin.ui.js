@@ -767,10 +767,10 @@ function loadAdminPage() {
     var print_dr_pending = function(partition_min_host, partition_min, partition_max){
         console.log('The following partitions have pending DR transactions that the consumer cluster has not processed:')
         var summaryline = "    Partition {0} needs acknowledgement for drIds {1} to {2} on hosts: {3}."
-        for(var i = 0; i < partition_min_host.length; i++){
-            pid = partition_min_host[i];
+        $.each(partition_min_host, function(key, value){
+            pid = key;
             console.log(summaryline.format(pid, partition_min[pid]+1, partition_max[pid], partition_min_host[pid].join()))
-        }
+        });
     }
 
     var sleepTime = function(milliseconds) {
