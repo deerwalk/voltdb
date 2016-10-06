@@ -486,9 +486,11 @@ function loadAdminPage() {
             $("#shutdownErrMsg").html(msg);
             $("#divRetryBtn").show()
             $("#divShutdownErrMsg").show()
+            $("#divShutdownRetryMsg").show()
         } else {
             $("#divRetryBtn").hide()
             $("#divShutdownErrMsg").hide()
+            $("#divShutdownRetryMsg").hide()
         }
     }
 
@@ -501,6 +503,7 @@ function loadAdminPage() {
             displayShutdownStatus("liCompleteClientTrans", "normal");
             displayShutdownStatus("liCompleteOutstandingImp", "normal");
             displayShutdownStatus("liShutdownReady", "normal");
+            showHideShutdownErrMsg(true);
             if (status != 0) {
                 console.log("The preparation for shutdown failed with status: " + status + ".");
                 displayShutdownStatus("liPrepareShutdown", "failure");
@@ -551,8 +554,7 @@ function loadAdminPage() {
                                     // have to get two samples of table stats because the cached value could be
                                     // from before Quiesce
 
-                                    while(true){
-                                        sleepTime(1000)
+                                    var setDrExpInterval= setInterval(function(){
                                         var result = false;
                                         curr_table_stat_time = 0;
                                         if(!$.isEmptyObject(drDetails["DrProducer"].partition_min) || drDetails["DrProducer"].partition_min != undefined){
@@ -560,19 +562,25 @@ function loadAdminPage() {
                                                 if(exportTableDetails["ExportTables"]["last_table_stat_time"] > 1){
                                                     voltDbRenderer.GetExportTablesInformation(function(exportTableDetails){
                                                         curr_table_stat_time = exportTableDetails["ExportTables"]["collection_time"]
+                                                        notifyInterval -= 1
                                                         result = checkExportAndDr(exportTableDetails["ExportTables"]["last_table_stat_time"],
                                                                                   curr_table_stat_time, exportTableDetails["ExportTables"]["export_tables_with_data"],
-                                                                                  drDetails["DrProducer"].partition_min, drDetails["DrProducer"].partition_max);
+                                                                                  drDetails["DrProducer"].partition_min, drDetails["DrProducer"].partition_max,
+                                                                                  drDetails["DrProducer"].partition_min_host, notifyInterval);
                                                         if(result){
+                                                            clearInterval(setDrExpInterval)
                                                             continueShutdown(popup)
                                                             return;
                                                         }
-                                                    });
+                                                    }, exportTableDetails);
                                                 } else {
+                                                    notifyInterval -= 1
                                                     result = checkExportAndDr(exportTableDetails["ExportTables"]["last_table_stat_time"],
                                                                               curr_table_stat_time, exportTableDetails["ExportTables"]["export_tables_with_data"],
-                                                                              drDetails["DrProducer"].partition_min, drDetails["DrProducer"].partition_max);
+                                                                              drDetails["DrProducer"].partition_min, drDetails["DrProducer"].partition_max,
+                                                                              drDetails["DrProducer"].partition_min_host, notifyInterval);
                                                     if(result){
+                                                        clearInterval(setDrExpInterval)
                                                         continueShutdown(popup)
                                                         return;
                                                     }
@@ -580,28 +588,34 @@ function loadAdminPage() {
 
                                             }, drDetails);
                                         } else {
-                                            if(last_table_stat_time > 1){
+                                            if(exportTableDetails["ExportTables"]["last_table_stat_time"] > 1){
                                                 voltDbRenderer.GetExportTablesInformation(function(exportTableDetails){
                                                     curr_table_stat_time = exportTableDetails["ExportTables"]["collection_time"]
+                                                    notifyInterval -= 1
                                                     result = checkExportAndDr(exportTableDetails["ExportTables"]["last_table_stat_time"],
                                                                      curr_table_stat_time, exportTableDetails["ExportTables"]["export_tables_with_data"],
-                                                                     drDetails["DrProducer"].partition_min, drDetails["DrProducer"].partition_max);
+                                                                     drDetails["DrProducer"].partition_min, drDetails["DrProducer"].partition_max,
+                                                                     drDetails["DrProducer"].partition_min_host, notifyInterval);
                                                     if(result){
+                                                        clearInterval(setDrExpInterval)
                                                         continueShutdown(popup)
                                                         return;
                                                     }
                                                 });
                                             } else{
+                                                notifyInterval -= 1
                                                 result = checkExportAndDr(exportTableDetails["ExportTables"]["last_table_stat_time"],
                                                                  curr_table_stat_time, exportTableDetails["ExportTables"]["export_tables_with_data"],
-                                                                 drDetails["DrProducer"].partition_min, drDetails["DrProducer"].partition_max);
+                                                                 drDetails["DrProducer"].partition_min, drDetails["DrProducer"].partition_max,
+                                                                 drDetails["DrProducer"].partition_min_host, notifyInterval);
                                                 if(result){
+                                                    clearInterval(setDrExpInterval)
                                                     continueShutdown(popup)
                                                     return;
                                                 }
                                             }
                                         }
-                                    }
+                                    }, 2000);
 
                                 }, exportTableDetails);
 
@@ -709,8 +723,8 @@ function loadAdminPage() {
                                     partition_min_host, notifyInterval){
         if(last_table_stat_time == 1 || curr_table_stat_time > last_table_stat_time){
             // have a new sample from table stat cache or there are no tables
-            if(!$.isEmptyObject(export_tables_with_data) && !$.isEmptyObject(partition_min)){
-                 $("#shutdownMsg").append('<li>All export and DR transactions have been processed.</li>')
+            if($.isEmptyObject(export_tables_with_data) && $.isEmptyObject(partition_min)){
+                console.log('All export and DR transactions have been processed.')
                 return true;
             }
         }
@@ -718,22 +732,24 @@ function loadAdminPage() {
         notifyInterval -= 1
         if(notifyInterval == 0){
             notifyInterval = 10
-            if(last_table_stat_time > 1 && export_tables_with_data)
-                print_export_pending(runner, export_tables_with_data)
-            if (!$.isEmptyObjectpartition_min)
-                print_dr_pending(runner, partition_min_host, partition_min, partition_max)
+            if(last_table_stat_time > 1 && (!$.isEmptyObject(export_tables_with_data)))
+                print_export_pending(export_tables_with_data)
+            if (!$.isEmptyObject(partition_min))
+                print_dr_pending(partition_min_host, partition_min, partition_max)
         }
         return false;
     }
 
+
     var print_export_pending = function(export_tables_with_data){
-        $("#shutdownMsg").append('<li>The following export tables have unacknowledged transactions:</li>');
-        var summaryline = "<li>    {0} needs acknowledgement on host(s) {1} for partition(s) {2}.</li>"
+        console.log('The following export tables have unacknowledged transactions:');
+        var summaryLine = "    {0} needs acknowledgement on host(s) {1} for partition(s) {2}."
         $.each(export_tables_with_data, function(key, value){
             var pidlist = []
             hostlist = Object.keys(export_tables_with_data[key])
             for(var i = 0; i < hostlist.length; i++){
-                pidlist = pidlist | export_tables_with_data[table][hostlist[i]]
+                for(var j = 0; j < export_tables_with_data[key][hostlist[i]].length ;j++)
+                    pidlist.push(export_tables_with_data[key][hostlist[i]][j])
             }
             var partlist = "";
 
@@ -744,13 +760,13 @@ function loadAdminPage() {
                     partlist = partlist + "," + pidlist[j].toString()
             }
 
-             $("#shutdownMsg").append(summaryline.format(table, hostlist.join(), partlist))
+             console.log(summaryLine.format(table, hostlist.join(), partlist))
         });
     }
 
     var print_dr_pending = function(partition_min_host, partition_min, partition_max){
-        $("#shutdownMsg").append('<li>The following partitions have pending DR transactions that the consumer cluster has not processed:</li>')
-        var summaryline = "<li>    Partition {0} needs acknowledgement for drIds {1} to {2} on hosts: {3}.</li>"
+        console.log('The following partitions have pending DR transactions that the consumer cluster has not processed:')
+        var summaryline = "    Partition {0} needs acknowledgement for drIds {1} to {2} on hosts: {3}."
         for(var i = 0; i < partition_min_host.length; i++){
             pid = partition_min_host[i];
             console.log(summaryline.format(pid, partition_min[pid]+1, partition_max[pid], partition_min_host[pid].join()))

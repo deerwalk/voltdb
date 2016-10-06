@@ -2458,9 +2458,10 @@ function alertNodeClicked(obj) {
                 return;
             } else {
                 tablestats = connection.Metadata['@Statistics_TABLE_EXPORT_TABLE_INFORMATION_completeData'][0].data
-                if(tablestats.length == 0)
+                if(tablestats.length == 0){
                     exportTableDetails["ExportTables"]["collection_time"] = 1
                     return;
+                }
                 var firsttuple = tablestats[0]
                 if(firsttuple[0] == last_collection_time){
                     // this statistic is the same cached set as the last call
@@ -2491,7 +2492,7 @@ function alertNodeClicked(obj) {
                     else {
                         var export_tables_with_data_key = Object.keys(export_tables_with_data)
                         if($.inArray(tablename, export_tables_with_data_key) != -1){
-                            tabledata = export_tables_with_data[tablename]
+                            var tabledata = export_tables_with_data[tablename]
                             var tableDataKeys =  Object.keys(tabledata)
                             if($.inArray(hostname, tableDataKeys) != -1){
                                 tabledata[hostname] = $.grep(tabledata[hostname], function(value) {
