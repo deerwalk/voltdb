@@ -798,14 +798,19 @@ function loadAdminPage() {
         },
         afterOpen: function () {
             var popup = $(this)[0];
-            $("#btnPrepareShutdownRetryOk").unbind("click");
-            $("#btnPrepareShutdownRetryOk").on("click", function(){
+            $("#btnPrepareShutdownOk").unbind("click");
+            $("#btnPrepareShutdownOk").on("click", function(){
                 popup.close();
                 setTimeout(function(){
                     $("#btnPrepareShutdown").trigger("click")
                 },500)
                 //$("#btnPrepareShutdown").trigger("click")
             })
+            $("#btnPrepareShutdownCancel").unbind("click");
+            $("#btnPrepareShutdownCancel").on("click", function(){
+                popup.close();
+            })
+
         }
     });
 
