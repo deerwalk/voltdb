@@ -107,12 +107,6 @@ body {
 .leftSide {
 	float: left;
 }
-.leftServWrap {position: relative; top: 5px; float:left!important;}
-.rightSideServ{float: left;padding: 0 0 0px 10px; position: relative;top: -3px;}
-.defaultServ option { font-weight:bold;}
-.defaultServ option{ padding:5px;}
-.defaultServ option:nth-child(1){ color:#222222; background:#cccccc;}
-
 .inputText {
 	height: 30px;
 	padding: 5px 10px;
@@ -273,7 +267,7 @@ label.ccErrorMsg {
 	font-size: 16px;
 	width: 73px;
 }
-.clusterDBName, .serverDBName {
+.clusterDBName {
 	font-weight: bold;
 	font-size: 16px;
 	color: #68A81A;
@@ -618,7 +612,7 @@ table td.tdROle label.error {
   overflow-y:auto;
 	height:211px;
 }
-.clusterConfig,.serverConfig {
+.clusterConfig {
 	background: #e4e4e4;
 	margin: 0 15px 0 15px;
 	padding-bottom: 15px;
@@ -626,7 +620,7 @@ table td.tdROle label.error {
 	border-right: 1px solid #CCCCCC;
 	border-bottom: 1px solid #CCCCCC;
 }
-.clusterConfigLeft,.serverConfigWrap {
+.clusterConfigLeft {
 	padding: 0 0 0 5px;
 }
 .clusterConfigRight {
@@ -757,7 +751,7 @@ ul.addServerList li:nth-child(1) {
 	position: relative;
 	top: -2px;
 }
-.clusterConfigWrapper, .serverConfigWrapper {
+.clusterConfigWrapper {
 	background-color: #f5f6f6;
 	padding: 15px 20px;
 	margin: 15px 0 0 0;
@@ -828,15 +822,14 @@ ul.addServerList li:nth-child(1) {
 	height: 53px;
 	position: relative;
 	background: #fbfbfb;
-	border: 1px solid #aaa;
-	border-bottom:none;
+	border-bottom: 1px solid #aaa;
 }
 .mainContent h1 {
 	padding: 18px 0 0 20px;
 	font-size: 17px;
 }
 .headerAdminContent h1 {
-	padding:0 0 15px 20px;
+	padding: 18px 0 0 20px;
 	font-size: 17px;
 }
 .mainTbl {
@@ -850,7 +843,6 @@ ul.addServerList li:nth-child(1) {
 .adminTbl tr {
 	border-bottom: 1px solid #CCCCCC;
 }
-.adminTbl tr:last-child {border-bottom:none;}
 .adminTbl th {
 	margin: 0;
 	padding: 15px 25px 15px 20px;
@@ -968,25 +960,21 @@ ul.addServerList li:nth-child(1) {
 	text-align: right
 }
 .drWrapperAdmin {
-	padding: 20px 0 0 0;
-	border-top:1px solid #ccc;
+	margin: 20px 0 0 0;
 }
 .headerAdminContent {
-/*	height: 53px;*/
+	height: 53px;
 	position: relative;
 	background: #fbfbfb;
-	border-bottom: 1px solid #ccc;
+	border-bottom: 1px solid #aaa;
 }
 
 .drAdminHeaderLeft {
 	float: left;
-    font-weight:bold;
-    font-size:14px;
 }
 .drAdminHeaderRight {
 	float: right;
-	/*width: 65px;*/
-	padding-right:46px;
+	width: 65px;
 }
 .replicaWrapper {
 	position: relative;
@@ -1277,7 +1265,6 @@ table.tblPopup {
 	text-decoration: underline;
 	font-style: italic;
 }
-.connectionSourceTbl tr td:nth-child(3) { width:81px;}
 .disableSelect {
 	background-color: #eee;
 	border-color: #ccc;
@@ -1762,14 +1749,6 @@ color: grey;
  }
 
 /**************Server List Ends******************/
-
-/******************* Database Configuration ***************************/
-.wrapOverview {overflow: hidden;padding: 20px;background: #F1F1F1; border:1px solid #CCCCCC;	}
-.mainTblLeft {float: left; width: 49%; background: #FFF; border:1px solid #CCCCCC;}
-.mainTblRight { float:right; background:#fff;width:49%; border:1px solid #CCCCCC;}
-.serverHeadText {font-weight: bold; font-size: 16px; }
-.serverDB { float: left;cursor: pointer; margin-left:5px;}
-/******************* Database Configuration end ***************************/
 /************Media Queries for mobile compatibility***************/
 @media (min-width: 768px) {
 .form-horizontal .control-label {
@@ -1819,7 +1798,7 @@ ul.nav li:nth-child(1) {
 
 }
 @media (max-width: 991px) {
-.clusterConfigLeft,.serverConfigWrap {
+.clusterConfigLeft {
 	padding: 0;
 }
 .clusterConfigRight {
@@ -1833,11 +1812,12 @@ ul.nav li:nth-child(1) {
 }
 
 @media (min-width: 320px) and (max-width: 360px) {
+.headerAdminContent { width:auto; overflow:auto;}
 .drAdminHeaderRight { width:10px;}
 }
 @media (min-width: 320px) and (max-width: 480px) {
 .headerAdminContent {
-	/*height: 63px;*/
+	height: 63px;
 }
 ul.drList {
 	margin: 0 12px 0 0;
@@ -1872,7 +1852,6 @@ ul.drList {
 .form-horizontal >.panel-group {
 	margin: 0;
 }
-
 }
  @media (min-width: 320px) and (max-width: 640px) {
 .rightSide {
@@ -1889,7 +1868,6 @@ ul.drList {
 	margin: 35% auto;
 	right: 0;
 }
-
 }
  @media (min-width: 620px) and (max-width: 800px) {
 .modal.custom .modifiedModalCreateDB {
@@ -1914,10 +1892,6 @@ ul.drList {
 .createDB {
 	margin-left: 15px;
 }
-}
-@media (max-width: 980px) {
-	
-.mainTblLeft, .mainTblRight { float:none; width:100%; overflow:auto;}	
 }
 @media (min-width: 768px) and (max-width: 980px) {
 .modal.custom .modifiedModalCreateDB {

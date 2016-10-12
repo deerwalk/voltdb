@@ -45,7 +45,6 @@ import Configuration
 import signal
 import thread
 
-
 filter_log = Filter('/api/1.0/', 'GET')
 
 APP = Flask(__name__, template_folder="../templates", static_folder="../static")
@@ -668,7 +667,6 @@ class Global:
     MODULE_PATH = ''
     DELETED_HOSTNAME = ''
     VOLT_SERVER_PATH = ''
-    DEFAULT_PATH = []
 
 
 class ServerAPI(MethodView):
@@ -760,13 +758,7 @@ class ServerAPI(MethodView):
             'internal-listener': request.json.get('internal-listener', "").strip().lstrip("0"),
             'http-listener': request.json.get('http-listener', "").strip().lstrip("0"),
             'placement-group': request.json.get('placement-group', "").strip(),
-            'isAdded': False,
-            'voltdbroot': request.json.get('voltdbroot', "").strip(),
-            'snapshots': request.json.get('snapshots', "").strip(),
-            'exportoverflow': request.json.get('exportoverflow', "").strip(),
-            'commandlog': request.json.get('commandlog', "").strip(),
-            'commandlogsnapshot': request.json.get('commandlogsnapshot', "").strip(),
-            'droverflow': request.json.get('droverflow', "").strip()
+            'isAdded': False
         }
 
         # Add server to the current database
@@ -892,18 +884,6 @@ class ServerAPI(MethodView):
             current_server['placement-group'] = \
                 str(request.json.get('placement-group', current_server['placement-group']))
             current_server['isAdded'] = current_server['isAdded']
-            current_server['voltdbroot'] = \
-                str(request.json.get('voltdbroot', current_server['voltdbroot']))
-            current_server['snapshots'] = \
-                str(request.json.get('snapshots', current_server['snapshots']))
-            current_server['exportoverflow'] = \
-                str(request.json.get('exportoverflow', current_server['exportoverflow']))
-            current_server['commandlog'] = \
-                str(request.json.get('commandlog', current_server['commandlog']))
-            current_server['commandlogsnapshot'] = \
-                str(request.json.get('commandlogsnapshot', current_server['commandlogsnapshot']))
-            current_server['droverflow'] = \
-                str(request.json.get('droverflow', current_server['droverflow']))
             sync_configuration()
             Configuration.write_configuration_file()
             return jsonify({'status': 200, 'statusString': 'OK', 'server': current_server})
@@ -1836,7 +1816,6 @@ def main(runner, amodule, config_dir, data_dir, server):
     global __IP__
     global __PORT__
 
-
     config_path = os.path.join(config_dir, 'voltdeploy.xml')
 
     arrServer = {}
@@ -1867,11 +1846,9 @@ def main(runner, amodule, config_dir, data_dir, server):
                              'enabled': True, 'external-interface': "", 'internal-interface': "",
                              'public-interface': "", 'client-listener': "", 'internal-listener': "",
                              'admin-listener': "", 'http-listener': "", 'replication-listener': "",
-                             'zookeeper-listener': "", 'placement-group': "", 'isAdded': False, 'voltdbroot': "",
-                             'snapshots': "", 'exportoverflow': "", 'commandlog': "",
-                             'commandlogsnapshot': "", 'droverflow': ""}
-        Global.DATABASES[1] = {'id': 1, 'name': "Database", "members": [1]}
+                             'zookeeper-listener': "", 'placement-group': "", 'isAdded': False}
 
+        Global.DATABASES[1] = {'id': 1, 'name': "Database", "members": [1]}
 
     Configuration.write_configuration_file()
 

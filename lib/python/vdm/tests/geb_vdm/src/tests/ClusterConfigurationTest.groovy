@@ -23,7 +23,6 @@ import org.openqa.selenium.WebElement
 import org.openqa.selenium.Keys
 
 class ClusterConfigurationTest extends TestBase {
-    String testingName = getTestingUrl()
     static String sitePerHost = "Site per host"
     static String ksafety = "K-safety"
     static String partitionDetection = "Partition detection"
@@ -1155,7 +1154,6 @@ class ClusterConfigurationTest extends TestBase {
         and: 'Check Save Message'
         checkSaveMessage()
         then: 'Check if Value in Log Frequency Time in Command Logging has changed'
-        println(overview.logFrequencyTimeField.value())
         if(overview.logFrequencyTimeField.value() == "10") {
             println("Test Pass: The change is displayed")
         }
@@ -1483,7 +1481,7 @@ class ClusterConfigurationTest extends TestBase {
         when: 'Provide Value for Snapshot Priority in Advanced'
         overview.snapshotPriorityField.value(Keys.chord(Keys.CONTROL, "A") + Keys.BACK_SPACE)
         overview.snapshotPriorityField.value("10")
-        overview.maxTempTableMemoryText.click()
+        overview.snapshotPriorityText.click()
         and: 'Check Save Message'
         checkSaveMessage()
         then: 'Check if Value in Snapshot Priority in Advanced has changed'
@@ -1498,7 +1496,7 @@ class ClusterConfigurationTest extends TestBase {
         when: 'Provide Value for Memory Limit in Advanced'
         overview.memoryLimitField.value(Keys.chord(Keys.CONTROL, "A") + Keys.BACK_SPACE)
         overview.memoryLimitField.value("10")
-        overview.maxTempTableMemoryText.click()
+        overview.memoryLimitText.click()
 
         and: 'Check Save Message'
         checkSaveMessage()
@@ -1551,21 +1549,26 @@ class ClusterConfigurationTest extends TestBase {
     def verifyRootDestination() {
         println("Test: verifyRootDestination")
         String oldVariablesRootDestination = directories.rootDestinationField.value()
-//        directories.selectServer.value("Default Setting")
-        when: 'Verify if text is displayed'
 
-            println("test" +  directories.rootDestinationText.text())
-            if(directories.rootDestinationText.text() == rootDestination) {
-                println("Test Pass: The text is displayed")
+        when: 'Verify if text is displayed'
+        for(count=0; count<numberOfTrials; count++) {
+            try {
+                if(directories.rootDestinationText.text() == rootDestination) {
+                    println("Test Pass: The text is displayed")
+                    break
+                }
+                else if(directories.rootDestinationText.text() != rootDestination) {
+                    println("Test Fail: The text is not displayed")
+                    assert false
+                }
+                else {
+                    println("Test Fail: Unknown error")
+                    assert false
+                }
+            } catch(org.openqa.selenium.StaleElementReferenceException e) {
+                println("Stale Element Exception - Retrying")
             }
-            else if(directories.rootDestinationText.text() != rootDestination) {
-                println("Test Fail: The text is not displayed")
-                assert false
-            }
-            else {
-                println("Test Fail: Unknown error")
-                assert false
-            }
+        }
         then: 'Verify if field is displayed'
         for(count=0; count<numberOfTrials; count++) {
             try {
@@ -1684,32 +1687,43 @@ class ClusterConfigurationTest extends TestBase {
         String oldVariablesSnapshot = directories.snapshotField.value()
 
         when: 'Verify if text is displayed'
-            if(directories.snapshotText.text() == snapshot) {
-                println("Test Pass: The text is displayed")
+        for(count=0; count<numberOfTrials; count++) {
+            try {
+                if(directories.snapshotText.text() == snapshot) {
+                    println("Test Pass: The text is displayed")
+                    break
+                }
+                else if(directories.snapshotText.text() != snapshot) {
+                    println("Test Fail: The text is not displayed")
+                    assert false
+                }
+                else {
+                    println("Test Fail: Unknown error")
+                    assert false
+                }
+            } catch(org.openqa.selenium.StaleElementReferenceException e) {
+                println("Stale Element Exception - Retrying")
             }
-            else if(directories.snapshotText.text() != snapshot) {
-                println("Test Fail: The text is not displayed")
-                assert false
-            }
-            else {
-                println("Test Fail: Unknown error")
-                assert false
-            }
-
+        }
         then: 'Verify if field is displayed'
-
-            if(directories.snapshotField.isDisplayed()) {
-                println("Test Pass: The field is displayed")
+        for(count=0; count<numberOfTrials; count++) {
+            try {
+                if(directories.snapshotField.isDisplayed()) {
+                    println("Test Pass: The field is displayed")
+                    break
+                }
+                else if(!directories.snapshotField.isDisplayed()) {
+                    println("Test Fail: The field is not displayed")
+                    assert false
+                }
+                else {
+                    println("Test Fail: Unknown error")
+                    assert false
+                }
+            } catch(org.openqa.selenium.StaleElementReferenceException e) {
+                println("Stale Element Exception - Retrying")
             }
-            else if(!directories.snapshotField.isDisplayed()) {
-                println("Test Fail: The field is not displayed")
-                assert false
-            }
-            else {
-                println("Test Fail: Unknown error")
-                assert false
-            }
-
+        }
 
         when: 'Create new database'
         for(count=0; count<numberOfTrials; count++) {
@@ -1809,29 +1823,43 @@ class ClusterConfigurationTest extends TestBase {
         String oldVariablesExportOverflow = directories.exportOverflowField.value()
 
         when: 'Verify if text is displayed'
-            if(directories.exportOverflowText.text() == exportOverflow) {
-                println("Test Pass: The text is displayed")
+        for(count=0; count<numberOfTrials; count++) {
+            try {
+                if(directories.exportOverflowText.text() == exportOverflow) {
+                    println("Test Pass: The text is displayed")
+                    break
+                }
+                else if(directories.exportOverflowText.text() != exportOverflow) {
+                    println("Test Fail: The text is not displayed")
+                    assert false
+                }
+                else {
+                    println("Test Fail: Unknown error")
+                    assert false
+                }
+            } catch(org.openqa.selenium.StaleElementReferenceException e) {
+                println("Stale Element Exception - Retrying")
             }
-            else if(directories.exportOverflowText.text() != exportOverflow) {
-                println("Test Fail: The text is not displayed")
-                assert false
-            }
-            else {
-                println("Test Fail: Unknown error")
-                assert false
-            }
+        }
         then: 'Verify if field is displayed'
-            if(directories.exportOverflowField.isDisplayed()) {
-                println("Test Pass: The field is displayed")
+        for(count=0; count<numberOfTrials; count++) {
+            try {
+                if(directories.exportOverflowField.isDisplayed()) {
+                    println("Test Pass: The field is displayed")
+                    break
+                }
+                else if(!directories.exportOverflowField.isDisplayed()) {
+                    println("Test Fail: The field is not displayed")
+                    assert false
+                }
+                else {
+                    println("Test Fail: Unknown error")
+                    assert false
+                }
+            } catch(org.openqa.selenium.StaleElementReferenceException e) {
+                println("Stale Element Exception - Retrying")
             }
-            else if(!directories.exportOverflowField.isDisplayed()) {
-                println("Test Fail: The field is not displayed")
-                assert false
-            }
-            else {
-                println("Test Fail: Unknown error")
-                assert false
-            }
+        }
 
         when: 'Create new database'
         for(count=0; count<numberOfTrials; count++) {
@@ -2341,125 +2369,6 @@ class ClusterConfigurationTest extends TestBase {
         then: "Check No Security Available Text"
         waitFor { overview.noSecurityAvailable.isDisplayed() }
         waitFor { overview.noSecurityAvailable.text().equals("No security available.") }
-    }
-
-    def verifyServerDropDown(){
-        when: 'Create database'
-        for(count=0; count<numberOfTrials; count++) {
-            try {
-                indexOfNewDatabase = createNewDatabase("name_src")
-                println("The index of database " + indexOfNewDatabase)
-                break
-            } catch(Exception e) {
-                //deleteDatabase(create_DatabaseTest_File)
-            } catch(org.codehaus.groovy.runtime.powerassert.PowerAssertionError e) {
-                //deleteDatabase(create_DatabaseTest_File)
-            }
-        }
-        then: 'Choose new database'
-        int countNext = 0
-        try {
-            for(countNext=0; countNext<numberOfTrials; countNext++) {
-                try {
-                    waitFor { buttonAddDatabase.isDisplayed() }
-                } catch(geb.waiting.WaitTimeoutException exception) {
-                    currentDatabase.click()
-                }
-            }
-            $(id:getIdOfDatabase(String.valueOf(indexOfNewDatabase))).click()
-            waitFor { currentDatabase.text().equals("name_src1") }
-
-        } catch (geb.waiting.WaitTimeoutException exception) {
-            println("Waiting - Retrying")
-        } catch (org.openqa.selenium.StaleElementReferenceException e) {
-            println("Stale Element exception - Retrying")
-        } catch(org.openqa.selenium.ElementNotVisibleException exception) {
-            try {
-                waitFor { currentDatabase.text().equals("name_src1") }
-            } catch (geb.waiting.WaitTimeoutException exc) {
-                println("Waiting - Retrying")
-            }
-        }
-//        }
-
-        when: 'Get the count for next server'
-        count = 1
-        and: 'Set the id for new server'
-        String editId   = getCssPathOfEditServer(count)
-        String serverId = getCssPathOfServer(count)
-        println("this " + " " + serverId + " " + editId)
-        then: 'Click Add Server button to open popup'
-        for(count=0; count<numberOfTrials; count++) {
-            try {
-                page.btnAddServerOption.click()
-                waitFor { page.popupAddServer.isDisplayed() }
-                page.popupAddServerDetails.click()
-                println("Add Server popup found")
-                break
-            } catch(geb.waiting.WaitTimeoutException e) {
-                println("Unable to find Add Server popup - Retrying")
-            } catch(geb.error.RequiredPageContentNotPresent e) {
-                println("Unable to find Add Server button - Retrying")
-            } catch (org.openqa.selenium.StaleElementReferenceException e) {
-                println("Stale Element Exception - Retrying")
-            }
-        }
-
-        when: 'Provide values for new server'
-        for(count=0; count<numberOfTrials; count++) {
-            try {
-                waitFor { popupAddServerNameField.value("new_server") }
-                waitFor { popupAddServerHostNameField.value(testingName) }
-                break
-            } catch(geb.waiting.WaitTimeoutException e) {
-                println("Unable to provide value to the text fields - Retrying")
-            }
-        }
-        and: 'Click Ok to save the Server'
-        for(count=0; count<numberOfTrials; count++) {
-            try {
-                popupAddServerButtonOk.click()
-                waitFor { !popupAddServerButtonOk.isDisplayed() }
-                break
-            } catch(geb.waiting.WaitTimeoutException e) {
-                println("Unable to Close Popup - Retrying")
-            } catch(org.openqa.selenium.ElementNotVisibleException e) {
-                try {
-                    waitFor { !popupAddServerButtonOk.isDisplayed() }
-                } catch(geb.waiting.WaitTimeoutException f) {
-                    println("Popup Closed")
-                    break
-                }
-            } catch(org.openqa.selenium.StaleElementReferenceException e) {
-                println("Stale Element Exception - Retrying")
-            }
-        }
-        then: 'Check if the server is created or not'
-        try {
-            report "hello1"
-            waitFor { $(serverId).text() == "new_server" }
-            println($(serverId).text() + " get Id of server")
-            println("The new server was created")
-        } catch(geb.waiting.WaitTimeoutException e) {
-            println("Test Fail: The new server was not created")
-            assert false
-        }
-        when:"select server from dropdown"
-
-        report "hello2"
-//        page.chooseSelectOption('Default Setting')
-//          page.selectserver.click()
-//            selectOption.click()
-
-        then:"check directory values"
-        directories.rootDestinationField.isDisplayed()
-        if(directories.rootDestinationField.value()=="voltdbroot"){
-            println("Default value is set")
-        }
-        else{
-            println("Value has not changed")
-            assert false
-        }
     }
 
     def cleanup() { // called after each test
