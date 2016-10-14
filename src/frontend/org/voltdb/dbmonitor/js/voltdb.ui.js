@@ -6,6 +6,13 @@ $(document).ready(function () {
     $("#helppopup").load("help.htm", function () {
     });
 
+
+       Split(['#a', '#inputQuery'], {
+         gutterSize: 8,
+         cursor: 'col-resize'
+       })
+
+
     //clear the localStorage for DataTables in DR Section
 
     var tmp = [];
