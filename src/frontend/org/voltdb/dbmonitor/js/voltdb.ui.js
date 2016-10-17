@@ -8,9 +8,13 @@ $(document).ready(function () {
 
 
        Split(['#a', '#inputQuery'], {
-         gutterSize: 8,
-         cursor: 'col-resize'
+         gutterSize: 10,
+         cursor: 'col-resize',
+         minSize: 320
        })
+
+
+
 
 
     //clear the localStorage for DataTables in DR Section

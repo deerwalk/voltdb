@@ -1891,10 +1891,11 @@ ul.topRightList li a {
 .queryInput .query textarea {
     width: 100%;
     padding: 1%;
-    resize: none !important;
+    /*resize: none !important;*/
     height: 215px;
     border: 1px solid #CCCCCC;
-    line-height: 25px;
+    /*line-height: 25px;*/
+    resize:vertical;
     font-size: 18px;
 }
 
@@ -4782,15 +4783,33 @@ fieldset { border:1px solid #ccc; padding:20px;}
 
  .gutter.gutter-horizontal {
    cursor: col-resize;
-   background-image: url('../images/vertical.png');
+   background-image: url(images/vertical.png);
+   background-color:#eee;
  }
 
  .gutter.gutter-vertical {
    cursor: row-resize;
-   background-image: url('../images/horizontal.png');
+   background-image: url(images/horizontal.png);
+   background-color:#eee;
+   margin-top:15px;
  }
 
  .split.split-horizontal, .gutter.gutter-horizontal {
    height: 100%;
    float: left;
  }
+
+ #querybar {
+    -moz-appearance: textfield-multiline;
+    -webkit-appearance: textarea;
+    border: 1px solid #ccc;
+    font: medium -moz-fixed;
+    font: -webkit-small-control;
+    height: 28px;
+    overflow: auto;
+    padding: 2px;
+    resize: both;
+    outline:none;
+
+}
+.workspace .ui-widget-content {border:none;}

@@ -656,7 +656,7 @@ $(document).ready(function () {
                     tab_counter : tabName) +'</a> <div class="ui-icon ui-icon-close close-tab" id="close-tab-' + tab_counter +
                     '" href="#closeTabConfirmation" title="Close Tab">Close</div></li>'
             }
-            var html_body = '<div class="querybar"><div class="wrapper"><textarea id="querybox-'+tab_counter+'" class="querybox-'+tab_counter+'" wrap="off"></textarea></div></div><div class="workspacestatusbar noborder"></div>'
+            var html_body = '<div class="querybar" id="querybar" contenteditable></div>'
             var html_query = '<div class="blockWrapper" id="blockContainer02">' +
                              '   <div class="exportType">' +
                              '<form name="" id="queryResult-'+tab_counter+'">' +
@@ -682,6 +682,13 @@ $(document).ready(function () {
             $('#worktabs').append('<div id="q-'+tab_counter+'" >' + html_body + html_query + '</div>')
             $('#querybox-'+tab_counter).val(tabQuery == undefined ? '' : tabQuery)
             SQLQueryRender.addQueryBtn(tab_counter)
+
+              Split(['#querybar', '#blockContainer02'], {
+      direction: 'vertical',
+//      sizes: [70, 30],
+      gutterSize: 10,
+      minSize: [230]
+    })
             $('#exportType-' + tab_counter).change(function () {
                 var tab_id = $(this).attr('id').split('-')[1]
                 if ($('#exportType-'+ tab_id).val() == 'HTML') {
