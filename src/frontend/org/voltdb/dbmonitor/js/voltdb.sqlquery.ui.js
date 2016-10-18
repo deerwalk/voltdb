@@ -656,8 +656,8 @@ $(document).ready(function () {
                     tab_counter : tabName) +'</a> <div class="ui-icon ui-icon-close close-tab" id="close-tab-' + tab_counter +
                     '" href="#closeTabConfirmation" title="Close Tab">Close</div></li>'
             }
-            var html_body = '<div class="querybar" id="querybar" contenteditable></div>'
-            var html_query = '<div class="blockWrapper" id="blockContainer02">' +
+            var html_body = '<div id="querybox-'+tab_counter+'" class="querybox-'+tab_counter+' querybox" contenteditable></div>'
+            var html_query = '<div class="blockWrapper" id="blockContainer'+tab_counter+'">' +
                              '   <div class="exportType">' +
                              '<form name="" id="queryResult-'+tab_counter+'">' +
                              '<select id="exportType-'+tab_counter+'">' +
@@ -668,6 +668,7 @@ $(document).ready(function () {
                              '</form>' +
                              '</div>' +
                              '<h1 class="theHeading icon-queryResult">Query Result</h1>' +
+                             '<div class="queryWrapper">' +
                              '<div class="queryResult-'+tab_counter+'">' +
                              '<div id="resultHtml-'+tab_counter+'" style="display: none;" class="resultHtml"></div>' +
                              '<div id="resultCsv-'+tab_counter+'" style="display: none;" class="resultCsv"></div>' +
@@ -676,6 +677,7 @@ $(document).ready(function () {
                              '</div>' +
                              '</div>' +
                              '<div id="queryResults-'+tab_counter+'" class="queryStatus"></div>' +
+                             '</div>' +
                             '</div>' ;
             $(html).appendTo( ul );
             $('#ulTabList').append($('#liNewQuery'))
@@ -683,11 +685,11 @@ $(document).ready(function () {
             $('#querybox-'+tab_counter).val(tabQuery == undefined ? '' : tabQuery)
             SQLQueryRender.addQueryBtn(tab_counter)
 
-              Split(['#querybar', '#blockContainer02'], {
+              Split(['#querybox-'+tab_counter, '#blockContainer' + tab_counter], {
       direction: 'vertical',
 //      sizes: [70, 30],
       gutterSize: 10,
-      minSize: [230]
+      minSize: [170]
     })
             $('#exportType-' + tab_counter).change(function () {
                 var tab_id = $(this).attr('id').split('-')[1]
