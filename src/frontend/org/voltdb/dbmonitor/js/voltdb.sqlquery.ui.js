@@ -131,7 +131,7 @@ $(document).ready(function () {
 
             $('#txtQueryName').val(SQLQueryRender.orgQueryName)
             $('#errorQueryName').hide()
-            var queryText = $('#querybox-' + element_id).val()
+            var queryText = $('#querybox-' + element_id).text()
             if(queryText == ''){
                 $('#btnSaveQueryOk').hide()
                 $('#queryError').show()
@@ -217,10 +217,10 @@ $(document).ready(function () {
 
         if(isNewTab){
             var key_name = generateKeyIndex(queryData) + '_' + newTabName
-            queryData[key_name] = $('#querybox-' + element_id).val()
+            queryData[key_name] = $('#querybox-' + element_id).text()
         } else {
             var key_index = getKeyIndex(queryData, oldTabName)
-            queryData[key_index + '_' + oldTabName] =  $('#querybox-' + element_id).val()
+            queryData[key_index + '_' + oldTabName] =  $('#querybox-' + element_id).text()
             newTabName =  oldTabName
         }
 
@@ -420,6 +420,8 @@ $(document).ready(function () {
         return false;
     });
 
+
+
     // Table Accordion	
     $('#accordionTable').accordion({
         collapsible: true,
@@ -551,6 +553,21 @@ $(document).ready(function () {
         SQLQueryRender.createQueryTab();
     else
         SQLQueryRender.loadSavedQueries();
+
+
+    $('#worktabs').tabs({ activate: function(event ,ui){
+        var counter = ui.newTab.attr('id').split('-')[1];
+
+        if($("#querybox-"+ counter).parent().find(".gutter").length == 0){
+            Split(['#querybox-' + counter, '#blockContainer'+ counter], {
+                    sizes: [50, 50],
+                    gutterSize: 10,
+                    minSize: [170]
+            })
+        }
+    }
+
+    });
 });
 
 (function (window) {
@@ -597,6 +614,7 @@ $(document).ready(function () {
         }
 
         this.loadSavedQueries= function(){
+
             var sql_localStorage = localStorage.queries
             var queryData = {}
 
@@ -604,6 +622,7 @@ $(document).ready(function () {
                 unOrderedData = $.parseJSON(sql_localStorage)
                 queryData = SQLQueryRender.getOrderedData(unOrderedData)
             }
+
 
             $.each( queryData, function( key, value ) {
                 SQLQueryRender.createQueryTab(key.split('_')[1], value)
@@ -656,8 +675,10 @@ $(document).ready(function () {
                     tab_counter : tabName) +'</a> <div class="ui-icon ui-icon-close close-tab" id="close-tab-' + tab_counter +
                     '" href="#closeTabConfirmation" title="Close Tab">Close</div></li>'
             }
-            var html_body = '<div id="querybox-'+tab_counter+'" class="querybox-'+tab_counter+' querybox" contenteditable></div>'
-            var html_query = '<div class="blockWrapper" id="blockContainer'+tab_counter+'">' +
+
+
+            var html_body = '<div class="verticalWrapper"><div id="querybox-'+tab_counter+'" class="querybox-'+tab_counter+' querybox split split-vertical" contenteditable></div>'
+            var html_query = '<div class="blockWrapper split split-vertical" id="blockContainer'+tab_counter+'">' +
                              '   <div class="exportType">' +
                              '<form name="" id="queryResult-'+tab_counter+'">' +
                              '<select id="exportType-'+tab_counter+'">' +
@@ -678,19 +699,15 @@ $(document).ready(function () {
                              '</div>' +
                              '<div id="queryResults-'+tab_counter+'" class="queryStatus"></div>' +
                              '</div>' +
-                            '</div>' ;
+                            '</div></div>' ;
             $(html).appendTo( ul );
             $('#ulTabList').append($('#liNewQuery'))
             $('#worktabs').append('<div id="q-'+tab_counter+'" >' + html_body + html_query + '</div>')
-            $('#querybox-'+tab_counter).val(tabQuery == undefined ? '' : tabQuery)
+            $('#querybox-'+tab_counter).html(tabQuery == undefined ? '' : tabQuery)
             SQLQueryRender.addQueryBtn(tab_counter)
 
-              Split(['#querybox-'+tab_counter, '#blockContainer' + tab_counter], {
-      direction: 'vertical',
-//      sizes: [70, 30],
-      gutterSize: 10,
-      minSize: [170]
-    })
+
+
             $('#exportType-' + tab_counter).change(function () {
                 var tab_id = $(this).attr('id').split('-')[1]
                 if ($('#exportType-'+ tab_id).val() == 'HTML') {
@@ -716,7 +733,20 @@ $(document).ready(function () {
             $("#new-query").unbind('click')
             $("#new-query").on('click', function() {
                 SQLQueryRender.createQueryTab()
+
+                tab_counter = tab_counter - 1
+                 if($("#querybox-" + tab_counter).parent().find(".gutter").length == 0){
+                     Split(['#querybox-' + tab_counter, '#blockContainer'+ tab_counter], {
+                            direction: 'vertical',
+                            sizes: [40, 60],
+                            gutterSize: 10,
+                            minSize: [170]
+                        })
+                    }
+
             });
+
+
             $('#close-tab-' + tab_counter).unbind('click')
             $('#close-tab-' + tab_counter).click(function() {
                 var element_id = $(this.parentElement).attr('id')
@@ -736,9 +766,12 @@ $(document).ready(function () {
                 SQLQueryRender.queryNameList.push(tabName == undefined ? 'Query' + tab_counter : tabName)
             }
 
+
+
             tab_counter++
             this.showHideNewTab()
             SQLQueryRender.enableDisableCrossTab()
+
         }
 
         this.addQueryBtn = function(tab_id){
@@ -769,7 +802,7 @@ $(document).ready(function () {
             $('#clearQuery-' + tab_id).unbind('click')
             $('#clearQuery-' + tab_id).click(function () {
                 query_id = $(this).attr('id').split('-')[1]
-                $('#querybox-' + query_id).val('')
+                $('#querybox-' + query_id).text('')
             });
 
             $('#querySaveBtn-' + tab_id).unbind('click');
@@ -803,6 +836,7 @@ $(document).ready(function () {
             else
                 $('#liNewQuery').show()
         }
+
 
         this.saveConnectionKey = function (useAdminPort) {
             var server = SQLQueryRender.server == null ? VoltDBConfig.GetDefaultServerNameForKey() : $.trim(SQLQueryRender.server);

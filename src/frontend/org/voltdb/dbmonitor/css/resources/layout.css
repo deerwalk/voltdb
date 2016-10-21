@@ -1868,6 +1868,7 @@ ul.topRightList li a {
 .blockWrapper {
     margin-bottom: 20px;
     margin-top:3px;
+
 }
 
 .objectExplorer {
@@ -1938,6 +1939,7 @@ ul.topRightList li a {
     background: #f2f2f2;
     border-bottom: 1px solid #ccc;
     color: #333;
+    margin-top:80px;
 }
 
 .ui-accordion {
@@ -4792,7 +4794,7 @@ fieldset { border:1px solid #ccc; padding:20px;}
  }
 
  .split.split-horizontal, .gutter.gutter-horizontal {
-   height:81%;
+   height:96.5%;
    float: left;
  }
 
@@ -4805,9 +4807,13 @@ fieldset { border:1px solid #ccc; padding:20px;}
     height: 170px;
     overflow: auto;
     padding: 2px;
-    resize: both;
+    resize: vertical;
     outline:none;
 
 }
 .workspace .ui-widget-content {border:none;}
-.queryWrapper {border:1px solid #ccc;   }
+.queryWrapper {border:1px solid #ccc; height: 300px;  }
+
+.verticalWrapper{
+height:650px;
+}

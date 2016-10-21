@@ -6,17 +6,6 @@ $(document).ready(function () {
     $("#helppopup").load("help.htm", function () {
     });
 
-
-       Split(['#a', '#inputQuery'], {
-         gutterSize: 10,
-         cursor: 'col-resize',
-         minSize: 320
-       })
-
-
-
-
-
     //clear the localStorage for DataTables in DR Section
 
     var tmp = [];
@@ -317,6 +306,22 @@ $(document).ready(function () {
         $('.contents').hide().eq($(this).index()).show();
         $("#nav li").removeClass('active');
         $(this).addClass('active');
+        Split(['#a', '#inputQuery'],{
+            gutterSize:10,
+            minSize:[380],
+            sizes:[25, 75]
+        });
+
+        var queryLength = $("#ulTabList li").length -1;
+        if($("#querybox-" + queryLength).parent().find(".gutter").length == 0){
+            Split(['#querybox-'+ queryLength, '#blockContainer' + queryLength], {
+                  direction: 'vertical',
+                  sizes: [40, 60],
+                  gutterSize: 10,
+                  minSize: [100]
+                })
+            }
+
         VoltDbUI.CurrentTab = getCurrentTab();
         refreshCss();
         saveSessionCookie("current-tab", VoltDbUI.CurrentTab);
