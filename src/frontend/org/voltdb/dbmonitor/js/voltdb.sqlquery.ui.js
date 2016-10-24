@@ -563,7 +563,7 @@ $(document).ready(function () {
                   direction: 'vertical',
                   sizes: [40, 60],
                   gutterSize: 10,
-                  minSize: [100]
+                  minSize: 100
             })
         }
     }
@@ -741,7 +741,7 @@ $(document).ready(function () {
                             direction: 'vertical',
                             sizes: [40, 60],
                             gutterSize: 10,
-                            minSize: [100]
+                            minSize: 100
                         })
                     }
 
