@@ -144,6 +144,7 @@ $(document).ready(function () {
         }
     });
 
+
     $('#btnSaveQueryConfirmation').popup({
         open: function (event, ui, ele) {
             var element = $("#worktabs .ui-tabs-panel:visible").attr("id");
@@ -151,7 +152,8 @@ $(document).ready(function () {
 
             $('#txtQueryName').val(SQLQueryRender.orgQueryName)
             $('#errorQueryName').hide()
-            var queryText = $('#querybox-' + element_id).text()
+            var item = document.getElementById('querybox-' + element_id);
+            var queryText = item.innerText || item.textContent;
             if(queryText == ''){
                 $('#btnSaveQueryOk').hide()
                 $('#queryError').show()
@@ -237,10 +239,14 @@ $(document).ready(function () {
 
         if(isNewTab){
             var key_name = generateKeyIndex(queryData) + '_' + newTabName
-            queryData[key_name] = $('#querybox-' + element_id).text()
+            var item = document.getElementById('querybox-' + element_id);
+            var queryText = item.innerText || item.textContent;
+            queryData[key_name] = queryText;
         } else {
             var key_index = getKeyIndex(queryData, oldTabName)
-            queryData[key_index + '_' + oldTabName] =  $('#querybox-' + element_id).text()
+            var item = document.getElementById('querybox-' + element_id);
+            var queryText = item.innerText || item.textContent;
+            queryData[key_index + '_' + oldTabName] =  queryText;
             newTabName =  oldTabName
         }
 
@@ -635,7 +641,6 @@ $(document).ready(function () {
         }
 
         this.loadSavedQueries= function(){
-
             var sql_localStorage = localStorage.queries
             var queryData = {}
 
