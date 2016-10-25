@@ -641,6 +641,7 @@ $(document).ready(function () {
         }
 
         this.loadSavedQueries= function(){
+            debugger;
             var sql_localStorage = localStorage.queries
             var queryData = {}
 
@@ -729,7 +730,7 @@ $(document).ready(function () {
             $(html).appendTo( ul );
             $('#ulTabList').append($('#liNewQuery'))
             $('#worktabs').append('<div id="q-'+tab_counter+'" >' + html_body + html_query + '</div>')
-            $('#querybox-'+tab_counter).html(tabQuery == undefined ? '' : tabQuery)
+            $('#querybox-'+tab_counter).text(tabQuery == undefined ? '' : tabQuery)
             SQLQueryRender.addQueryBtn(tab_counter)
 
 

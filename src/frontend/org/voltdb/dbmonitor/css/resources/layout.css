@@ -4798,6 +4798,7 @@ fieldset { border:1px solid #ccc; padding:20px;}
    float: left;
  }
 
+
  .querybox {
     -moz-appearance: textfield-multiline;
     -webkit-appearance: textarea;
@@ -4809,6 +4810,9 @@ fieldset { border:1px solid #ccc; padding:20px;}
     padding: 2px;
     resize: vertical;
     outline:none;
+    white-space: pre;
+    font-size: 18px;
+    font-family: Arial,Helvetica,sans-serif;
 
 }
 .workspace .ui-widget-content {border:none;}
