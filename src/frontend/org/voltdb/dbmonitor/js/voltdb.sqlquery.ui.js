@@ -585,12 +585,14 @@ $(document).ready(function () {
         var counter = ui.newTab.attr('id').split('-')[1];
 
         if($("#querybox-"+ counter).parent().find(".gutter").length == 0){
+            if(window.screen.width > 300){
             Split(['#querybox-' + counter, '#blockContainer'+ counter], {
                   direction: 'vertical',
                   sizes: [30, 70],
-                  gutterSize: 10,
+                  gutterSize: 15,
                   minSize: 120
             })
+            }
         }
     }
 
@@ -641,7 +643,6 @@ $(document).ready(function () {
         }
 
         this.loadSavedQueries= function(){
-            debugger;
             var sql_localStorage = localStorage.queries
             var queryData = {}
 
@@ -763,12 +764,14 @@ $(document).ready(function () {
 
                 tab_counter = tab_counter - 1
                  if($("#querybox-" + tab_counter).parent().find(".gutter").length == 0){
-                     Split(['#querybox-' + tab_counter, '#blockContainer'+ tab_counter], {
-                            direction: 'vertical',
-                            sizes: [30, 70],
-                            gutterSize: 10,
-                            minSize: 120
-                        })
+                     if(window.screen.width > 300){
+                         Split(['#querybox-' + tab_counter, '#blockContainer'+ tab_counter], {
+                                direction: 'vertical',
+                                sizes: [30, 70],
+                                gutterSize: 15,
+                                minSize: 120
+                            })
+                        }
                     }
 
             });

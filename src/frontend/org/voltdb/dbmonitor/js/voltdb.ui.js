@@ -307,25 +307,28 @@ $(document).ready(function () {
         $("#nav li").removeClass('active');
         $(this).addClass('active');
 
-        var gutterLength = $("#BlockContainer01").find(".gutter").length
+        if(window.screen.width > 300){
+                var gutterLength = $("#BlockContainer01").find(".gutter").length
 
-        if(gutterLength == 0){
-            Split(['#a', '#inputQuery'],{
-                gutterSize:10,
-                minSize:380,
-                sizes:[25, 75]
-            });
+                if(gutterLength == 0){
+                    Split(['#a', '#inputQuery'],{
+                        gutterSize:15,
+                        minSize:380,
+                        sizes:[25, 75]
+                    });
+                }
+
+                    var queryLength = $("#ulTabList li").length -1;
+                if($("#querybox-" + queryLength).parent().find(".gutter").length == 0){
+                    Split(['#querybox-'+ queryLength, '#blockContainer' + queryLength], {
+                          direction: 'vertical',
+                          sizes: [30, 70],
+                          gutterSize: 15,
+                          minSize: 120
+                        })
+                    }
+
         }
-
-            var queryLength = $("#ulTabList li").length -1;
-        if($("#querybox-" + queryLength).parent().find(".gutter").length == 0){
-            Split(['#querybox-'+ queryLength, '#blockContainer' + queryLength], {
-                  direction: 'vertical',
-                  sizes: [30, 70],
-                  gutterSize: 10,
-                  minSize: 120
-                })
-            }
 
         VoltDbUI.CurrentTab = getCurrentTab();
         refreshCss();
