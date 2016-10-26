@@ -321,9 +321,9 @@ $(document).ready(function () {
         if($("#querybox-" + queryLength).parent().find(".gutter").length == 0){
             Split(['#querybox-'+ queryLength, '#blockContainer' + queryLength], {
                   direction: 'vertical',
-                  sizes: [40, 60],
+                  sizes: [30, 70],
                   gutterSize: 10,
-                  minSize: 100
+                  minSize: 120
                 })
             }
 

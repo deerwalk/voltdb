@@ -1939,7 +1939,7 @@ ul.topRightList li a {
     background: #f2f2f2;
     border-bottom: 1px solid #ccc;
     color: #333;
-    margin-top:80px;
+    margin-top:10px;
 }
 
 .ui-accordion {
@@ -2036,7 +2036,7 @@ border:1px solid #FFF;
 #worktabs .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {background:#76BD1D;}
 #worktabs .ui-tabs-nav { padding:1px 0 0px 3px !important; border-radius:0;}
 #worktabs .ui-tabs-nav li { border:1px solid #CCC!important; margin-top:2px; border-radius:12px 2px 0 0;}
-#worktabs .ui-tabs-panel {padding:0 3px; position:relative; top:-3px; }
+#worktabs .ui-tabs-panel {padding:0 3px; position:relative; top:-1px; }
 #worktabs .ui-tabs-nav .ui-tabs-anchor {font-size: 12px; font-weight: bold;}
 #worktabs ul li#liNewQuery {background: #ccc; border:none!important; padding-top:1px;border-radius: 12px 2px 0 0;}
 #worktabs ul li a.ui-tabs-anchor { padding:.5em .2em;}
@@ -2060,8 +2060,8 @@ border:1px solid #FFF;
 
 .resultHtml, .resultCsv, .resultMonospace {
     width: 100%;
+    height: 240px;
     overflow: auto;
-    height: 200px;
 
 }
 
@@ -4763,8 +4763,8 @@ fieldset { border:1px solid #ccc; padding:20px;}
       -moz-box-sizing: border-box;
            box-sizing: border-box;
 
-   overflow-y: auto;
-   overflow-x: hidden;
+   overflow-y: hidden;
+   overflow-x: auto;
  }
 
  .content {
@@ -4816,7 +4816,7 @@ fieldset { border:1px solid #ccc; padding:20px;}
 
 }
 .workspace .ui-widget-content {border:none;}
-.queryWrapper {border:1px solid #ccc; height: 300px;  }
+.queryWrapper {border:1px solid #ccc;}
 
 .verticalWrapper{
 height:650px;

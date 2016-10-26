@@ -587,9 +587,9 @@ $(document).ready(function () {
         if($("#querybox-"+ counter).parent().find(".gutter").length == 0){
             Split(['#querybox-' + counter, '#blockContainer'+ counter], {
                   direction: 'vertical',
-                  sizes: [40, 60],
+                  sizes: [30, 70],
                   gutterSize: 10,
-                  minSize: 100
+                  minSize: 120
             })
         }
     }
@@ -765,9 +765,9 @@ $(document).ready(function () {
                  if($("#querybox-" + tab_counter).parent().find(".gutter").length == 0){
                      Split(['#querybox-' + tab_counter, '#blockContainer'+ tab_counter], {
                             direction: 'vertical',
-                            sizes: [40, 60],
+                            sizes: [30, 70],
                             gutterSize: 10,
-                            minSize: 100
+                            minSize: 120
                         })
                     }
 
