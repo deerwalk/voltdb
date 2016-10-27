@@ -26,15 +26,23 @@ import org.voltdb.catalog.Cluster;
 import org.voltdb.catalog.Database;
 import org.voltdb.catalog.Procedure;
 import org.voltdb.dtxn.SiteTracker;
+import org.voltdb.settings.ClusterSettings;
+import org.voltdb.settings.NodeSettings;
 
 public interface SystemProcedureExecutionContext {
     public Database getDatabase();
 
     public Cluster getCluster();
 
+    public ClusterSettings getClusterSettings();
+
+    public NodeSettings getPaths();
+
     public long getSpHandleForSnapshotDigest();
 
     public long getSiteId();
+
+    public int getLocalSitesCount();
 
     // does this site have "lowest site id" responsibilities.
     public boolean isLowestSiteId();

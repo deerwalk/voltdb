@@ -53,6 +53,9 @@ import org.voltdb.importer.ImportManager;
 import org.voltdb.iv2.MpInitiator;
 import org.voltdb.iv2.TxnEgo;
 import org.voltdb.iv2.UniqueIdGenerator;
+import org.voltdb.modular.ModuleManager;
+import org.voltdb.settings.DbSettings;
+import org.voltdb.settings.NodeSettings;
 import org.voltdb.utils.CatalogUtil;
 import org.voltdb.utils.CatalogUtil.CatalogAndIds;
 import org.voltdb.utils.HTTPAdminListener;
@@ -394,7 +397,7 @@ public class Inits {
                         catalogStuff.txnId,
                         catalogStuff.uniqueId,
                         catalog,
-                        m_rvdb.m_clusterSettings,
+                        new DbSettings(m_rvdb.m_clusterSettings, m_rvdb.m_nodeSettings),
                         catalogJarBytes,
                         catalogJarHash,
                         // Our starter catalog has set the deployment stuff, just yoink it out for now
@@ -634,9 +637,21 @@ public class Inits {
         }
     }
 
+    class InitModuleManager extends InitWork {
+        InitModuleManager() {
+        }
+
+        @Override
+        public void run() {
+            ModuleManager.initializeCacheRoot(new File(m_config.m_voltdbRoot, VoltDB.MODULE_CACHE));
+            // TODO: start foundation bundles
+        }
+    }
+
     class InitExport extends InitWork {
         InitExport() {
             dependsOn(LoadCatalog.class);
+            dependsOn(InitModuleManager.class);
         }
 
         @Override
@@ -660,6 +675,7 @@ public class Inits {
     class InitImport extends InitWork {
         InitImport() {
             dependsOn(LoadCatalog.class);
+            dependsOn(InitModuleManager.class);
         }
 
         @Override
@@ -732,6 +748,7 @@ public class Inits {
 
                 org.voltdb.catalog.CommandLog cl = m_rvdb.m_catalogContext.cluster.getLogconfig().get("log");
                 if (cl == null || !cl.getEnabled()) return;
+                NodeSettings paths = m_rvdb.m_nodeSettings;
                 try {
                     m_rvdb.m_restoreAgent = new RestoreAgent(
                                                       m_rvdb.m_messenger,
@@ -739,11 +756,12 @@ public class Inits {
                                                       m_rvdb,
                                                       m_config.m_startAction,
                                                       cl.getEnabled(),
-                                                      VoltDB.instance().getCommandLogPath(),
-                                                      VoltDB.instance().getCommandLogSnapshotPath(),
+                                                      paths.resolve(paths.getCommandLog()).getPath(),
+                                                      paths.resolve(paths.getCommandLogSnapshot()).getPath(),
                                                       snapshotPath,
                                                       allPartitions,
-                                                      VoltDB.instance().getVoltDBRootPath());
+                                                      paths.getVoltDBRoot().getPath(),
+                                                      m_rvdb.m_terminusNonce);
                 } catch (IOException e) {
                     VoltDB.crashLocalVoltDB("Unable to construct the RestoreAgent", true, e);
                 }
@@ -755,8 +773,10 @@ public class Inits {
                     m_statusTracker.setNodeState(NodeState.RECOVERING);
                 }
                 // if the restore agent found a catalog, set the following info
-                // so the right node can send it out to the others
-                if (catalog != null) {
+                // so the right node can send it out to the others. In case the
+                // restore agent chooses a terminus snapshot, it lets the restore
+                // snapshot restore and if required upgrade the snapshot catalog
+                if (catalog != null && !m_rvdb.m_restoreAgent.willRestoreShutdownSnaphot()) {
                     // Make sure the catalog corresponds to the current server version.
                     // Prevent automatic upgrades by rejecting mismatched versions.
                     int hostId = catalog.getFirst().intValue();
@@ -786,7 +806,9 @@ public class Inits {
                                     e.getMessage()));
                         }
                     }
-                    hostLog.debug("Found catalog to load on host " + hostId + ": " + catalogPath);
+                    if (hostLog.isDebugEnabled()) {
+                        hostLog.debug("Found catalog to load on host " + hostId + ": " + catalogPath);
+                    }
                     m_rvdb.m_hostIdWithStartupCatalog = hostId;
                     assert(m_rvdb.m_hostIdWithStartupCatalog >= 0);
                     m_rvdb.m_pathToStartupCatalog = catalogPath;
