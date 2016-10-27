@@ -7,25 +7,6 @@ var tab_counter = 1;
 var INT_MAX_VALUE = 2147483647;
 $(document).ready(function () {
 
-      var refreshSplit = function() {
-      var mousedown = new CustomEvent('mousedown');
-      var mousemove = new CustomEvent('mousemove', {bubbles: true});
-      var mouseup = new CustomEvent('mouseup', {bubbles: true});
-      var gutter = document.querySelector('.gutter-horizontal');
-
-      mousemove.clientX = gutter.getBoundingClientRect().left;
-
-      gutter.dispatchEvent(mousedown);
-      gutter.dispatchEvent(mousemove);
-      gutter.dispatchEvent(mouseup);
-    };
-
-
-    var lock;
-    window.onresize = function() {
-      clearTimeout(lock);
-      lock = setTimeout(refreshSplit, 100);
-    };
     function CheckBrowser() {
         if ('localStorage' in window && window['localStorage'] !== null) {
             return true;
@@ -71,11 +52,27 @@ $(document).ready(function () {
         }
     };
 
+    var lock;
     addEvent(window, "resize", function() {
         fixWidth()
+         clearTimeout(lock);
+      lock = setTimeout(refreshSplit, 100);
     });
 
     fixWidth()
+
+     var refreshSplit = function() {
+      var mousedown = new CustomEvent('mousedown');
+      var mousemove = new CustomEvent('mousemove', {bubbles: true});
+      var mouseup = new CustomEvent('mouseup', {bubbles: true});
+      var gutter = document.querySelector('.gutter-horizontal');
+
+      mousemove.clientX = gutter.getBoundingClientRect().left;
+
+      gutter.dispatchEvent(mousedown);
+      gutter.dispatchEvent(mousemove);
+      gutter.dispatchEvent(mouseup);
+    };
     
     $("#bntTimeoutSetting").popup({
         open: function (event, ui, ele) {
