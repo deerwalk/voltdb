@@ -706,9 +706,15 @@ ul.rightShowhideList {
 .collapsed {
     background: #fbfbfb url(images/voltdb-icon-sprite.png) 20px -535px no-repeat;
 }
+.collapsedDR {
+    background:url(images/voltdb-icon-sprite.png) 20px -537px no-repeat;
+}
 
 .expanded {
     background: #fbfbfb url(images/voltdb-icon-sprite.png) 20px -490px no-repeat;
+}
+.expandedDR {
+    background:url(images/voltdb-icon-sprite.png) 20px -493px no-repeat;
 }
 
 .leftShowhide .expanded {
@@ -721,6 +727,11 @@ ul.rightShowhideList {
 
 .arrowAdjust {
     padding: 0px 0 0 26px;
+    position: relative;
+    top: 4px;
+}
+.arrowAdjustDR {
+    padding: 0px 0 0 10px;
     position: relative;
     top: 4px;
 }
@@ -1440,7 +1451,7 @@ a.icon-document {
         color: #76bd1d;
     }
 
-#schema, #sqlQuery, #admin {
+#schema, #sqlQuery, #admin, #dr {
     display: none;
 }
 
@@ -2018,6 +2029,18 @@ h1.icon-queryResult {
     background-position: 0px -1039px;
     padding-left:30px!important;
 }
+/***********************************DR page*******************************/
+#containerMain1 { background:#fff; padding:10px;}
+.DRContantWrap {background:#ccc; padding:10px; display:block;}
+.contentDR {
+    margin: 0 0 20px 0;
+    padding:0 20px;
+
+
+}
+.drHead { background-color:#fff; padding:5px 20px 25px 37px; border:none;  }
+.drBody { padding:0;}
+.DRHeaderName { position:relative;top:5px;}
 
 /*********************jquery ui class override*********************/
 #accordionProcedures .ui-state-default, #accordionTable .ui-state-default,#accordionStreamedTable .ui-state-default,
