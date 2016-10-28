@@ -67,7 +67,7 @@
                                 <li id="navAdmin" style="display: none;"><a href="#">Admin</a></li>
                                 <li id="navSchema"><a href="#o">Schema</a></li>
                                 <li id="navSqlQuery"><a href="#">SQL Query</a></li>
-                                <li id="navDR" ><a href="#">&nbsp;&nbsp;DR&nbsp;&nbsp;</a></li>
+                                <li id="navDR" style="display: none;"><a href="#">&nbsp;&nbsp;DR&nbsp;&nbsp;</a></li>
                             </ul>
                         </nav>
                     </div>
@@ -1122,7 +1122,13 @@
                      <div id="dbPane" class="menu_list">
                             <!--Code for menu starts here-->
                             <div class="menu_head expandedDR drHead">
-                               <h1 class="headText1"><a href="#" id="showHideGraphBlock1" class="showhideIcon expandedDR arrowAdjustDR"><span class="DRHeaderName">Database (1)</span></a></h1>
+                                 <span class="iconDRDatabase"></span>
+                                <h1 class="headText1 DRHeaderWrap">
+                                   <a href="#" id="showHideGraphBlock1" class="showhideIcon expandedDR arrowAdjustDR">
+                                       <span class="DRHeaderName" id="dRHeaderName">Database (1)</span>
+                                   </a>
+                               </h1>
+                                <div class="clear"></div>
                             </div>
                             <div class="menu_body drBody" style="display: block;">
 
@@ -1138,7 +1144,7 @@
                             <div class="clear"></div>
                         </div>
                             <div class="graphChart" id="graphChart1">
-                                <div id="ChartDrReplicationRate" class="chart" style="display: block">
+                                <div id="ChartDrReplicationRate" class="chart chartDR" style="display: block">
                                     <div class="chartHeader">
                                         <h1>Database Replication (DR)
                                         <a href="#" class="downloadBtnChart" onclick='downloadCSV(event, { filename: "DrReplication-data" }, "dataReplication");'> <img class="downloadCls" src="css/resources/images/downloadBtn.png" alt="download" title="Download data as CSV"/></a>
