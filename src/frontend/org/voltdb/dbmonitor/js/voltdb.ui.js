@@ -309,7 +309,6 @@ $(document).ready(function () {
         $('.contents').hide().eq($(this).index()).show();
         $("#nav li").removeClass('active');
         $(this).addClass('active');
-        console.log(isMobile)
         if(isMobile==false){
                 var gutterLength = $("#BlockContainer01").find(".gutter").length
 
@@ -330,6 +329,12 @@ $(document).ready(function () {
                           minSize: 120
                         })
                     }
+                Split(['#queryWrapper-'+ queryLength, '#divider-' + queryLength], {
+                          direction: 'vertical',
+                          sizes: [30, 70],
+                          gutterSize: 15,
+                          minSize: 120
+                        })
 
         }
 

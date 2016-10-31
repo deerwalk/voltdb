@@ -588,16 +588,22 @@ $(document).ready(function () {
 
         if($("#querybox-"+ counter).parent().find(".gutter").length == 0){
             debugger;
-            console.log(isMobile)
             if(isMobile == false){
-            Split(['#querybox-' + counter, '#blockContainer'+ counter], {
-                  direction: 'vertical',
-                  sizes: [30, 70],
-                  gutterSize: 15,
-                  minSize: 120
-            })
+                Split(['#querybox-' + counter, '#blockContainer'+ counter], {
+                      direction: 'vertical',
+                      sizes: [30, 70],
+                      gutterSize: 15,
+                      minSize: 120
+                })
             }
         }
+
+          Split(['#queryWrapper-'+ counter, '#divider-'+ counter], {
+                          direction: 'vertical',
+                          sizes: [30, 70],
+                          gutterSize: 15,
+                          minSize: 120
+                        })
     }
 
     });
@@ -721,7 +727,7 @@ $(document).ready(function () {
                              '</form>' +
                              '</div>' +
                              '<h1 class="theHeading icon-queryResult">Query Result</h1>' +
-                             '<div class="queryWrapper">' +
+                             '<div id="queryWrapper-'+tab_counter+'" class="queryWrapper split split-vertical">' +
                              '<div class="queryResult-'+tab_counter+'">' +
                              '<div id="resultHtml-'+tab_counter+'" style="display: none;" class="resultHtml"></div>' +
                              '<div id="resultCsv-'+tab_counter+'" style="display: none;" class="resultCsv"></div>' +
@@ -730,8 +736,8 @@ $(document).ready(function () {
                              '</div>' +
                              '</div>' +
                              '<div id="queryResults-'+tab_counter+'" class="queryStatus"></div>' +
-                             '</div>' +
-                            '</div></div>' ;
+                             '</div><div id="divider-'+tab_counter+'" class="divider split split-vertical"></div>' +
+                            '</div>' ;
             $(html).appendTo( ul );
             $('#ulTabList').append($('#liNewQuery'))
             $('#worktabs').append('<div id="q-'+tab_counter+'" >' + html_body + html_query + '</div>')
@@ -777,6 +783,13 @@ $(document).ready(function () {
                             })
                         }
                     }
+
+                    Split(['#queryWrapper-'+ counter, '#divider-' + counter], {
+                      direction: 'vertical',
+                      sizes: [30, 70],
+                      gutterSize: 15,
+                      minSize: 120
+                    })
 
             });
 
