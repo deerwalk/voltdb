@@ -329,12 +329,12 @@ $(document).ready(function () {
                           minSize: 120
                         })
                     }
-                Split(['#queryWrapper-'+ queryLength, '#divider-' + queryLength], {
-                          direction: 'vertical',
-                          sizes: [30, 70],
-                          gutterSize: 15,
-                          minSize: 120
-                        })
+//                Split(['#queryWrapper-'+ queryLength, '#divider-' + queryLength], {
+//                          direction: 'vertical',
+//                          sizes: [30, 70],
+//                          gutterSize: 15,
+//                          minSize: 120
+//                        })
 
         }
 

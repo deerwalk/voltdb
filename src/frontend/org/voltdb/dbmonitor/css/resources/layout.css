@@ -2037,6 +2037,7 @@ border:1px solid #FFF;
     color:#222;
 }
 
+
 #worktabs .ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited { color:#FFF; background:#76BD1D; padding:.5em .2em; border-radius:12px 2px 0 0;}
 #worktabs .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {background:#76BD1D;}
 #worktabs .ui-tabs-nav { padding:1px 0 0px 3px !important; border-radius:0;}
@@ -2045,8 +2046,10 @@ border:1px solid #FFF;
 #worktabs .ui-tabs-nav .ui-tabs-anchor {font-size: 12px; font-weight: bold;}
 #worktabs ul li#liNewQuery {background: #ccc; border:none!important; padding-top:1px;border-radius: 12px 2px 0 0;}
 #worktabs ul li a.ui-tabs-anchor { padding:.5em .2em;}
+.workspace {height:100%}
 .workspace .ui-tabs .ui-tabs-nav li { margin:1px 2px 0 0;}
 .workspace .ui-tabs .ui-tabs-nav li.ui-tabs-active { padding-bottom:0;}
+
 .disableCloserTab { opacity:0.5;}
 #queryError span.error{ color: #c70000; font-size:13px; }
 

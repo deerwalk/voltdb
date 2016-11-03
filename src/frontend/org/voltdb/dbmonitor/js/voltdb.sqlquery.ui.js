@@ -727,7 +727,7 @@ $(document).ready(function () {
                              '</form>' +
                              '</div>' +
                              '<h1 class="theHeading icon-queryResult">Query Result</h1>' +
-                             '<div id="queryWrapper-'+tab_counter+'" class="queryWrapper split split-vertical">' +
+                             '<div id="queryWrapper-'+tab_counter+'" class="queryWrapper">' +
                              '<div class="queryResult-'+tab_counter+'">' +
                              '<div id="resultHtml-'+tab_counter+'" style="display: none;" class="resultHtml"></div>' +
                              '<div id="resultCsv-'+tab_counter+'" style="display: none;" class="resultCsv"></div>' +
@@ -736,7 +736,7 @@ $(document).ready(function () {
                              '</div>' +
                              '</div>' +
                              '<div id="queryResults-'+tab_counter+'" class="queryStatus"></div>' +
-                             '</div><div id="divider-'+tab_counter+'" class="divider split split-vertical"></div>' +
+                             '</div>' +
                             '</div>' ;
             $(html).appendTo( ul );
             $('#ulTabList').append($('#liNewQuery'))
@@ -784,12 +784,12 @@ $(document).ready(function () {
                         }
                     }
 
-                    Split(['#queryWrapper-'+ counter, '#divider-' + counter], {
-                      direction: 'vertical',
-                      sizes: [30, 70],
-                      gutterSize: 15,
-                      minSize: 120
-                    })
+//                    Split(['#queryWrapper-'+ counter, '#divider-' + counter], {
+//                      direction: 'vertical',
+//                      sizes: [30, 70],
+//                      gutterSize: 15,
+//                      minSize: 120
+//                    })
 
             });
 
