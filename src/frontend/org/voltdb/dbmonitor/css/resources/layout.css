@@ -1168,7 +1168,7 @@ table.serversTbl tr.serverActive {
     ul.servers-list li.monitoring a {
         font-weight: bold;
         color: #76bd1d;
-        
+
     }
 
     .serverNameAlign {float: left; word-break: break-all;}
@@ -1637,7 +1637,7 @@ div.popup {
      ::i-block-chrome,.overlay-content  {
      width: 450px;
     }
-   
+
 }
 
 .graphPop {
@@ -1662,7 +1662,7 @@ div.popup {
     margin-bottom: 5px;
     height: 30px;
     line-height: 35px;
-   
+
 }
 
     .user-preferences li.last {
@@ -1929,6 +1929,7 @@ ul.topRightList li a {
     margin: 0 0 1.5px 0 !important;
     padding: 17px 20px 17px 45px;
     background-color: #FFFFFF;
+    border-bottom:1px solid #ccc;
     }
 .blockWrapper h1.theHeadingQuery {
     margin: 0 0 1.5px 0 !important;
@@ -1940,11 +1941,10 @@ ul.topRightList li a {
 }
 
 .queryStatus {
-    padding: 10px;
-    background: #f2f2f2;
-    border-bottom: 1px solid #ccc;
-    color: #333;
-    margin-top:10px;
+    padding:0 0 0 10px;
+    color: #aaa;
+    float:left;
+
 }
 
 .ui-accordion {
@@ -2068,7 +2068,7 @@ border:1px solid #FFF;
 
 .resultHtml, .resultCsv, .resultMonospace {
     width: 100%;
-    height: 240px;
+    height:85%;
     overflow: auto;
 
 }
@@ -2595,7 +2595,7 @@ ul.adminClusterList li a.shutdown {
     height: 17px;
     position: relative;
     top: 5px;
-   
+
 }
 
 .deleteSmall {
@@ -2699,7 +2699,7 @@ ul.adminClusterList li a.shutdown {
 .labelCollapsed {
     /*background-position: -468px -11px;*/
     padding-left: 22px;
-    background: url("images/up.png")0 1px no-repeat; 
+    background: url("images/up.png")0 1px no-repeat;
 }
 
 .labelExpanded {
@@ -2853,7 +2853,7 @@ input.exitableMemoryLimit {
 }
 
 .serverHeader { background: #dee0e0; }
-.serverHeader:hover  {  
+.serverHeader:hover  {
     background: #dee0e0 !important;
 }
 tr.serverHeader:hover {background: #dee0e0;}
@@ -3754,7 +3754,7 @@ svg.nvd3-svg { width:95% !important; }
 
 /**************************QueryTimeOut*************************/
 .queryHeadName { float:left; width:100px; height:22px; text-indent:40px; padding-top:17px;}
-.queryTimeoutName { 
+.queryTimeoutName {
     background: #d0d2d2 none repeat scroll 0 0;
     cursor: pointer;
     float: left;
@@ -3906,6 +3906,9 @@ fieldset { border:1px solid #ccc; padding:20px;}
    overflow-y: hidden;
    overflow-x: auto;
  }
+ @-moz-document url-prefix() {
+ split { overflow-y:auto;}
+ }
 
  .content {
    border: 1px solid #C0C0C0;
@@ -3956,10 +3959,11 @@ fieldset { border:1px solid #ccc; padding:20px;}
 
 }
 .workspace .ui-widget-content {border:none;}
-.queryWrapper {border:1px solid #ccc;}
+/*.queryWrapper {border:1px solid #ccc;}*/
 
 .verticalWrapper{
-height:650px;
+height: 90%;
+ /*height:calc(95% - 92px);*/
 }
 
 
@@ -4000,7 +4004,7 @@ ul#shutdownMsg li{ font-size:13px; line-height:20px; }
     }
 	.downloadConfig { margin-bottom:5px;}
 
-  
+
 }
 
 @media (min-width: 320px) and (max-width:360px) {
@@ -4080,7 +4084,7 @@ ul#shutdownMsg li{ font-size:13px; line-height:20px; }
         float: left;
         padding-top: 15px;
     }
-    
+
     .tabs-filter-wrapperDR .filter {
         float: none;
         width: auto;
@@ -4140,7 +4144,7 @@ ul#shutdownMsg li{ font-size:13px; line-height:20px; }
     .tabs-filter-wrapperDR {
         width: 560px;
     }
-    /*admin*/   
+    /*admin*/
     .server-info-heading .servIp {margin-left: 10%;margin-top: 0;}
     ul.servers-list li span.servIpNum {margin-left: 8%;}
     /*.serverNameAlign { width: 26%;}*/
@@ -4647,7 +4651,7 @@ ul#shutdownMsg li{ font-size:13px; line-height:20px; }
     /*.popup_cont {
         width: 380px;
     }*/
-	
+
 }
 
 @media (width: 768px) {
@@ -4710,7 +4714,7 @@ ul#shutdownMsg li{ font-size:13px; line-height:20px; }
 }
 
 @media (width: 320px) {
-    
+
 
     input.icon-search {
         width: 182px;
@@ -4785,7 +4789,7 @@ ul#shutdownMsg li{ font-size:13px; line-height:20px; }
     .partitionHeight {
         height: 310px!important;
     }
-     
+
 
     .drScroll {
         overflow: visible !important;
@@ -4795,7 +4799,7 @@ ul#shutdownMsg li{ font-size:13px; line-height:20px; }
 @media screen and (orientation:landscape) {
     .popup_cont {
         top: 5%;
-		
+
     }
 }
 

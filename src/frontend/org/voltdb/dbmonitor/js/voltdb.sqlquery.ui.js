@@ -587,7 +587,6 @@ $(document).ready(function () {
         var counter = ui.newTab.attr('id').split('-')[1];
 
         if($("#querybox-"+ counter).parent().find(".gutter").length == 0){
-            debugger;
             if(isMobile == false){
                 Split(['#querybox-' + counter, '#blockContainer'+ counter], {
                       direction: 'vertical',
@@ -598,12 +597,7 @@ $(document).ready(function () {
             }
         }
 
-          Split(['#queryWrapper-'+ counter, '#divider-'+ counter], {
-                          direction: 'vertical',
-                          sizes: [30, 70],
-                          gutterSize: 15,
-                          minSize: 120
-                        })
+
     }
 
     });
@@ -715,7 +709,7 @@ $(document).ready(function () {
             }
 
 
-            var html_body = '<div class="verticalWrapper"><div id="querybox-'+tab_counter+'" class="querybox-'+tab_counter+' querybox split split-vertical" contenteditable></div>'
+           var html_body = '<div class="verticalWrapper"><div id="querybox-'+tab_counter+'" class="querybox-'+tab_counter+' querybox split split-vertical" contenteditable></div>'
             var html_query = '<div class="blockWrapper split split-vertical" id="blockContainer'+tab_counter+'">' +
                              '   <div class="exportType">' +
                              '<form name="" id="queryResult-'+tab_counter+'">' +
@@ -726,7 +720,8 @@ $(document).ready(function () {
                              '</select>' +
                              '</form>' +
                              '</div>' +
-                             '<h1 class="theHeading icon-queryResult">Query Result</h1>' +
+                             '<h1 class="theHeading icon-queryResult"><span style=" float:left">Query Result</span> <div id="queryResults-'+tab_counter+'" class="queryStatus"></div><div class="clear"></div></h1> ' +
+
                              '<div id="queryWrapper-'+tab_counter+'" class="queryWrapper">' +
                              '<div class="queryResult-'+tab_counter+'">' +
                              '<div id="resultHtml-'+tab_counter+'" style="display: none;" class="resultHtml"></div>' +
@@ -735,9 +730,10 @@ $(document).ready(function () {
                              '<pre>                    </pre>' +
                              '</div>' +
                              '</div>' +
-                             '<div id="queryResults-'+tab_counter+'" class="queryStatus"></div>' +
+
                              '</div>' +
-                            '</div>' ;
+                            '</div>';
+
             $(html).appendTo( ul );
             $('#ulTabList').append($('#liNewQuery'))
             $('#worktabs').append('<div id="q-'+tab_counter+'" >' + html_body + html_query + '</div>')
@@ -1168,7 +1164,9 @@ $(document).ready(function () {
         var toggleSpinner = function (show) {
             if (!show) {
                 $("#sqlQueryOverlay").hide();
-                $("#tabScroller").css("height", 556);
+                //$("#tabScroller").css("height", "calc(100% - 96px)");
+                $("#tabScroller").css("height", "-moz-calc(100% - 96px)");
+                //$("#tabScroller").css("height", "-webkit-calc(100% - 96px)");
                 $(".slimScrollBar").css('z-index', '99');
             }
             else if (show) {
