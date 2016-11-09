@@ -1869,6 +1869,7 @@ ul.topRightList li a {
     background: #FFFFFF;
     padding: 15px;
 }
+.queryResultStyle {float:left; margin-top:3px;position: relative;top:6px;}
 
 .blockWrapper {
     margin-bottom: 20px;
@@ -1927,7 +1928,7 @@ ul.topRightList li a {
 
 .blockWrapper h1.theHeading {
     margin: 0 0 1.5px 0 !important;
-    padding: 17px 20px 35px 45px;
+    padding: 17px 20px 28px 45px;
     background-color: #FFFFFF;
     border-bottom:1px solid #ccc;
     }
@@ -2014,7 +2015,7 @@ h3.ui-state-active {
 }
 
 h1.icon-queryResult {
-    background-position: 0px -1039px;
+    background-position: 0px -1034px;
     padding-left:30px!important;
 }
 
