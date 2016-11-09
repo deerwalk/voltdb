@@ -592,7 +592,7 @@ $(document).ready(function () {
                       direction: 'vertical',
                       sizes: [30, 70],
                       gutterSize: 15,
-                      minSize: 120
+                      minSize: [120, 150]
                 })
             }
         }
@@ -719,20 +719,30 @@ $(document).ready(function () {
                              '   <option>Monospace</option>' +
                              '</select>' +
                              '</form>' +
-                             '</div>' +
-                             '<h1 class="theHeading icon-queryResult"><span style=" float:left">Query Result</span> <div id="queryResults-'+tab_counter+'" class="queryStatus"></div><div class="clear"></div></h1> ' +
+                             '</div>';
 
-                             '<div id="queryWrapper-'+tab_counter+'" class="queryWrapper">' +
-                             '<div class="queryResult-'+tab_counter+'">' +
-                             '<div id="resultHtml-'+tab_counter+'" style="display: none;" class="resultHtml"></div>' +
-                             '<div id="resultCsv-'+tab_counter+'" style="display: none;" class="resultCsv"></div>' +
-                             '<div id="resultMonospace-'+tab_counter+'" style="display: block;" class="resultMonospace">' +
-                             '<pre>                    </pre>' +
-                             '</div>' +
-                             '</div>' +
+            if(!isMobile){
+            html_query = html_query + '<h1 class="theHeading icon-queryResult"><span style=" float:left">Query Result</span><div id="queryResults-'+tab_counter+'" class="queryStatus"></div><div class="clear"></div></h1>';
+            }
+            else{
+            html_query = html_query + '<h1 class="theHeading icon-queryResult"><span style=" float:left">Query Result</span></h1>';
+            }
 
-                             '</div>' +
-                            '</div>';
+            html_query = html_query + '<div id="queryWrapper-'+tab_counter+'" class="queryWrapper">' +
+                 '<div class="queryResult-'+tab_counter+'">' +
+                 '<div id="resultHtml-'+tab_counter+'" style="display: none;" class="resultHtml"></div>' +
+                 '<div id="resultCsv-'+tab_counter+'" style="display: none;" class="resultCsv"></div>' +
+                 '<div id="resultMonospace-'+tab_counter+'" style="display: block;" class="resultMonospace">' +
+                 '<pre>                    </pre>' +
+                 '</div>' +
+                 '</div>';
+
+
+            if(isMobile){
+            html_query = html_query + '<div id="queryResults-'+tab_counter+'" class="queryStatus"></div><div class="clear"></div>';
+            }
+
+            html_query = html_query + '</div></div>';
 
             $(html).appendTo( ul );
             $('#ulTabList').append($('#liNewQuery'))
@@ -775,17 +785,10 @@ $(document).ready(function () {
                                 direction: 'vertical',
                                 sizes: [30, 70],
                                 gutterSize: 15,
-                                minSize: 120
+                                minSize: [120, 150]
                             })
                         }
                     }
-
-//                    Split(['#queryWrapper-'+ counter, '#divider-' + counter], {
-//                      direction: 'vertical',
-//                      sizes: [30, 70],
-//                      gutterSize: 15,
-//                      minSize: 120
-//                    })
 
             });
 
@@ -1164,8 +1167,8 @@ $(document).ready(function () {
         var toggleSpinner = function (show) {
             if (!show) {
                 $("#sqlQueryOverlay").hide();
-                //$("#tabScroller").css("height", "calc(100% - 96px)");
-                $("#tabScroller").css("height", "-moz-calc(100% - 96px)");
+//                $("#tabScroller").css("height", "calc(100% - 96px)");
+//                $("#tabScroller").css("height", "-moz-calc(100% - 96px)");
                 //$("#tabScroller").css("height", "-webkit-calc(100% - 96px)");
                 $(".slimScrollBar").css('z-index', '99');
             }

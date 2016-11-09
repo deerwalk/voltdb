@@ -326,7 +326,7 @@ $(document).ready(function () {
                           direction: 'vertical',
                           sizes: [30, 70],
                           gutterSize: 15,
-                          minSize: 120
+                          minSize: [120, 150]
                         })
                     }
 //                Split(['#queryWrapper-'+ queryLength, '#divider-' + queryLength], {

@@ -1927,7 +1927,7 @@ ul.topRightList li a {
 
 .blockWrapper h1.theHeading {
     margin: 0 0 1.5px 0 !important;
-    padding: 17px 20px 17px 45px;
+    padding: 17px 20px 35px 45px;
     background-color: #FFFFFF;
     border-bottom:1px solid #ccc;
     }
@@ -3909,6 +3909,7 @@ fieldset { border:1px solid #ccc; padding:20px;}
  @-moz-document url-prefix() {
  split { overflow-y:auto;}
  }
+ .tabScroller{height:88%; margin-bottom:0;}
 
  .content {
    border: 1px solid #C0C0C0;
@@ -3960,6 +3961,7 @@ fieldset { border:1px solid #ccc; padding:20px;}
 }
 .workspace .ui-widget-content {border:none;}
 /*.queryWrapper {border:1px solid #ccc;}*/
+.queryWrapper { height:calc(100% - 85px)}
 
 .verticalWrapper{
 height: 90%;
@@ -4033,6 +4035,7 @@ ul#shutdownMsg li{ font-size:13px; line-height:20px; }
     ul.servers-list li span.servIpNum {margin-left: 10%;}
     /*.serverNameAlign { width: 22%;}*/
 	.headLeft .logo{ margin-right:0;}
+
 
 
 
@@ -4116,6 +4119,7 @@ ul#shutdownMsg li{ font-size:13px; line-height:20px; }
 	.queryHeadName { float:none;}
 	.queryTimeOutLabel { width:86%; margin-right:2px;}
 
+
 }
 @media (max-width: 480px) {
         .split {
@@ -4124,10 +4128,14 @@ ul#shutdownMsg li{ font-size:13px; line-height:20px; }
         box-sizing: content-box;
         overflow-x: hidden;
         overflow-y: auto;}
+        .resultHtml { height:65%;}
+        .queryWrapper {border:1px solid #ccc;margin: 10px 0 0 0; height:calc(60% - 85px)}
+        .blockWrapper h1.theHeading { border:none;}
+        .queryStatus{ background:#f2f2f2;float:none;padding: 10px;border-bottom: 1px solid#ccc;color: #333;margin-top: 18px;}
+
     }
 
 
-}
 
 @media (min-width: 639px) and (max-width:640px) {
     #serverConfigAdmin {
