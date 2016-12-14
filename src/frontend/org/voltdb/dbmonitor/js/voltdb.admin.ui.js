@@ -116,6 +116,15 @@ function loadAdminPage() {
         iconAutoSnapshotOption: $("#autoSnapshotIcon"),
         txtAutoSnapshot: $("#txtAutoSnapshot"),
 
+        //        //Edit Snmp objects
+        bthEditSnmpOk: $("#btnEditSnmpOk"),
+        btnEditSnmpCancel: $("#btnEditSnmpCancel"),
+        LinkSnmpEdit: $("#snmpEdit"),
+        chkSnmp: $("#chkSnmp"),
+        chkSnmpValue: $("#chkSnmp").is(":checked"),
+        iconSnmpOption: $("#snmpIcon"),
+        txtSnmp: $("#txtSnmp"),
+
         //File Prefix objects
         tBoxFilePrefix: $("#txtPrefix"),
         tBoxFilePrefixValue: $("#txtPrefix").text(),
@@ -143,6 +152,10 @@ function loadAdminPage() {
         //snapshot
         editStateSnapshot: editStates.ShowEdit,
         loadingSnapshot: $("#loadingSnapshot"),
+
+                //snmp
+        editStateSnmp : editStates.ShowEdit,
+        loadingSnmp: $("#loadingSnmp"),
 
         //Heartbeat Timeout
         rowHeartbeatTimeout: $("#heartbeatTimeoutRow"),
@@ -1578,6 +1591,15 @@ function loadAdminPage() {
         }
     };
 
+    var toggleSnmpEdit = function(state){
+        adminEditObjects.editStateSnmp = state;
+         if (adminEditObjects.chkSnmpValue) {
+            adminEditObjects.chkSnmp.iCheck('check');
+        } else {
+            adminEditObjects.chkSnmp.iCheck('uncheck');
+        }
+    }
+
     adminEditObjects.btnEditAutoSnapshotCancel.on("click", function () {
         toggleAutoSnapshotEdit(editStates.ShowEdit);
     });
@@ -1744,6 +1766,17 @@ function loadAdminPage() {
         parent.find(".labelCollapsed").addClass("labelExpanded");
         toggleAutoSnapshotEdit(editStates.ShowOkCancel);
     });
+
+     adminEditObjects.LinkAutoSnapshotEdit.click(function () {
+        var parent = $(this).parent().parent();
+        parent.siblings('.child-' + parent.attr("id")).show();
+        parent.find(".labelCollapsed").addClass("labelExpanded");
+        toggleAutoSnapshotEdit(editStates.ShowOkCancel);
+    });
+
+    adminEditObjects.LinkSnmpEdit.click(function(){
+        toggleSnmpEdit(editStates.ShowOkCancel);
+    })
 
     $("#formHeartbeatTimeout").validate({
         rules: {
