@@ -117,13 +117,32 @@ function loadAdminPage() {
         txtAutoSnapshot: $("#txtAutoSnapshot"),
 
         //        //Edit Snmp objects
-        bthEditSnmpOk: $("#btnEditSnmpOk"),
+        btnEditSnmpOk: $("#btnEditSnmpOk"),
         btnEditSnmpCancel: $("#btnEditSnmpCancel"),
         LinkSnmpEdit: $("#snmpEdit"),
         chkSnmp: $("#chkSnmp"),
         chkSnmpValue: $("#chkSnmp").is(":checked"),
         iconSnmpOption: $("#snmpIcon"),
         txtSnmp: $("#txtSnmp"),
+        txtTarget: $("#txtTarget"),
+        txtCommunity: $("#txtCommunity"),
+        txtUsername: $("#txtUsername"),
+        targetSpan: $("#targetSpan"),
+        communitySpan: $("#communitySpan"),
+        usernameSpan:$("#usernameSpan"),
+        authKeySpan: $("#authKeySpan"),
+        privProtocolSpan: $("#privProtocolSpan"),
+        privKeySpan: $("#privKeySpan"),
+        ddlAuthProtocol: $("#ddlAuthProtocol"),
+        ddlPrivProtocol: $("#ddlPrivProtocol"),
+        txtPrivKey: $("#txtPrivKey"),
+        authProtocolSpan: $("#authProtocolSpan"),
+        txtAuthkey: $("#txtAuthkey"),
+        snmpLabel: $("#row-7").find("td:first-child").text(),
+
+
+
+
 
         //File Prefix objects
         tBoxFilePrefix: $("#txtPrefix"),
@@ -156,6 +175,9 @@ function loadAdminPage() {
                 //snmp
         editStateSnmp : editStates.ShowEdit,
         loadingSnmp: $("#loadingSnmp"),
+        loadingTarget: $("#loadingTarget"),
+        loadingCommunity: $("#loadingCommunity"),
+        loadingUsername: $("#loadingUsername"),
 
         //Heartbeat Timeout
         rowHeartbeatTimeout: $("#heartbeatTimeoutRow"),
@@ -339,6 +361,22 @@ function loadAdminPage() {
             max: "Please enter a positive number between 0 and " + INT_MAX_VALUE + ".",
             digits: "Please enter a positive number without any decimal."
         },
+        authKeyRules:{
+            required: true,
+            minlength: 8
+        },
+        authKeyMessages:{
+            required: "This field is required",
+            minlength: "Please enter at least 8 characters."
+        },
+        privKeyRules:{
+            required: true,
+            minlength: 8
+        },
+        privKeyMessages:{
+            required: "This field is required",
+            minlength: "Please enter at least 8 characters.",
+        }
     };
 
     //Admin Page download link
@@ -362,6 +400,10 @@ function loadAdminPage() {
 
     adminEditObjects.chkDrMaster.on('ifChanged', function () {
         adminEditObjects.txtDrMaster.text(getOnOffText(adminEditObjects.chkDrMaster.is(":checked")));
+    });
+
+     adminEditObjects.chkSnmp.on('ifChanged', function () {
+        adminEditObjects.txtSnmp.text(getOnOffText(adminEditObjects.chkSnmp.is(":checked")));
     });
 
     $(".tblshutdown").find(".edit").on("click", function () {
@@ -1500,6 +1542,7 @@ function loadAdminPage() {
 
 
     var toggleAutoSnapshotEdit = function (state) {
+    debugger;
         adminEditObjects.editStateSnapshot = state;
 
         if (adminEditObjects.chkAutoSnapshotValue) {
@@ -1592,11 +1635,113 @@ function loadAdminPage() {
     };
 
     var toggleSnmpEdit = function(state){
+        debugger;
         adminEditObjects.editStateSnmp = state;
-         if (adminEditObjects.chkSnmpValue) {
+        if (adminEditObjects.chkSnmpValue) {
             adminEditObjects.chkSnmp.iCheck('check');
         } else {
             adminEditObjects.chkSnmp.iCheck('uncheck');
+        }
+
+        if (state == editStates.ShowLoading) {
+//            adminEditObjects.chkAutoSnapsot.parent().removeClass("customCheckbox");
+//            adminEditObjects.iconAutoSnapshotOption.hide();
+//            adminDOMObjects.autoSnapshotLabel.hide();
+//            adminEditObjects.LinkAutoSnapshotEdit.hide();
+//            adminEditObjects.btnEditAutoSnapshotOk.hide();
+//            adminEditObjects.btnEditAutoSnapshotCancel.hide();
+//
+//            adminEditObjects.spanAutoSnapshotFreqUnit.hide();
+//            adminEditObjects.spanAutoSnapshotFreq.hide();
+//            adminEditObjects.spanAutoSnapshotRetained.hide();
+//            adminEditObjects.spanAutoSnapshotFilePrefix.hide();
+//
+//            adminEditObjects.tBoxAutoSnapshotFreq.hide();
+//            adminEditObjects.ddlAutoSnapshotFreqUnit.hide();
+//            adminEditObjects.tBoxAutoSnapshotRetained.hide();
+//            adminEditObjects.tBoxFilePrefix.hide();
+//            adminDOMObjects.retainedLabel.hide();
+//
+//            adminEditObjects.errorAutoSnapshotFreq.hide();
+//            adminEditObjects.errorAutoSnapshotFilePrefix.hide();
+//            adminEditObjects.errorAutoSnapshotRetained.hide();
+//
+//            adminEditObjects.loadingSnapshot.show();
+//            adminEditObjects.loadingSnapshotFrequency.show();
+//            adminEditObjects.loadingSnapshotPrefix.show();
+//            adminEditObjects.loadingSnapshotRetained.show();
+
+            adminEditObjects.iconSnmpOption.hide();
+            adminEditObjects.LinkSnmpEdit.hide();
+            adminEditObjects.btnEditSnmpOk.hide();
+            adminEditObjects.btnEditSnmpCancel.hide();
+            adminEditObjects.chkSnmp.parent().removeClass("customCheckbox");
+
+            adminEditObjects.targetSpan.hide();
+            adminEditObjects.communitySpan.hide();
+            adminEditObjects.usernameSpan.hide();
+            adminEditObjects.authKeySpan.hide();
+            adminEditObjects.privProtocolSpan.hide();
+            adminEditObjects.privKeySpan.hide();
+            adminEditObjects.authProtocolSpan.hide();
+            adminEditObjects.txtAuthkey.hide();
+            adminEditObjects.txtPrivKey.hide();
+            adminEditObjects.txtTarget.hide();
+            adminEditObjects.txtCommunity.hide();
+            adminEditObjects.txtUsername.hide();
+            adminEditObjects.ddlAuthProtocol.hide();
+            adminEditObjects.ddlPrivProtocol.hide();
+
+            adminEditObjects.loadingSnmp.show();
+
+
+        } else if (state == editStates.ShowOkCancel) {
+            debugger;
+            adminEditObjects.iconSnmpOption.hide();
+            adminEditObjects.LinkSnmpEdit.hide();
+            adminEditObjects.btnEditSnmpOk.show();
+            adminEditObjects.btnEditSnmpCancel.show();
+            adminEditObjects.chkSnmp.parent().addClass("customCheckbox");
+
+            adminEditObjects.targetSpan.hide();
+            adminEditObjects.communitySpan.hide();
+            adminEditObjects.usernameSpan.hide();
+            adminEditObjects.authKeySpan.hide();
+            adminEditObjects.privProtocolSpan.hide();
+            adminEditObjects.privKeySpan.hide();
+            adminEditObjects.authProtocolSpan.hide();
+            adminEditObjects.txtAuthkey.show();
+            adminEditObjects.txtPrivKey.show();
+            adminEditObjects.txtTarget.show();
+            adminEditObjects.txtCommunity.show();
+            adminEditObjects.txtUsername.show();
+            adminEditObjects.ddlAuthProtocol.show();
+            adminEditObjects.ddlPrivProtocol.show();
+
+            VoltDbAdminConfig.isSnmpEditMode = true;
+
+        } else {
+           adminEditObjects.iconSnmpOption.show();
+            adminEditObjects.LinkSnmpEdit.show();
+            adminEditObjects.btnEditSnmpOk.hide();
+            adminEditObjects.btnEditSnmpCancel.hide();
+            adminEditObjects.chkSnmp.parent().removeClass("customCheckbox");
+
+            adminEditObjects.targetSpan.show();
+            adminEditObjects.communitySpan.show();
+            adminEditObjects.usernameSpan.show();
+            adminEditObjects.authKeySpan.show();
+            adminEditObjects.privProtocolSpan.show();
+            adminEditObjects.privKeySpan.show();
+            adminEditObjects.authProtocolSpan.show();
+            adminEditObjects.txtTarget.hide();
+            adminEditObjects.txtCommunity.hide();
+            adminEditObjects.txtUsername.hide();
+            adminEditObjects.ddlAuthProtocol.hide();
+            adminEditObjects.ddlPrivProtocol.hide();
+            adminEditObjects.txtAuthkey.hide();
+            adminEditObjects.txtPrivKey.hide();
+
         }
     }
 
@@ -1637,6 +1782,44 @@ function loadAdminPage() {
         }
 
     });
+
+
+    adminEditObjects.btnEditSnmpCancel.on("click", function () {
+        toggleSnmpEdit(editStates.ShowEdit);
+    });
+
+    adminEditObjects.btnEditSnmpOk.on("click", function (e) {
+        debugger;
+        if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() != "noauth"){
+             if(!$("#frmAuthkey").valid()){
+                e.preventDefault();
+                e.stopPropagation();
+
+                adminEditObjects.txtAuthkey.focus();
+            }
+        }
+
+        if(adminEditObjects.ddlPrivProtocol.val().toLowerCase() != "nopriv"){
+            if(!$("#frmPrivKey").valid()){
+                e.preventDefault();
+                e.stopPropagation();
+
+                adminEditObjects.txtPrivKey.focus();
+            }
+        }
+    });
+
+    adminEditObjects.ddlAuthProtocol.on("change", function(e){
+        debugger;
+         if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() != "noauth"){
+             if(!$("#frmAuthkey").valid()){
+                e.preventDefault();
+                e.stopPropagation();
+
+                adminEditObjects.txtAuthkey.focus();
+            }
+        }
+    })
 
 
     $("#frmSnapshotFrequency").validate({
@@ -1685,6 +1868,24 @@ function loadAdminPage() {
     });
 
     $("#formAddDiskLimit").validate();
+
+    $("#frmAuthkey").validate({
+        rules:{
+            txtAuthkey : adminValidationRules.authKeyRules
+        },
+        messages:{
+            txtAuthkey : adminValidationRules.authKeyMessages
+        }
+    })
+
+    $("#frmPrivKey").validate({
+        rules:{
+            txtPrivKey : adminValidationRules.privKeyRules
+        },
+        messages:{
+            txtPrivKey : adminValidationRules.privKeyMessages
+        }
+    })
 
     adminEditObjects.btnEditAutoSnapshotOk.popup({
         open: function (event, ui, ele) {
@@ -1760,21 +1961,91 @@ function loadAdminPage() {
         }
     });
 
+    adminEditObjects.btnEditSnmpOk.popup({
+        open: function (event, ui, ele) {
+        },
+        afterOpen: function () {
+            var popup = $(this)[0];
+            $("#btnSaveSnmp").unbind("click");
+            $("#btnSaveSnmp").on("click", function () {
+                var adminConfigurations = VoltDbAdminConfig.getLatestRawAdminConfigurations();
+                if (!adminConfigurations.hasOwnProperty("snmp")) {
+                    adminConfigurations.snmp = {};
+                }
+                //Set the new value to be saved.
+
+                adminConfigurations.snmp.username = adminEditObjects.txtUsername;
+                adminConfigurations.snmp.enabled = true;
+                adminConfigurations.snmp.community = adminEditObjects.txtCommunity;
+                adminConfigurations.snmp.authprotocol = adminEditObjects.ddlAuthProtocol.val();
+                adminConfigurations.snmp.target = adminEditObjects.txtTarget;
+                adminConfigurations.snmp.authkey = adminEditObjects.txtAuthkey;
+                adminConfigurations.snmp.privacyprotocal = adminEditObjects.ddlPrivProtocol.val();
+                adminConfigurations.snmp.privacykey = adminEditObjects.txtPrivKey.val();
+                //Call the loading image only after setting the new value to be saved.
+                toggleSnmpEdit(editStates.ShowLoading);
+                voltDbRenderer.updateAdminConfiguration(adminConfigurations, function (result) {
+                    if (result.status == "1") {
+//                        adminEditObjects.tBoxAutoSnapshotFreqValue = adminEditObjects.tBoxAutoSnapshotFreq.val();
+//                        adminEditObjects.ddlAutoSnapshotFreqUnitValue = adminEditObjects.ddlAutoSnapshotFreqUnit.val();
+//                        adminEditObjects.tBoxAutoSnapshotRetainedValue = adminEditObjects.tBoxAutoSnapshotRetained.val();
+//                        adminEditObjects.tBoxFilePrefixValue = adminEditObjects.tBoxFilePrefix.val();
+//
+//                        adminEditObjects.spanAutoSnapshotFreq.html(adminEditObjects.tBoxAutoSnapshotFreqValue);
+//                        adminEditObjects.spanAutoSnapshotFreqUnit.html(adminEditObjects.ddlAutoSnapshotFreqUnitValue);
+//                        adminEditObjects.spanAutoSnapshotRetained.html(adminEditObjects.tBoxAutoSnapshotRetainedValue);
+//                        adminEditObjects.spanAutoSnapshotFilePrefix.html(adminEditObjects.tBoxFilePrefixValue);
+
+                        //Reload Admin configurations for displaying the updated value
+//                        voltDbRenderer.GetAdminDeploymentInformation(false, function (adminConfigValues, rawConfigValues) {
+//                            VoltDbAdminConfig.displayAdminConfiguration(adminConfigValues, rawConfigValues);
+//                            toggleAutoSnapshotEdit(editStates.ShowEdit);
+//                        });
+                    } else {
+                        toggleSnmpEdit(editStates.ShowEdit);
+                        var msg = '"' + adminEditObjects.snmpLabel + '". ';
+                        if (result.status == "-1" && result.statusstring == "Query timeout.") {
+                            msg += "The Database is either down, very slow to respond or the server refused connection. Please try to edit when the server is back online.";
+                        } else {
+                            msg += "Please try again later.";
+                        }
+
+//                        adminEditObjects.updateSnapshotErrorFieldMsg.text(msg);
+//                        $("#updateErrorSnapshotPopupLink").trigger("click");
+                    }
+                });
+                //Close the popup
+                popup.close();
+            });
+
+            $("#btnPopupSnmpCancel").on("click", function () {
+                toggleSnmpEdit(editStates.ShowEdit);
+                popup.close();
+            });
+
+            $(".popup_back").on("click", function () {
+                toggleSnmpEdit(editStates.ShowEdit);
+            });
+
+            $(".popup_close").on("click", function () {
+                toggleSnmpEdit(editStates.ShowEdit);
+            });
+        }
+    });
+
     adminEditObjects.LinkAutoSnapshotEdit.click(function () {
+        debugger;
         var parent = $(this).parent().parent();
         parent.siblings('.child-' + parent.attr("id")).show();
         parent.find(".labelCollapsed").addClass("labelExpanded");
         toggleAutoSnapshotEdit(editStates.ShowOkCancel);
     });
 
-     adminEditObjects.LinkAutoSnapshotEdit.click(function () {
-        var parent = $(this).parent().parent();
-        parent.siblings('.child-' + parent.attr("id")).show();
-        parent.find(".labelCollapsed").addClass("labelExpanded");
-        toggleAutoSnapshotEdit(editStates.ShowOkCancel);
-    });
 
     adminEditObjects.LinkSnmpEdit.click(function(){
+         var parent = $(this).parent().parent();
+        parent.siblings('.child-' + parent.attr("id")).show();
+        parent.find(".labelCollapsed").addClass("labelExpanded");
         toggleSnmpEdit(editStates.ShowOkCancel);
     })
 
@@ -1864,8 +2135,12 @@ function loadAdminPage() {
                     adminConfigurations.heartbeat = {};
                 }
                 //Set the new value to be saved.
-                adminConfigurations.heartbeat.timeout = adminEditObjects.tBoxHeartbeatTimeout.val();
+//                adminConfigurations.heartbeat.timeout = adminEditObjects.tBoxHeartbeatTimeout.val();
                 //Call the loading image only after setting the new value to be saved.
+//
+                adminConfigurations.snmp = {};
+                adminConfigurations.snmp.target = "test";
+                adminConfigurations.snmp.community = "community-name";
                 toggleHeartbeatTimeoutEdit(editStates.ShowLoading);
                 voltDbRenderer.updateAdminConfiguration(adminConfigurations, function (result) {
 
@@ -4444,6 +4719,7 @@ function loadAdminPage() {
         this.drReplicaEnabled = true;
         this.isDrMasterEditMode = false;
         this.isSnapshotEditMode = false;
+        this.isSnmpEditMode = false;
         this.isMemoryLimitEditMode = false;
         this.newStreamMinmPropertyName = {
             "outdir": "#txtOutdirValue",
