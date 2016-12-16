@@ -144,6 +144,13 @@ function loadAdminPage() {
         errorUserName: $("#errorUsername"),
         errorAuthkey: $("#errorAuthkey"),
         errorPrivKey: $("#errorPrivKey"),
+        targetSpanValue: $("#targetSpan").text(),
+        communitySpanValue: $("#communitySpan").text(),
+        usernameSpanValue: $("#usernameSpan").text(),
+        authKeySpanValue: $("#authKeySoan").text(),
+        privProtocolSpanValue: $("#privProtocolSpan").text(),
+        privKeySpanValue: $("#privKeySpan").text(),
+        authProtocolSpanValue: $("#authProtocolSpan").text(),
 
 
 
@@ -380,6 +387,14 @@ function loadAdminPage() {
         privKeyMessages:{
             required: "This field is required",
             minlength: "Please enter at least 8 characters.",
+        },
+        targetRules:{
+            required: true,
+            portRegex : /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
+        },
+        targetMessages:{
+            required:"This field is required",
+            portRegex : "Please enter a valid value.(e.g, 127.0.0.1:(1-65535))"
         }
     };
 
@@ -1546,7 +1561,6 @@ function loadAdminPage() {
 
 
     var toggleAutoSnapshotEdit = function (state) {
-    debugger;
         adminEditObjects.editStateSnapshot = state;
 
         if (adminEditObjects.chkAutoSnapshotValue) {
@@ -1639,7 +1653,6 @@ function loadAdminPage() {
     };
 
     var toggleSnmpEdit = function(state){
-        debugger;
         adminEditObjects.editStateSnmp = state;
         if (adminEditObjects.chkSnmpValue) {
             adminEditObjects.chkSnmp.iCheck('check');
@@ -1683,7 +1696,6 @@ function loadAdminPage() {
 
 
         } else if (state == editStates.ShowOkCancel) {
-            debugger;
             adminEditObjects.iconSnmpOption.hide();
             adminEditObjects.LinkSnmpEdit.hide();
             adminEditObjects.btnEditSnmpOk.show();
@@ -1785,7 +1797,6 @@ function loadAdminPage() {
     });
 
     adminEditObjects.btnEditSnmpOk.on("click", function (e) {
-        debugger;
         if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() != "noauth"){
              if(!$("#frmAuthkey").valid()){
                 e.preventDefault();
@@ -1813,19 +1824,34 @@ function loadAdminPage() {
             }, 2000);
             }
         }
+
+
+        if(!$("#frmTarget").valid()){
+            e.preventDefault();
+            e.stopPropagation();
+
+            adminEditObjects.txtTarget.focus();
+
+            adminEditObjects.errorTarget.css("background-color", "yellow");
+            setTimeout(function () {
+                adminEditObjects.errorTarget.animate({ backgroundColor: 'white' }, 'slow');
+            }, 2000);
+        }
     });
+
 
     adminEditObjects.ddlAuthProtocol.on("change", function(e){
          if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() == "noauth"){
-             $("#frmAuthkey").validate();
+             $("#txtAuthkey").rules("remove");
         }
     })
 
     adminEditObjects.ddlPrivProtocol.on("change", function(e){
          if(adminEditObjects.ddlPrivProtocol.val().toLowerCase() == "nopriv"){
-             $("#frmPrivkey").validate();
+             $("#txtPrivKey").rules("remove");
         }
     })
+
 
 
     $("#frmSnapshotFrequency").validate({
@@ -1890,6 +1916,15 @@ function loadAdminPage() {
         },
         messages:{
             txtPrivKey : adminValidationRules.privKeyMessages
+        }
+    })
+
+    $("#frmTarget").validate({
+        rules:{
+            txtTarget : adminValidationRules.targetRules
+        },
+        messages:{
+            txtTarget : adminValidationRules.targetMessages
         }
     })
 
@@ -1975,16 +2010,16 @@ function loadAdminPage() {
             $("#btnSaveSnmp").unbind("click");
             $("#btnSaveSnmp").on("click", function () {
                 var adminConfigurations = VoltDbAdminConfig.getLatestRawAdminConfigurations();
-                if (!adminConfigurations.hasOwnProperty("snmp")) {
-                    adminConfigurations.snmp = {};
-                }
+
+                adminConfigurations.snmp = {};
+
                 //Set the new value to be saved.
 
                 adminConfigurations.snmp.username = adminEditObjects.txtUsername;
                 adminConfigurations.snmp.enabled = true;
                 adminConfigurations.snmp.community = adminEditObjects.txtCommunity;
                 adminConfigurations.snmp.authprotocol = adminEditObjects.ddlAuthProtocol.val();
-                adminConfigurations.snmp.target = adminEditObjects.txtTarget;
+                adminConfigurations.snmp.target = adminEditObjects.txtTarget.val();
                 adminConfigurations.snmp.authkey = adminEditObjects.txtAuthkey;
                 adminConfigurations.snmp.privacyprotocal = adminEditObjects.ddlPrivProtocol.val();
                 adminConfigurations.snmp.privacykey = adminEditObjects.txtPrivKey.val();
@@ -1992,21 +2027,19 @@ function loadAdminPage() {
                 toggleSnmpEdit(editStates.ShowLoading);
                 voltDbRenderer.updateAdminConfiguration(adminConfigurations, function (result) {
                     if (result.status == "1") {
-//                        adminEditObjects.tBoxAutoSnapshotFreqValue = adminEditObjects.tBoxAutoSnapshotFreq.val();
-//                        adminEditObjects.ddlAutoSnapshotFreqUnitValue = adminEditObjects.ddlAutoSnapshotFreqUnit.val();
-//                        adminEditObjects.tBoxAutoSnapshotRetainedValue = adminEditObjects.tBoxAutoSnapshotRetained.val();
-//                        adminEditObjects.tBoxFilePrefixValue = adminEditObjects.tBoxFilePrefix.val();
-//
-//                        adminEditObjects.spanAutoSnapshotFreq.html(adminEditObjects.tBoxAutoSnapshotFreqValue);
-//                        adminEditObjects.spanAutoSnapshotFreqUnit.html(adminEditObjects.ddlAutoSnapshotFreqUnitValue);
-//                        adminEditObjects.spanAutoSnapshotRetained.html(adminEditObjects.tBoxAutoSnapshotRetainedValue);
-//                        adminEditObjects.spanAutoSnapshotFilePrefix.html(adminEditObjects.tBoxFilePrefixValue);
+                          adminEditObjects.targetSpan.html(adminEditObjects.targetSpanValue)
+                          adminEditObjects.usernameSpan.html(adminEditObjects.usernameSpanValue);
+                          adminEditObjects.communitySpan.html(adminEditObjects.communitySpanValue);
+                          adminEditObjects.authProtocolSpan.html(adminEditObjects.authProtocolSpanValue);
+                          adminEditObjects.privProtocolSpan.html(adminEditObjects.privProtocolSpanValue);
+                          adminEditObjects.authKeySpan.html(adminEditObjects.authKeySpanValue);
+                          adminEditObjects.privKeySpan.html(adminEditObjects.privKeySpanValue)
 
                         //Reload Admin configurations for displaying the updated value
-//                        voltDbRenderer.GetAdminDeploymentInformation(false, function (adminConfigValues, rawConfigValues) {
-//                            VoltDbAdminConfig.displayAdminConfiguration(adminConfigValues, rawConfigValues);
-//                            toggleAutoSnapshotEdit(editStates.ShowEdit);
-//                        });
+                        voltDbRenderer.GetAdminDeploymentInformation(false, function (adminConfigValues, rawConfigValues) {
+                            VoltDbAdminConfig.displayAdminConfiguration(adminConfigValues, rawConfigValues);
+                            toggleSnmpEdit(editStates.ShowEdit);
+                        });
                     } else {
                         toggleSnmpEdit(editStates.ShowEdit);
                         var msg = '"' + adminEditObjects.snmpLabel + '". ';
@@ -2040,7 +2073,6 @@ function loadAdminPage() {
     });
 
     adminEditObjects.LinkAutoSnapshotEdit.click(function () {
-        debugger;
         var parent = $(this).parent().parent();
         parent.siblings('.child-' + parent.attr("id")).show();
         parent.find(".labelCollapsed").addClass("labelExpanded");
@@ -4695,6 +4727,30 @@ function loadAdminPage() {
         "Username already exists."
     );
 
+     $.validator.addMethod(
+        "portRegex",
+        function(value, element, regexp){
+            var result = true
+            var values = value.split(':');
+            var re = new RegExp(regexp);
+           if(values.length == 2){
+                if(!$.isNumeric(values[1]) || !(values[1] > 1 && values[1] < 65536))
+                    result = false;
+                else{
+                    if(values[1].split('.').length > 1)
+                        result = false;
+                }
+                if(!re.test(values[0]))
+                    result = false;
+            } else {
+                result = false;
+            }
+
+            return this.optional(element) || result;
+        },
+        "Please enter only valid character."
+    );
+
     showHideIntSnapshotMsg = function(isProVersion){
         if(!VoltDbAdminConfig.isCommandLogEnabled && isProVersion){
             $('#continueShutdownMsg').show()
@@ -4772,7 +4828,6 @@ function loadAdminPage() {
         };
 
         this.displayAdminConfiguration = function (adminConfigValues, rawConfigValues) {
-
             if (!VoltDbAdminConfig.firstResponseReceived)
                 VoltDbAdminConfig.firstResponseReceived = true;
 
@@ -4905,6 +4960,17 @@ function loadAdminPage() {
                     getDrReplicaStatus(false);
                 }
             }
+
+            //snmp setting
+
+//            adminEditObjects.targetSpanValue = adminConfigValues.snmp.target;
+//            adminEditObjects.usernameSpanValue = adminConfigValues.snmp.username;
+//            adminEditObjects.communitySpanValue = adminConfigValues.snmp.community;
+//            adminEditObjects.authProtocolSpanValue = adminConfigValues.snmp.authprotocol;
+//            adminEditObjects.privProtocolSpanValue = adminConfigValues.snmp.privprotocol;
+//            adminEditObjects.authKeySpanValue = adminConfigValues.snmp.authkey;
+//            adminEditObjects.privKeySpanValue = adminConfigValues.snmp.privkey;
+
         };
 
         var getDrReplicaStatus = function (result) {
