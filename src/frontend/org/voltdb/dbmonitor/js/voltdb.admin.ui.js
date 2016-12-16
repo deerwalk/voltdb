@@ -139,7 +139,11 @@ function loadAdminPage() {
         authProtocolSpan: $("#authProtocolSpan"),
         txtAuthkey: $("#txtAuthkey"),
         snmpLabel: $("#row-7").find("td:first-child").text(),
-
+        errorTarget: $("#errorTarget"),
+        errorCommunity: $("#errorCommunity"),
+        errorUserName: $("#errorUsername"),
+        errorAuthkey: $("#errorAuthkey"),
+        errorPrivKey: $("#errorPrivKey"),
 
 
 
@@ -1644,38 +1648,19 @@ function loadAdminPage() {
         }
 
         if (state == editStates.ShowLoading) {
-//            adminEditObjects.chkAutoSnapsot.parent().removeClass("customCheckbox");
-//            adminEditObjects.iconAutoSnapshotOption.hide();
-//            adminDOMObjects.autoSnapshotLabel.hide();
-//            adminEditObjects.LinkAutoSnapshotEdit.hide();
-//            adminEditObjects.btnEditAutoSnapshotOk.hide();
-//            adminEditObjects.btnEditAutoSnapshotCancel.hide();
-//
-//            adminEditObjects.spanAutoSnapshotFreqUnit.hide();
-//            adminEditObjects.spanAutoSnapshotFreq.hide();
-//            adminEditObjects.spanAutoSnapshotRetained.hide();
-//            adminEditObjects.spanAutoSnapshotFilePrefix.hide();
-//
-//            adminEditObjects.tBoxAutoSnapshotFreq.hide();
-//            adminEditObjects.ddlAutoSnapshotFreqUnit.hide();
-//            adminEditObjects.tBoxAutoSnapshotRetained.hide();
-//            adminEditObjects.tBoxFilePrefix.hide();
-//            adminDOMObjects.retainedLabel.hide();
-//
-//            adminEditObjects.errorAutoSnapshotFreq.hide();
-//            adminEditObjects.errorAutoSnapshotFilePrefix.hide();
-//            adminEditObjects.errorAutoSnapshotRetained.hide();
-//
-//            adminEditObjects.loadingSnapshot.show();
-//            adminEditObjects.loadingSnapshotFrequency.show();
-//            adminEditObjects.loadingSnapshotPrefix.show();
-//            adminEditObjects.loadingSnapshotRetained.show();
 
             adminEditObjects.iconSnmpOption.hide();
             adminEditObjects.LinkSnmpEdit.hide();
             adminEditObjects.btnEditSnmpOk.hide();
             adminEditObjects.btnEditSnmpCancel.hide();
             adminEditObjects.chkSnmp.parent().removeClass("customCheckbox");
+
+            adminEditObjects.errorTarget.hide();
+            adminEditObjects.errorUserName.hide();
+            adminEditObjects.errorCommunity.hide();
+            adminEditObjects.errorAuthkey.hide();
+            adminEditObjects.errorPrivKey.hide();
+
 
             adminEditObjects.targetSpan.hide();
             adminEditObjects.communitySpan.hide();
@@ -1693,6 +1678,8 @@ function loadAdminPage() {
             adminEditObjects.ddlPrivProtocol.hide();
 
             adminEditObjects.loadingSnmp.show();
+
+
 
 
         } else if (state == editStates.ShowOkCancel) {
@@ -1720,12 +1707,21 @@ function loadAdminPage() {
 
             VoltDbAdminConfig.isSnmpEditMode = true;
 
+
+
         } else {
            adminEditObjects.iconSnmpOption.show();
             adminEditObjects.LinkSnmpEdit.show();
             adminEditObjects.btnEditSnmpOk.hide();
             adminEditObjects.btnEditSnmpCancel.hide();
             adminEditObjects.chkSnmp.parent().removeClass("customCheckbox");
+
+            adminEditObjects.errorTarget.hide();
+            adminEditObjects.errorUserName.hide();
+            adminEditObjects.errorCommunity.hide();
+            adminEditObjects.errorAuthkey.hide();
+            adminEditObjects.errorPrivKey.hide();
+
 
             adminEditObjects.targetSpan.show();
             adminEditObjects.communitySpan.show();
@@ -1796,6 +1792,11 @@ function loadAdminPage() {
                 e.stopPropagation();
 
                 adminEditObjects.txtAuthkey.focus();
+
+                adminEditObjects.errorAuthkey.css("background-color", "yellow");
+            setTimeout(function () {
+                adminEditObjects.errorAuthkey.animate({ backgroundColor: 'white' }, 'slow');
+            }, 2000);
             }
         }
 
@@ -1805,19 +1806,24 @@ function loadAdminPage() {
                 e.stopPropagation();
 
                 adminEditObjects.txtPrivKey.focus();
+
+               adminEditObjects.errorPrivKey.css("background-color", "yellow");
+            setTimeout(function () {
+                adminEditObjects.errorPrivKey.animate({ backgroundColor: 'white' }, 'slow');
+            }, 2000);
             }
         }
     });
 
     adminEditObjects.ddlAuthProtocol.on("change", function(e){
-        debugger;
-         if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() != "noauth"){
-             if(!$("#frmAuthkey").valid()){
-                e.preventDefault();
-                e.stopPropagation();
+         if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() == "noauth"){
+             $("#frmAuthkey").validate();
+        }
+    })
 
-                adminEditObjects.txtAuthkey.focus();
-            }
+    adminEditObjects.ddlPrivProtocol.on("change", function(e){
+         if(adminEditObjects.ddlPrivProtocol.val().toLowerCase() == "nopriv"){
+             $("#frmPrivkey").validate();
         }
     })
 
