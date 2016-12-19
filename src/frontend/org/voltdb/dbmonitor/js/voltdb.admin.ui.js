@@ -243,6 +243,7 @@ function loadAdminPage() {
         //Update Error
         updateErrorFieldMsg: $("#updateErrorFieldMsg"),
         updateSnapshotErrorFieldMsg: $("#updateSnapshotErrorFieldMsg"),
+        updateSnmpErrorFieldMsg: $("#updateSnapshotErrorFieldMsg"),
         heartbeatTimeoutLabel: $("#heartbeatTimeoutRow").find("td:first-child").text(),
         queryTimeoutUpdateErrorFieldMsg: $("#queryTimeoutUpdateErrorFieldMsg"),
         snapshotLabel: $("#row-2").find("td:first-child").text(),
@@ -1713,7 +1714,7 @@ function loadAdminPage() {
             adminEditObjects.ddlPrivProtocol.hide();
 
 
-            $("#loadingSnmp").show();
+
             adminEditObjects.loadingSnmp.show();
             adminEditObjects.loadingTarget.show();
             adminEditObjects.loadingCommunity.show();
@@ -1772,7 +1773,7 @@ function loadAdminPage() {
             adminEditObjects.errorAuthkey.hide();
             adminEditObjects.errorPrivKey.hide();
 
-
+            adminEditObjects.txtSnmp.show();
             adminEditObjects.targetSpan.show();
             adminEditObjects.communitySpan.show();
             adminEditObjects.usernameSpan.show();
@@ -2106,8 +2107,8 @@ function loadAdminPage() {
                             msg += "Please try again later.";
                         }
 
-//                        adminEditObjects.updateSnapshotErrorFieldMsg.text(msg);
-//                        $("#updateErrorSnapshotPopupLink").trigger("click");
+                        adminEditObjects.updateSnmpErrorFieldMsg.text(msg);
+                        $("#updateErrorSnmpPopupLink").trigger("click");
                     }
                 });
                 //Close the popup

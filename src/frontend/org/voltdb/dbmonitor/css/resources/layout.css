@@ -4023,6 +4023,7 @@ ul#shutdownMsg li{ font-size:13px; line-height:20px; }
 
 /******************SNMP******************************/
 .snmpForm > form input[type="text"],.snmpFormSelect > form > select { width:156px;}
+.loadingSNMP { position:static;}
 
 
 
