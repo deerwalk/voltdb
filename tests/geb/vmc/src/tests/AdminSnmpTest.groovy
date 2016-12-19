@@ -38,7 +38,7 @@ import geb.Page.*
 
 class AdminSnmpTest extends TestBase {
     def setup() { // called before each test
-        count = 0
+        int count = 0
 
         while(count<numberOfTrials) {
             count ++
