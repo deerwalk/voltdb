@@ -125,8 +125,11 @@ function loadAdminPage() {
         iconSnmpOption: $("#snmpIcon"),
         txtSnmp: $("#txtSnmp"),
         txtTarget: $("#txtTarget"),
+        txtTargetValue: $("#txtTarget").text(),
         txtCommunity: $("#txtCommunity"),
+        txtCommunityValue : $("#txtCommunity").text(),
         txtUsername: $("#txtUsername"),
+        txtUsernameValue : $("#txtUsername").text(),
         targetSpan: $("#targetSpan"),
         communitySpan: $("#communitySpan"),
         usernameSpan:$("#usernameSpan"),
@@ -134,10 +137,14 @@ function loadAdminPage() {
         privProtocolSpan: $("#privProtocolSpan"),
         privKeySpan: $("#privKeySpan"),
         ddlAuthProtocol: $("#ddlAuthProtocol"),
+        ddlAuthProtocolValue: $("#authProtocolSpan").value,
         ddlPrivProtocol: $("#ddlPrivProtocol"),
+        ddlPrivProtocolValue: $("#privProtocolSpan").value,
         txtPrivKey: $("#txtPrivKey"),
+        txtPrivkeyValue: $("#txtPrivKey").text(),
         authProtocolSpan: $("#authProtocolSpan"),
         txtAuthkey: $("#txtAuthkey"),
+        txtAuthkeyValue: $("#txtAuthkey").text(),
         snmpLabel: $("#row-7").find("td:first-child").text(),
         errorTarget: $("#errorTarget"),
         errorCommunity: $("#errorCommunity"),
@@ -189,6 +196,10 @@ function loadAdminPage() {
         loadingTarget: $("#loadingTarget"),
         loadingCommunity: $("#loadingCommunity"),
         loadingUsername: $("#loadingUsername"),
+        loadingAuthProtocol: $("#loadingAuthProtocol"),
+        loadingAuthkey : $("#loadingAuthkey"),
+        loadingPrivProtocol: $("#loadingPrivProtocol"),
+        loadingPrivKey: $("#loadingPrivKey"),
 
         //Heartbeat Timeout
         rowHeartbeatTimeout: $("#heartbeatTimeoutRow"),
@@ -1660,6 +1671,17 @@ function loadAdminPage() {
             adminEditObjects.chkSnmp.iCheck('uncheck');
         }
 
+
+        adminEditObjects.txtTarget.val(adminEditObjects.txtTargetValue);
+        adminEditObjects.txtCommunity.val(adminEditObjects.txtCommunityValue);
+        adminEditObjects.txtUsername.val(adminEditObjects.txtUsernameValue);
+        adminEditObjects.ddlAuthProtocol.val(adminEditObjects.ddlAuthProtocolValue);
+        adminEditObjects.ddlPrivProtocol.val(adminEditObjects.ddlPrivProtocolValue);
+        adminEditObjects.txtAuthkey.val(adminEditObjects.txtAuthkeyValue);
+        adminEditObjects.txtPrivKey.val(adminEditObjects.txtPrivkeyValue);
+
+
+
         if (state == editStates.ShowLoading) {
 
             adminEditObjects.iconSnmpOption.hide();
@@ -1667,7 +1689,7 @@ function loadAdminPage() {
             adminEditObjects.btnEditSnmpOk.hide();
             adminEditObjects.btnEditSnmpCancel.hide();
             adminEditObjects.chkSnmp.parent().removeClass("customCheckbox");
-
+            adminEditObjects.txtSnmp.hide();
             adminEditObjects.errorTarget.hide();
             adminEditObjects.errorUserName.hide();
             adminEditObjects.errorCommunity.hide();
@@ -1690,12 +1712,21 @@ function loadAdminPage() {
             adminEditObjects.ddlAuthProtocol.hide();
             adminEditObjects.ddlPrivProtocol.hide();
 
-            adminEditObjects.loadingSnmp.show();
 
+            $("#loadingSnmp").show();
+            adminEditObjects.loadingSnmp.show();
+            adminEditObjects.loadingTarget.show();
+            adminEditObjects.loadingCommunity.show();
+            adminEditObjects.loadingUsername.show();
+            adminEditObjects.loadingAuthProtocol.show();
+            adminEditObjects.loadingPrivProtocol.show();
+            adminEditObjects.loadingAuthkey.show();
+            adminEditObjects.loadingPrivKey.show()
 
 
 
         } else if (state == editStates.ShowOkCancel) {
+
             adminEditObjects.iconSnmpOption.hide();
             adminEditObjects.LinkSnmpEdit.hide();
             adminEditObjects.btnEditSnmpOk.show();
@@ -1717,9 +1748,16 @@ function loadAdminPage() {
             adminEditObjects.ddlAuthProtocol.show();
             adminEditObjects.ddlPrivProtocol.show();
 
+            adminEditObjects.loadingSnmp.hide();
+            adminEditObjects.loadingTarget.hide();
+            adminEditObjects.loadingCommunity.hide();
+            adminEditObjects.loadingUsername.hide();
+            adminEditObjects.loadingAuthProtocol.hide();
+            adminEditObjects.loadingPrivProtocol.hide();
+            adminEditObjects.loadingAuthkey.hide();
+            adminEditObjects.loadingPrivKey.hide();
+
             VoltDbAdminConfig.isSnmpEditMode = true;
-
-
 
         } else {
            adminEditObjects.iconSnmpOption.show();
@@ -1749,6 +1787,15 @@ function loadAdminPage() {
             adminEditObjects.ddlPrivProtocol.hide();
             adminEditObjects.txtAuthkey.hide();
             adminEditObjects.txtPrivKey.hide();
+
+            adminEditObjects.loadingSnmp.hide();
+            adminEditObjects.loadingTarget.hide();
+            adminEditObjects.loadingCommunity.hide();
+            adminEditObjects.loadingUsername.hide();
+            adminEditObjects.loadingAuthProtocol.hide();
+            adminEditObjects.loadingPrivProtocol.hide();
+            adminEditObjects.loadingAuthkey.hide();
+            adminEditObjects.loadingPrivKey.hide();
 
         }
     }
@@ -2015,18 +2062,28 @@ function loadAdminPage() {
 
                 //Set the new value to be saved.
 
-                adminConfigurations.snmp.username = adminEditObjects.txtUsername;
-                adminConfigurations.snmp.enabled = true;
-                adminConfigurations.snmp.community = adminEditObjects.txtCommunity;
+                adminConfigurations.snmp.username = adminEditObjects.txtUsername.val();
+                adminConfigurations.snmp.enabled = adminEditObjects.chkSnmp.is(':checked');
+                adminConfigurations.snmp.community = adminEditObjects.txtCommunity.val();
                 adminConfigurations.snmp.authprotocol = adminEditObjects.ddlAuthProtocol.val();
                 adminConfigurations.snmp.target = adminEditObjects.txtTarget.val();
-                adminConfigurations.snmp.authkey = adminEditObjects.txtAuthkey;
-                adminConfigurations.snmp.privacyprotocal = adminEditObjects.ddlPrivProtocol.val();
+                adminConfigurations.snmp.authkey = adminEditObjects.txtAuthkey.val();
+                adminConfigurations.snmp.privacyprotocol = adminEditObjects.ddlPrivProtocol.val();
                 adminConfigurations.snmp.privacykey = adminEditObjects.txtPrivKey.val();
                 //Call the loading image only after setting the new value to be saved.
+
                 toggleSnmpEdit(editStates.ShowLoading);
                 voltDbRenderer.updateAdminConfiguration(adminConfigurations, function (result) {
                     if (result.status == "1") {
+
+                          adminEditObjects.txtTargetValue = adminEditObjects.txtTarget.val();
+                          adminEditObjects.txtCommunityValue = adminEditObjects.txtCommunity.val();
+                          adminEditObjects.txtUsernameValue = adminEditObjects.txtUsername.val();
+                          adminEditObjects.ddlPrivProtocolValue = adminEditObjects.ddlPrivProtocol.val();
+                          adminEditObjects.ddlAuthProtocolValue = adminEditObjects.ddlAuthProtocol.val();
+                          adminEditObjects.txtAuthkeyValue = adminEditObjects.txtAuthkey.val();
+                          adminEditObjects.txtPrivkeyValue = adminEditObjects.txtPrivKey.val();
+
                           adminEditObjects.targetSpan.html(adminEditObjects.targetSpanValue)
                           adminEditObjects.usernameSpan.html(adminEditObjects.usernameSpanValue);
                           adminEditObjects.communitySpan.html(adminEditObjects.communitySpanValue);
@@ -4830,7 +4887,6 @@ function loadAdminPage() {
         this.displayAdminConfiguration = function (adminConfigValues, rawConfigValues) {
             if (!VoltDbAdminConfig.firstResponseReceived)
                 VoltDbAdminConfig.firstResponseReceived = true;
-
             if (adminConfigValues != undefined && VoltDbAdminConfig.isAdmin) {
                 configureAdminValues(adminConfigValues);
                 configureDirectoryValues(adminConfigValues);
@@ -4961,15 +5017,60 @@ function loadAdminPage() {
                 }
             }
 
+
+
             //snmp setting
 
-//            adminEditObjects.targetSpanValue = adminConfigValues.snmp.target;
-//            adminEditObjects.usernameSpanValue = adminConfigValues.snmp.username;
-//            adminEditObjects.communitySpanValue = adminConfigValues.snmp.community;
-//            adminEditObjects.authProtocolSpanValue = adminConfigValues.snmp.authprotocol;
-//            adminEditObjects.privProtocolSpanValue = adminConfigValues.snmp.privprotocol;
-//            adminEditObjects.authKeySpanValue = adminConfigValues.snmp.authkey;
-//            adminEditObjects.privKeySpanValue = adminConfigValues.snmp.privkey;
+            adminEditObjects.chkSnmpValue = adminConfigValues.enabled;
+            if (!VoltDbAdminConfig.isSnmpEditMode)
+                adminEditObjects.txtSnmp.text(adminConfigValues.enabled == true ? 'On' : 'Off');
+
+            if(adminConfigValues.enabled != null){
+                adminEditObjects.iconSnmpOption.removeClass().addClass(getOnOffClass(adminConfigValues.enabled));
+            }
+
+            if(adminConfigValues.target!= null){
+                adminEditObjects.targetSpan.text(adminConfigValues.target);
+                adminEditObjects.txtTargetValue = adminConfigValues.target;
+            }
+
+            if(adminConfigValues.community != null){
+                adminEditObjects.communitySpan.text(adminConfigValues.community);
+                adminEditObjects.txtCommunityValue = adminConfigValues.community;
+            }
+
+            if(adminConfigValues.username != null){
+                adminEditObjects.usernameSpan.text(adminConfigValues.username);
+                adminEditObjects.txtUsernameValue = adminConfigValues.username;
+            }
+
+            if(adminConfigValues.authprotocol != null){
+                adminEditObjects.authProtocolSpan.text(adminConfigValues.authprotocol)
+                adminEditObjects.ddlAuthProtocolValue = adminConfigValues.authprotocol;
+            }
+            else{
+                adminEditObjects.ddlAuthProtocolValue = "SHA";
+            }
+
+             if(adminConfigValues.privacyprotocol != null){
+                adminEditObjects.privProtocolSpan.text(adminConfigValues.privacyprotocol)
+                adminEditObjects.ddlPrivProtocolValue = adminConfigValues.privacyprotocol;
+            }
+            else{
+                adminEditObjects.ddlPrivProtocolValue = "AES";
+            }
+
+            if(adminConfigValues.authkey != null){
+                adminEditObjects.authKeySpan.text(adminConfigValues.authkey);
+                adminEditObjects.txtAuthkeyValue = adminConfigValues.authkey;
+            }
+
+            if(adminConfigValues.privacykey != null){
+                adminEditObjects.privKeySpan.text(adminConfigValues.privacykey);
+                adminEditObjects.txtPrivkeyValue = adminConfigValues.privacykey;
+            }
+
+
 
         };
 
