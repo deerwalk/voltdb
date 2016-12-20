@@ -435,6 +435,39 @@ function loadAdminPage() {
 
      adminEditObjects.chkSnmp.on('ifChanged', function () {
         adminEditObjects.txtSnmp.text(getOnOffText(adminEditObjects.chkSnmp.is(":checked")));
+        if(adminEditObjects.txtSnmp.text() == "Off"){
+            $("#txtAuthkey").rules("remove");
+            $("#txtPrivKey").rules("remove");
+            $("#txtTarget").rules("remove");
+        }
+        else{
+            $("#txtPrivKey").rules("add",{
+                required: true,
+                minlength: 8,
+                messages:{
+                    required: "This field is required",
+                    minlength: "Please enter at least 8 characters.",
+                }
+            })
+
+             $("#txtAuthkey").rules("add",{
+                required: true,
+                minlength: 8,
+                messages:{
+                    required: "This field is required",
+                    minlength: "Please enter at least 8 characters.",
+                }
+            })
+
+            $("#txtTarget").rules("add",{
+                required: true,
+                portRegex : /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/,
+                messages:{
+                    required:"This field is required",
+                    portRegex : "Please enter a valid value.(e.g, 127.0.0.1:(1-65535))"
+                }
+            })
+        }
     });
 
     $(".tblshutdown").find(".edit").on("click", function () {
@@ -1758,6 +1791,20 @@ function loadAdminPage() {
             adminEditObjects.loadingAuthkey.hide();
             adminEditObjects.loadingPrivKey.hide();
 
+            if(adminEditObjects.txtCommunity.val() == "" || adminEditObjects.txtCommunity.val() == null){
+                adminEditObjects.txtCommunity.val("public");
+            }
+
+            if(adminEditObjects.txtAuthkey.val() == "" || adminEditObjects.txtAuthkey.val() == null)
+            {
+                adminEditObjects.txtAuthkey.val("voltdbauthkey")
+            }
+
+            if(adminEditObjects.txtPrivKey.val() == "" || adminEditObjects.txtPrivKey.val() == null)
+            {
+                adminEditObjects.txtPrivKey.val("voltdbprivacykey")
+            }
+
             VoltDbAdminConfig.isSnmpEditMode = true;
 
         } else {
@@ -1845,32 +1892,41 @@ function loadAdminPage() {
     });
 
     adminEditObjects.btnEditSnmpOk.on("click", function (e) {
-        if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() != "noauth"){
-             if(!$("#frmAuthkey").valid()){
-                e.preventDefault();
-                e.stopPropagation();
+        if(adminEditObjects.txtSnmp.text() == "On"){
+            if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() != "noauth"){
+                 if(!$("#frmAuthkey").valid()){
+                    e.preventDefault();
+                    e.stopPropagation();
 
-                adminEditObjects.txtAuthkey.focus();
+                    adminEditObjects.txtAuthkey.focus();
 
-                adminEditObjects.errorAuthkey.css("background-color", "yellow");
-            setTimeout(function () {
-                adminEditObjects.errorAuthkey.animate({ backgroundColor: 'white' }, 'slow');
-            }, 2000);
+                    adminEditObjects.errorAuthkey.css("background-color", "yellow");
+                setTimeout(function () {
+                    adminEditObjects.errorAuthkey.animate({ backgroundColor: 'white' }, 'slow');
+                }, 2000);
+                }
+            }
+
+            if(adminEditObjects.ddlPrivProtocol.val().toLowerCase() != "nopriv"){
+                if(!$("#frmPrivKey").valid()){
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    adminEditObjects.txtPrivKey.focus();
+
+                   adminEditObjects.errorPrivKey.css("background-color", "yellow");
+                setTimeout(function () {
+                    adminEditObjects.errorPrivKey.animate({ backgroundColor: 'white' }, 'slow');
+                }, 2000);
+                }
             }
         }
+        else{
 
-        if(adminEditObjects.ddlPrivProtocol.val().toLowerCase() != "nopriv"){
-            if(!$("#frmPrivKey").valid()){
-                e.preventDefault();
-                e.stopPropagation();
+            $("#txtAuthkey").rules("remove");
+            $("#txtPrivKey").rules("remove");
+            $("#txtTarget").rules("remove");
 
-                adminEditObjects.txtPrivKey.focus();
-
-               adminEditObjects.errorPrivKey.css("background-color", "yellow");
-            setTimeout(function () {
-                adminEditObjects.errorPrivKey.animate({ backgroundColor: 'white' }, 'slow');
-            }, 2000);
-            }
         }
 
 
