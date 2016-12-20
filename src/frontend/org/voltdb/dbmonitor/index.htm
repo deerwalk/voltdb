@@ -492,7 +492,7 @@
                                 </tr>
                                 <!--<tr class="security" id="securityRow">
                                     <td class="configLabel">Security</td>-->
-                                <tr class="hasSubLabel parent security" id="row-6">
+                                <tr class="hasSubLabel parent security" id="row-8">
                                     <td class="configLabel"><a href="javascript:void(0)" class="labelCollapsed">Security</a></td>
                                     <td align="right" class="securitytd">
                                         <div id="securityOptionIcon" class="offIcon"></div>
@@ -506,7 +506,7 @@
                                         <a href="#securityPop" id="securityEdit" class="edit" title="Edit">&nbsp;</a>
                                     </td>
                                 </tr>
-                                <tr class="child-row-6 subLabelRow">
+                                <tr class="child-row-8 subLabelRow">
                                     <td colspan="4">
                                         <div id="loadingUserList" class="userSecurity" style="display: none;">
                                             <div class="loading-small loadingSecurity"></div>
@@ -675,89 +675,6 @@
                                     </td>
                                 </tr>
                                 <tbody id="importConfiguration" data-status="value" style="display: none;"></tbody>
-                                <tr class="hasSubLabel parent" id="row-6">
-                                    <td class="configLabel"><a href="javascript:void(0)" class="labelCollapsed">Advanced</a></td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                </tr>
-                                <tr class="child-row-6 subLabelRow">
-                                    <td class="configLabel">Max Java Heap </td>
-                                    <td align="right">
-                                        <span id="maxJavaHeap"></span>
-                                        <span id="maxJavaHeapUnit"></span>
-                                    </td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                </tr>
-                                <tr class="child-row-6 subLabelRow" id="heartbeatTimeoutRow">
-                                    <td class="configLabel">Heartbeat Timeout </td>
-                                    <td align="right" class="heartbeattd">
-                                        <form id="formHeartbeatTimeout" method="get" action="">
-                                            <div id="loadingHeartbeatTimeout" class="loading-small" style="display: none;"></div>
-                                            <span id="hrtTimeOutSpan"></span>
-                                            <input id="txtHrtTimeOut" name="txtHrtTimeOut" class="exitableTxtBx" type="text" style="display: none" />
-                                            <span id="hrtTimeOutUnitSpan"></span>
-                                            <label id="errorHeartbeatTimeout" for="txtHrtTimeOut" class="error" style="display: none;"></label>
-                                        </form>
-                                    </td>
-                                    <td>&nbsp;</td>
-                                    <td><a id="btnEditHeartbeatTimeoutOk" href="#HrtTimeOutPopup" class="editOk" title="Save" style="">Ok</a> <a id="btnEditHeartbeatTimeoutCancel" href="javascript:void(0)" class="editCancel" title="Cancel" style="">Cancel</a> <a id="btnEditHrtTimeOut" href="javascript:void(0)" class="edit" title="Edit">&nbsp;</a></td>
-                                </tr>
-                                <tr class="child-row-6 subLabelRow" id="queryTimoutRow">
-                                    <td class="configLabel">Query Timeout</td>
-                                    <td align="right" class="queryTimeOut">
-                                        <form id="formQueryTimeout" method="get" action="">
-                                            <div id="loadingQueryTimeout" class="loading-small" style="display: none;"></div>
-                                            <span id="queryTimeOutSpan"></span>
-                                            <input id="txtQueryTimeout" name="txtQueryTimeout" class="exitableTxtBx" type="text" style="display: none" />
-                                            <span id="queryTimeOutUnitSpan"></span>
-                                            <label id="errorQueryTimeout" for="txtQueryTimeout" class="error" style="display: none;"></label>
-                                        </form>
-                                    </td>
-                                    <td>&nbsp;</td>
-                                    <td><a id="btnEditQueryTimeoutOk" href="#QueryTimeOutPopup" class="editOk" title="Save" style="">Ok</a> <a id="btnEditQueryTimeoutCancel" href="javascript:void(0)" class="editCancel" title="Cancel" style="">Cancel</a> <a id="btnEditQueryTimeout" href="javascript:void(0)" class="edit" title="Edit">&nbsp;</a></td>
-                                </tr>
-                                <tr class="child-row-6 subLabelRow">
-                                    <td class="configLabel">Max Temp Table Memory</td>
-                                    <td align="right">
-                                        <span id="temptablesmaxsize"></span>
-                                        <span id="temptablesmaxsizeUnit"></span>
-                                    </td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                </tr>
-                                <tr class="child-row-6 subLabelRow">
-                                    <td class="configLabel">Snapshot Priority</td>
-                                    <td id="snapshotpriority" align="right"></td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                </tr>
-                                <tr class="child-row-6 subLabelRow" id="memorySizeTimeout">
-                                    <td class="configLabel">Memory Limit</td>
-                                    <td align="right" class="memorySize">
-                                        <form id="formMemoryLimit" method="get" action="">
-                                            <div id="loadingMemoryLimit" class="loading-small" style="display: none;"></div>
-                                            <span id="memoryLimitSize"></span>
-                                            <input id="txtMemoryLimitSize" name="txtMemoryLimitSize" class="exitableMemoryLimit" type="text" style="display: none" />
-                                            <span id="memoryLimitSizeUnit"></span>
-                                            <select id="ddlMemoryLimitUnit" style="display: none;">
-                                                <option>GB</option>
-                                                <option>%</option>
-                                            </select>
-                                            <label id="errorMemorySize" for="txtMemoryLimitSize" class="error" style="display: none;"></label>
-                                        </form>
-                                    </td>
-                                    <td>&nbsp;</td>
-                                    <td>
-                                        <a id="btnEditMemorySizeOk" href="#MemoryLimitPopup" class="editOk" title="Save" style="">Ok</a>
-                                        <a id="btnEditMemorySizeCancel" href="javascript:void(0)" class="editCancel" title="Cancel" style="">Cancel</a>
-                                        <a id="btnEditMemorySize" href="javascript:void(0)" class="edit" title="Edit">&nbsp;</a>
-                                        <a href="#addDiskLimitPopup" id="addDiskLimitPopupLink" data-id="-1" title="Add Disk Limit" style="display: none">Add Disk Limit</a>
-                                        <a id="btnDeleteMemory" href="#deleteMemoryLimitPopup" class="deleteSmall" title="Delete" style="display:none;">&nbsp;</a>
-                                    </td>
-                                </tr>
-                                <tbody id="diskLimitConfiguration" data-status="value" style="display: none;"></tbody>
                                  <tr class="hasSubLabel parent" id="row-7">
                                     <td class="configLabel"><a href="javascript:void(0)" class="labelCollapsed">SNMP</a></td>
                                     <td align="right" id="snmpOption" class="snmptd">
@@ -874,6 +791,89 @@
                                     <td>&nbsp;</td>
                                     <td>&nbsp;</td>
                                 </tr>
+                                <tr class="hasSubLabel parent" id="row-6">
+                                    <td class="configLabel"><a href="javascript:void(0)" class="labelCollapsed">Advanced</a></td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr class="child-row-6 subLabelRow">
+                                    <td class="configLabel">Max Java Heap </td>
+                                    <td align="right">
+                                        <span id="maxJavaHeap"></span>
+                                        <span id="maxJavaHeapUnit"></span>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr class="child-row-6 subLabelRow" id="heartbeatTimeoutRow">
+                                    <td class="configLabel">Heartbeat Timeout </td>
+                                    <td align="right" class="heartbeattd">
+                                        <form id="formHeartbeatTimeout" method="get" action="">
+                                            <div id="loadingHeartbeatTimeout" class="loading-small" style="display: none;"></div>
+                                            <span id="hrtTimeOutSpan"></span>
+                                            <input id="txtHrtTimeOut" name="txtHrtTimeOut" class="exitableTxtBx" type="text" style="display: none" />
+                                            <span id="hrtTimeOutUnitSpan"></span>
+                                            <label id="errorHeartbeatTimeout" for="txtHrtTimeOut" class="error" style="display: none;"></label>
+                                        </form>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                    <td><a id="btnEditHeartbeatTimeoutOk" href="#HrtTimeOutPopup" class="editOk" title="Save" style="">Ok</a> <a id="btnEditHeartbeatTimeoutCancel" href="javascript:void(0)" class="editCancel" title="Cancel" style="">Cancel</a> <a id="btnEditHrtTimeOut" href="javascript:void(0)" class="edit" title="Edit">&nbsp;</a></td>
+                                </tr>
+                                <tr class="child-row-6 subLabelRow" id="queryTimoutRow">
+                                    <td class="configLabel">Query Timeout</td>
+                                    <td align="right" class="queryTimeOut">
+                                        <form id="formQueryTimeout" method="get" action="">
+                                            <div id="loadingQueryTimeout" class="loading-small" style="display: none;"></div>
+                                            <span id="queryTimeOutSpan"></span>
+                                            <input id="txtQueryTimeout" name="txtQueryTimeout" class="exitableTxtBx" type="text" style="display: none" />
+                                            <span id="queryTimeOutUnitSpan"></span>
+                                            <label id="errorQueryTimeout" for="txtQueryTimeout" class="error" style="display: none;"></label>
+                                        </form>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                    <td><a id="btnEditQueryTimeoutOk" href="#QueryTimeOutPopup" class="editOk" title="Save" style="">Ok</a> <a id="btnEditQueryTimeoutCancel" href="javascript:void(0)" class="editCancel" title="Cancel" style="">Cancel</a> <a id="btnEditQueryTimeout" href="javascript:void(0)" class="edit" title="Edit">&nbsp;</a></td>
+                                </tr>
+                                <tr class="child-row-6 subLabelRow">
+                                    <td class="configLabel">Max Temp Table Memory</td>
+                                    <td align="right">
+                                        <span id="temptablesmaxsize"></span>
+                                        <span id="temptablesmaxsizeUnit"></span>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr class="child-row-6 subLabelRow">
+                                    <td class="configLabel">Snapshot Priority</td>
+                                    <td id="snapshotpriority" align="right"></td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                                <tr class="child-row-6 subLabelRow" id="memorySizeTimeout">
+                                    <td class="configLabel">Memory Limit</td>
+                                    <td align="right" class="memorySize">
+                                        <form id="formMemoryLimit" method="get" action="">
+                                            <div id="loadingMemoryLimit" class="loading-small" style="display: none;"></div>
+                                            <span id="memoryLimitSize"></span>
+                                            <input id="txtMemoryLimitSize" name="txtMemoryLimitSize" class="exitableMemoryLimit" type="text" style="display: none" />
+                                            <span id="memoryLimitSizeUnit"></span>
+                                            <select id="ddlMemoryLimitUnit" style="display: none;">
+                                                <option>GB</option>
+                                                <option>%</option>
+                                            </select>
+                                            <label id="errorMemorySize" for="txtMemoryLimitSize" class="error" style="display: none;"></label>
+                                        </form>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                    <td>
+                                        <a id="btnEditMemorySizeOk" href="#MemoryLimitPopup" class="editOk" title="Save" style="">Ok</a>
+                                        <a id="btnEditMemorySizeCancel" href="javascript:void(0)" class="editCancel" title="Cancel" style="">Cancel</a>
+                                        <a id="btnEditMemorySize" href="javascript:void(0)" class="edit" title="Edit">&nbsp;</a>
+                                        <a href="#addDiskLimitPopup" id="addDiskLimitPopupLink" data-id="-1" title="Add Disk Limit" style="display: none">Add Disk Limit</a>
+                                        <a id="btnDeleteMemory" href="#deleteMemoryLimitPopup" class="deleteSmall" title="Delete" style="display:none;">&nbsp;</a>
+                                    </td>
+                                </tr>
+                                <tbody id="diskLimitConfiguration" data-status="value" style="display: none;"></tbody>
                             </table>
                         </div>
                         <div class="drWrapperAdmin" id="divDrWrapperAdmin" style="display:none">
