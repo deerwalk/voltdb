@@ -436,28 +436,48 @@ function loadAdminPage() {
      adminEditObjects.chkSnmp.on('ifChanged', function () {
         adminEditObjects.txtSnmp.text(getOnOffText(adminEditObjects.chkSnmp.is(":checked")));
         if(adminEditObjects.txtSnmp.text() == "Off"){
-//            $("#txtAuthkey").rules("remove");
-//            $("#txtPrivKey").rules("remove");
+            $("#txtAuthkey").rules("remove");
+            $("#txtPrivKey").rules("remove");
             $("#txtTarget").rules("remove");
         }
         else{
-//            $("#txtPrivKey").rules("add",{
-//                required: true,
-//                minlength: 8,
-//                messages:{
-//                    required: "This field is required",
-//                    minlength: "Please enter at least 8 characters.",
-//                }
-//            })
-//
-//             $("#txtAuthkey").rules("add",{
-//                required: true,
-//                minlength: 8,
-//                messages:{
-//                    required: "This field is required",
-//                    minlength: "Please enter at least 8 characters.",
-//                }
-//            })
+            if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() != "noauth" && adminEditObjects.txtUsername.val() != ""){
+                    $("#txtAuthkey").rules("add",{
+                        required: true,
+                        minlength: 8,
+                        messages:{
+                            required: "This field is required",
+                            minlength: "Please enter at least 8 characters.",
+                        }
+                    })
+            }
+            else if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() != "noauth" && adminEditObjects.txtUsername.val() == ""){
+                 $("#txtAuthkey").rules("add",{
+                    required: true,
+                    messages:{
+                        required: "This field is required",
+                    }
+                })
+            }
+
+            if(adminEditObjects.ddlPrivProtocol.val().toLowerCase() != "nopriv" && adminEditObjects.txtUsername.val() != ""){
+                    $("#txtPrivKey").rules("add",{
+                        required: true,
+                        minlength: 8,
+                        messages:{
+                            required: "This field is required",
+                            minlength: "Please enter at least 8 characters.",
+                        }
+                    })
+            }
+            else if(adminEditObjects.ddlPrivProtocol.val().toLowerCase() != "nopriv" && adminEditObjects.txtUsername.val() == ""){
+                 $("#txtPrivKey").rules("add",{
+                    required: true,
+                    messages:{
+                        required: "This field is required",
+                    }
+                })
+            }
 
             $("#txtTarget").rules("add",{
                 required: true,
@@ -1981,8 +2001,66 @@ function loadAdminPage() {
 
 
     adminEditObjects.ddlAuthProtocol.on("change", function(e){
-         if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() == "noauth"){
-             $("#txtAuthkey").rules("remove");
+        if(adminEditObjects.txtSnmp.text() == "Off"){
+            $("#txtAuthkey").rules("remove");
+            $("#txtPrivKey").rules("remove");
+            $("#txtTarget").rules("remove");
+        }
+        else{
+
+            if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() != "noauth" && adminEditObjects.txtUsername.val() != ""){
+                    $("#txtAuthkey").rules("add",{
+                        required: true,
+                        minlength: 8,
+                        messages:{
+                            required: "This field is required",
+                            minlength: "Please enter at least 8 characters.",
+                        }
+                    })
+            }
+            else if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() != "noauth" && adminEditObjects.txtUsername.val() == ""){
+                 $("#txtAuthkey").rules("add",{
+                    required: true,
+                    messages:{
+                        required: "This field is required",
+                    }
+                })
+            }
+            else{
+                $("#txtAuthkey").rules("remove");
+            }
+
+
+            if(adminEditObjects.ddlPrivProtocol.val().toLowerCase() != "nopriv" && adminEditObjects.txtUsername.val() != ""){
+                    $("#txtPrivKey").rules("add",{
+                        required: true,
+                        minlength: 8,
+                        messages:{
+                            required: "This field is required",
+                            minlength: "Please enter at least 8 characters.",
+                        }
+                    })
+            }
+            else if(adminEditObjects.ddlPrivProtocol.val().toLowerCase() != "nopriv" && adminEditObjects.txtUsername.val() == ""){
+                 $("#txtPrivKey").rules("add",{
+                    required: true,
+                    messages:{
+                        required: "This field is required",
+                    }
+                })
+            }
+            else{
+                $("#txtPrivKey").rules("remove");
+            }
+
+            $("#txtTarget").rules("add",{
+                required: true,
+                portRegex : /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/,
+                messages:{
+                    required:"This field is required",
+                    portRegex : "Please enter a valid value.(e.g, 127.0.0.1:(1-65535))"
+                }
+            })
         }
     })
 
@@ -2006,14 +2084,7 @@ function loadAdminPage() {
                         }
                     })
             }
-//            else if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() == "noauth" && adminEditObjects.txtUsername.val() != ""){
-//                 $("#txtAuthkey").rules("add",{
-//                    required: true,
-//                    messages:{
-//                        required: "This field is required",
-//                    }
-//                })
-//            }
+
             else if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() != "noauth" && adminEditObjects.txtUsername.val() == ""){
                  $("#txtAuthkey").rules("add",{
                     required: true,
@@ -2033,14 +2104,7 @@ function loadAdminPage() {
                         }
                     })
             }
-//            else if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() == "nopriv" && adminEditObjects.txtUsername.val() != ""){
-//                 $("#txtPrivKey").rules("add",{
-//                    required: true,
-//                    messages:{
-//                        required: "This field is required",
-//                    }
-//                })
-//            }
+
         }
     })
 
