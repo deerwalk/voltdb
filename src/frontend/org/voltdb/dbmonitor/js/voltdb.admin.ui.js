@@ -1903,14 +1903,6 @@ function loadAdminPage() {
                         }
                     })
             }
-            else if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() == "noauth" && adminEditObjects.txtUsername.val() != ""){
-                 $("#txtAuthkey").rules("add",{
-                    required: true,
-                    messages:{
-                        required: "This field is required",
-                    }
-                })
-            }
             else if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() != "noauth" && adminEditObjects.txtUsername.val() == ""){
                  $("#txtAuthkey").rules("add",{
                     required: true,
@@ -1930,14 +1922,6 @@ function loadAdminPage() {
                         }
                     })
             }
-            else if(adminEditObjects.ddlPrivProtocol.val().toLowerCase() == "nopriv" && adminEditObjects.txtUsername.val() != ""){
-                 $("#txtPrivKey").rules("add",{
-                    required: true,
-                    messages:{
-                        required: "This field is required",
-                    }
-                })
-            }
             else if(adminEditObjects.ddlPrivProtocol.val().toLowerCase() != "nopriv" && adminEditObjects.txtUsername.val() == ""){
                  $("#txtPrivKey").rules("add",{
                     required: true,
@@ -1946,6 +1930,7 @@ function loadAdminPage() {
                     }
                 })
             }
+
 
              if(!$("#frmAuthkey").valid()){
                         e.preventDefault();
@@ -2021,14 +2006,14 @@ function loadAdminPage() {
                         }
                     })
             }
-            else if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() == "noauth" && adminEditObjects.txtUsername.val() != ""){
-                 $("#txtAuthkey").rules("add",{
-                    required: true,
-                    messages:{
-                        required: "This field is required",
-                    }
-                })
-            }
+//            else if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() == "noauth" && adminEditObjects.txtUsername.val() != ""){
+//                 $("#txtAuthkey").rules("add",{
+//                    required: true,
+//                    messages:{
+//                        required: "This field is required",
+//                    }
+//                })
+//            }
             else if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() != "noauth" && adminEditObjects.txtUsername.val() == ""){
                  $("#txtAuthkey").rules("add",{
                     required: true,
@@ -2048,14 +2033,14 @@ function loadAdminPage() {
                         }
                     })
             }
-            else if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() == "nopriv" && adminEditObjects.txtUsername.val() != ""){
-                 $("#txtPrivKey").rules("add",{
-                    required: true,
-                    messages:{
-                        required: "This field is required",
-                    }
-                })
-            }
+//            else if(adminEditObjects.ddlAuthProtocol.val().toLowerCase() == "nopriv" && adminEditObjects.txtUsername.val() != ""){
+//                 $("#txtPrivKey").rules("add",{
+//                    required: true,
+//                    messages:{
+//                        required: "This field is required",
+//                    }
+//                })
+//            }
         }
     })
 
