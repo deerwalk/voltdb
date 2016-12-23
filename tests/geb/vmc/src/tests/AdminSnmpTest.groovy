@@ -83,4 +83,92 @@ class AdminSnmpTest extends TestBase {
         then: 'click snmp button'
         page.snmpEditButton.click()
     }
+
+    def targetValueNotEmpty() {
+        int count = 0
+        testStatus = false
+        isPro = false
+        snmpEnabled = false
+
+        expect: 'at Admin Page'
+
+        when: "check Pro version"
+        if (!waitFor(10) { page.snmpTitle.isDisplayed() }) {
+            isPro = true
+        }
+        else{
+            assert true
+        }
+        then: "check SNMP enabled"
+        if (isPro == true) {
+            if (page.snmpEnabled.value("On")) {
+                snmpEnabled = true
+            }
+        }
+        when: "check edit snmp button displayed"
+        if (page.editSnmpButton.isDisplayed()) {
+            page.edit.SnmpButton.click()
+        }
+        if (waitFor(10) { page.editSnmpOkButton.isDisplayed() }) {
+            page.editSnmpOkButton.click()
+        }
+
+        then: "check target validation"
+        if (snmpEnabled == true) {
+            if (page.errorTarget.isDisplayed()) {
+                println("PASS")
+            } else {
+                println("FAIL: Test didn't pass")
+                assert false
+            }
+
+        }
+
+    }
+
+    def checkCommunityDefaultValue(){
+        when: "click edit button"
+            if (page.editSnmpButton.isDisplayed()) {
+                page.edit.SnmpButton.click()
+            }
+        then:
+            if(page.txtCommunity.value().equals("public")){
+                assert true
+            }
+            else{
+                println("default value for community is not set")
+                assert false
+            }
+    }
+
+    def checkAuthKeyDefaultValue(){
+        when: "click edit button"
+        if (page.editSnmpButton.isDisplayed()) {
+            page.edit.SnmpButton.click()
+        }
+        then:
+        if(page.txtAuthkey.value().equals("defaultauthkey")){
+            assert true
+        }
+        else{
+            println("default value for authkey is not set")
+            assert false
+        }
+    }
+
+    def checkPrivKeyDefaultValue(){
+        when: "click edit button"
+        if (page.editSnmpButton.isDisplayed()) {
+            page.edit.SnmpButton.click()
+        }
+        then:
+        if(page.txtPrivkey.value().equals("defaultprivkey")){
+            assert true
+        }
+        else{
+            println("default value for privkey is not set")
+            assert false
+        }
+
+    }
 }

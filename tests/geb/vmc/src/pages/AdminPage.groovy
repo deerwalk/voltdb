@@ -279,6 +279,17 @@ class AdminPage extends VoltDBManagementCenterPage {
         snmpAuthenticationKey           { $("tr.child-row-7:nth-child(6) > td:nth-child(1)") }
         snmpPrivacyProtocol             { $("tr.child-row-7:nth-child(7) > td:nth-child(1)") }
         snmpPrivacyKey                  { $("tr.child-row-7:nth-child(8) > td:nth-child(1)") }
+
+        snmpEnabled                     { $("#txtSnmp")}
+        editSnmpButton                  { $("#snmpEdit")}
+        editSnmpOkButton                { $("#btnEditSnmpOk")}
+        errorTarget                     {$("#errorTarget")}
+        txtCommunity                    {$("#txtCommunity")}
+        txtAuthkey                      {$("#txtAuthkey")}
+        txtPrivkey                      {$("#txtPrivKey")}
+
+
+
     }
     static at = {
         adminTab.displayed
