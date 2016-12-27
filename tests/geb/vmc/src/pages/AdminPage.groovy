@@ -269,7 +269,7 @@ class AdminPage extends VoltDBManagementCenterPage {
         updateInnerErrorPopup           { $("#updateInnerErrorPopup") }
 
         /* Snmp */
-        snmpTitle                       { $("#row-7 > td:nth-child(1)") }
+        snmpTitle                       { $("#row-7 > td.configLabel") }
         snmpEditButton                  { $("#snmpEdit") }
 
         snmpTarget                      { $("tr.child-row-7:nth-child(2) > td:nth-child(1)") }

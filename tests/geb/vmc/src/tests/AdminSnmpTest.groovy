@@ -63,23 +63,60 @@ class AdminSnmpTest extends TestBase {
     }
 
     def checkSnmpTitles() {
-        when: 'check snmp title'
-        page.snmpTitle.isDisplayed()
-        and: 'click snmp title'
-        page.snmpTitle.click()
-        then: 'check titles under snmp'
-        page.snmpTarget.isDisplayed()
-        page.snmpCommunity.isDisplayed()
-        page.snmpUsername.isDisplayed()
-        page.snmpAuthenticationProtocol.isDisplayed()
-        page.snmpAuthenticationKey.isDisplayed()
-        page.snmpPrivacyProtocol.isDisplayed()
-        page.snmpPrivacyKey.isDisplayed()
+        int count = 0
+        testStatus = false
+
+        expect: 'at Admin Page'
+
+        while(count<numberOfTrials) {
+            count ++
+            try {
+                when:
+                waitFor(waitTime) {
+                    page.snmpTitle.isDisplayed()
+                    page.snmpTitle.text().toLowerCase().equals("SNMP".toLowerCase())
+                }
+                then:
+                testStatus = true
+                break
+            } catch(geb.waiting.WaitTimeoutException e) {
+                println("RETRYING: WaitTimeoutException occured")
+            } catch(org.openqa.selenium.StaleElementReferenceException e) {
+                println("RETRYING: StaleElementReferenceException occured")
+            }
+        }
+        if(testStatus == true) {
+            println("PASS")
+        }
+        else {
+            println("FAIL: Test didn't pass in " + numberOfTrials + " trials")
+            assert false
+        }
+
+        when:'click title'
+            page.snmpTitle.click()
+        then:
+            page.snmpTarget.isDisplayed()
+            page.snmpTarget.text().toLowerCase().equals("Target".toLowerCase())
+            page.snmpCommunity.isDisplayed()
+            page.snmpCommunity.text().toLowerCase().equals("Community".toLowerCase())
+            page.snmpUsername.isDisplayed()
+            page.snmpUsername.text().toLowerCase().equals("username".toLowerCase())
+            page.snmpAuthenticationProtocol.isDisplayed()
+            page.snmpAuthenticationProtocol.text().toLowerCase().equals("Authentication Protocol".toLowerCase())
+            page.snmpAuthenticationKey.isDisplayed()
+            page.snmpAuthenticationKey.text().toLowerCase().equals("Authentication Key".toLowerCase())
+            page.snmpPrivacyProtocol.isDisplayed()
+            page.snmpPrivacyProtocol.text().toLowerCase().equals("Privacy Protocol".toLowerCase())
+            page.snmpPrivacyKey.isDisplayed()
+            page.snmpPrivacyKey.text().toLowerCase().equals("Privacy Key".toLowerCase())
     }
 
     def checkSnmpButtons() {
+        expect: 'at Admin Page'
+
         when: 'check snmp edit button'
-        page.snmpEditButton.isDisplayed()
+        waitFor(10){page.snmpEditButton.isDisplayed()}
         then: 'click snmp button'
         page.snmpEditButton.click()
     }
@@ -87,27 +124,27 @@ class AdminSnmpTest extends TestBase {
     def targetValueNotEmpty() {
         int count = 0
         testStatus = false
-        isPro = false
-        snmpEnabled = false
+        boolean isPro = false
+        boolean snmpEnabled = false
 
         expect: 'at Admin Page'
 
         when: "check Pro version"
-        if (!waitFor(10) { page.snmpTitle.isDisplayed() }) {
+        if (waitFor(10){page.snmpTitle.isDisplayed()}) {
             isPro = true
         }
         else{
-            assert true
+            assert false
         }
         then: "check SNMP enabled"
         if (isPro == true) {
-            if (page.snmpEnabled.value("On")) {
+            if (page.snmpEnabled.text().toLowerCase().equals("On")) {
                 snmpEnabled = true
             }
         }
         when: "check edit snmp button displayed"
         if (page.editSnmpButton.isDisplayed()) {
-            page.edit.SnmpButton.click()
+            page.editSnmpButton.click()
         }
         if (waitFor(10) { page.editSnmpOkButton.isDisplayed() }) {
             page.editSnmpOkButton.click()
@@ -127,9 +164,11 @@ class AdminSnmpTest extends TestBase {
     }
 
     def checkCommunityDefaultValue(){
+        expect: 'at Admin Page'
+
         when: "click edit button"
             if (page.editSnmpButton.isDisplayed()) {
-                page.edit.SnmpButton.click()
+                page.editSnmpButton.click()
             }
         then:
             if(page.txtCommunity.value().equals("public")){
@@ -142,12 +181,14 @@ class AdminSnmpTest extends TestBase {
     }
 
     def checkAuthKeyDefaultValue(){
+        expect: 'at Admin Page'
+
         when: "click edit button"
         if (page.editSnmpButton.isDisplayed()) {
-            page.edit.SnmpButton.click()
+            page.editSnmpButton.click()
         }
         then:
-        if(page.txtAuthkey.value().equals("defaultauthkey")){
+        if(page.txtAuthkey.value().equals("voltdbauthkey")){
             assert true
         }
         else{
@@ -157,12 +198,15 @@ class AdminSnmpTest extends TestBase {
     }
 
     def checkPrivKeyDefaultValue(){
+
+        expect: 'at Admin Page'
+
         when: "click edit button"
         if (page.editSnmpButton.isDisplayed()) {
-            page.edit.SnmpButton.click()
+            page.editSnmpButton.click()
         }
         then:
-        if(page.txtPrivkey.value().equals("defaultprivkey")){
+        if(page.txtPrivkey.value().equals("voltdbprivacykey")){
             assert true
         }
         else{
