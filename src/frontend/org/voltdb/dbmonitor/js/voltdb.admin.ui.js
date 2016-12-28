@@ -1799,7 +1799,10 @@ function loadAdminPage() {
             adminEditObjects.txtTarget.show();
             adminEditObjects.txtCommunity.show();
             adminEditObjects.txtUsername.show();
+
+            adminEditObjects.ddlAuthProtocol.append("<option>SHA</option><option>MD5</option><option>NoAuth</option>")
             adminEditObjects.ddlAuthProtocol.show();
+            adminEditObjects.ddlPrivProtocol.append("<option>AES</option><option>DES</option><option>NoPriv</option><option>3DES</option><option>AES192</option><option>AES256</option>")
             adminEditObjects.ddlPrivProtocol.show();
 
             adminEditObjects.loadingSnmp.hide();

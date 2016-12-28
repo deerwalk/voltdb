@@ -113,12 +113,35 @@ class AdminSnmpTest extends TestBase {
     }
 
     def checkSnmpButtons() {
+        int count = 0
+        testStatus = false
         expect: 'at Admin Page'
 
-        when: 'check snmp edit button'
-        waitFor(10){page.snmpEditButton.isDisplayed()}
-        then: 'click snmp button'
-        page.snmpEditButton.click()
+        while(count<numberOfTrials) {
+            count ++
+            try {
+                when:
+                waitFor(waitTime) {
+                    page.snmpEditButton.isDisplayed()
+                }
+                then:
+                page.snmpEditButton.click()
+                testStatus = true
+                break
+            } catch(geb.waiting.WaitTimeoutException e) {
+                println("RETRYING: WaitTimeoutException occured")
+            } catch(org.openqa.selenium.StaleElementReferenceException e) {
+                println("RETRYING: StaleElementReferenceException occured")
+            }
+        }
+        if(testStatus == true) {
+            println("PASS")
+        }
+        else {
+            println("FAIL: Test didn't pass in " + numberOfTrials + " trials")
+            assert false
+        }
+
     }
 
     def targetValueNotEmpty() {
@@ -164,20 +187,53 @@ class AdminSnmpTest extends TestBase {
     }
 
     def checkCommunityDefaultValue(){
+        int count = 0
+        testStatus = false
         expect: 'at Admin Page'
-
-        when: "click edit button"
-            if (page.editSnmpButton.isDisplayed()) {
-                page.editSnmpButton.click()
+        while(count<numberOfTrials) {
+            count ++
+            try {
+                when:
+                waitFor(waitTime) {
+                    if (page.editSnmpButton.isDisplayed()) {
+                        page.editSnmpButton.click()
+                    }
+                }
+                then:
+                if(page.txtCommunity.value().equals("public")){
+                    assert true
+                }
+                else{
+                    println("default value for community is not set")
+                    assert false
+                }
+                testStatus = true
+                break
+            } catch(geb.waiting.WaitTimeoutException e) {
+                println("RETRYING: WaitTimeoutException occured")
+            } catch(org.openqa.selenium.StaleElementReferenceException e) {
+                println("RETRYING: StaleElementReferenceException occured")
             }
-        then:
-            if(page.txtCommunity.value().equals("public")){
-                assert true
-            }
-            else{
-                println("default value for community is not set")
-                assert false
-            }
+        }
+        if(testStatus == true) {
+            println("PASS")
+        }
+        else {
+            println("FAIL: Test didn't pass in " + numberOfTrials + " trials")
+            assert false
+        }
+//        when: "click edit button"
+//            if (page.editSnmpButton.isDisplayed()) {
+//                page.editSnmpButton.click()
+//            }
+//        then:
+//            if(page.txtCommunity.value().equals("public")){
+//                assert true
+//            }
+//            else{
+//                println("default value for community is not set")
+//                assert false
+//            }
     }
 
     def checkAuthKeyDefaultValue(){
@@ -213,6 +269,380 @@ class AdminSnmpTest extends TestBase {
             println("default value for privkey is not set")
             assert false
         }
+
+    }
+
+    def checkInvalidTarget(){
+        int count = 0
+        testStatus = false
+        boolean isPro = false
+        boolean snmpEnabled = false
+
+        expect: 'at Admin Page'
+
+        when: "check Pro version"
+
+        if (waitFor(10){page.snmpTitle.isDisplayed()}) {
+            isPro = true
+        }
+        else{
+            assert false
+        }
+        then: "check SNMP enabled"
+        if (isPro == true) {
+            if (page.snmpEnabled.text().toLowerCase().equals("On")) {
+                snmpEnabled = true
+            }
+        }
+        when: "check edit snmp button displayed"
+        if (page.editSnmpButton.isDisplayed()) {
+            page.editSnmpButton.click()
+
+        }
+
+        then:
+        if(page.chkSNMPDiv.isDisplayed()){
+            page.chkSNMPDiv.click()
+            page.snmpEnabled.text().toLowerCase().equals("On")
+        }
+        if (waitFor(10) { page.editSnmpOkButton.isDisplayed() }) {
+            page.txtTarget.value("asdfasdf")
+            page.editSnmpOkButton.click()
+        }
+
+        when: "check target validation"
+        report "target"
+        if (snmpEnabled == true) {
+            if (page.errorTarget.isDisplayed()) {
+                page.errorTarget.text().toLowerCase().equals("This field is required")
+                println("PASS")
+            } else {
+                println("FAIL: Test didn't pass")
+                assert false
+            }
+
+        }
+        then:
+            assert true
+    }
+
+    def checkInvalidAuthKey(){
+        int count = 0
+        testStatus = false
+        boolean isPro = false
+        boolean snmpEnabled = false
+
+        expect: 'at Admin Page'
+
+        when: "check Pro version"
+
+        if (waitFor(10){page.snmpTitle.isDisplayed()}) {
+            isPro = true
+        }
+        else{
+            assert false
+        }
+        then: "check SNMP enabled"
+        if (isPro == true) {
+            if (page.snmpEnabled.text().toLowerCase().equals("On")) {
+                snmpEnabled = true
+            }
+        }
+        when: "check edit snmp button displayed"
+        if (page.editSnmpButton.isDisplayed()) {
+            page.editSnmpButton.click()
+
+        }
+
+        then:
+        if(page.chkSNMPDiv.isDisplayed()){
+            page.chkSNMPDiv.click()
+            page.snmpEnabled.text().toLowerCase().equals("On")
+        }
+        if (waitFor(10) { page.editSnmpOkButton.isDisplayed() }) {
+            page.txtAuthkey.value("")
+            page.editSnmpOkButton.click()
+        }
+
+        when: "check auth key validation"
+        if (snmpEnabled == true) {
+            if (page.errorAuthkey.isDisplayed()) {
+                page.errorAuthkey.text().toLowerCase().equals("This field is required")
+                println("PASS")
+            } else {
+                println("FAIL: Test didn't pass")
+                assert false
+            }
+        }
+        then:
+        assert true
+
+        when: "check no auth condition"
+        page.ddlAuthProtocol.value("NoAuth")
+        then: "click edit ok button"
+        if (waitFor(10) { page.editSnmpOkButton.isDisplayed() }) {
+            page.txtAuthkey.value("")
+            page.txtTarget.value("10.10.1.2:89")
+            page.editSnmpOkButton.click()
+        }
+        if (snmpEnabled == true) {
+            if (page.errorAuthkey.isDisplayed()) {
+                assert false
+                println("No validation required")
+            } else {
+                println("FAIL: Test didn't pass")
+                assert true
+            }
+        }
+
+        when: "check auth key with username given and auth given"
+        page.txtUsername.value("sfd")
+        then: "click edit ok button"
+        if (waitFor(10) { page.editSnmpOkButton.isDisplayed() }) {
+            page.txtAuthkey.value("")
+            page.txtTarget.value("10.10.1.2:89")
+            page.editSnmpOkButton.click()
+        }
+        if (snmpEnabled == true) {
+            if (page.errorAuthkey.isDisplayed()) {
+                assert true
+                page.errorAuthkey.text().toLowerCase().equals("This field is required")
+            } else {
+                println("FAIL: Test didn't pass")
+                assert false
+            }
+        }
+
+        when: "check max 6 character auth key validation with username given and auth given"
+        page.txtUsername.value("sfd")
+        then: "click edit ok button"
+        if (waitFor(10) { page.editSnmpOkButton.isDisplayed() }) {
+            page.txtAuthkey.value("df")
+            page.txtTarget.value("10.10.1.2:89")
+            page.editSnmpOkButton.click()
+        }
+        if (snmpEnabled == true) {
+            if (page.errorAuthkey.isDisplayed()) {
+                assert true
+                page.errorAuthkey.text().toLowerCase().equals("Please enter at least 8 characters.")
+            } else {
+                println("FAIL: Test didn't pass")
+                assert false
+            }
+        }
+
+    }
+
+    def checkInvalidPrivKey(){
+        int count = 0
+        testStatus = false
+        boolean isPro = false
+        boolean snmpEnabled = false
+
+        expect: 'at Admin Page'
+
+        when: "check Pro version"
+
+        if (waitFor(10){page.snmpTitle.isDisplayed()}) {
+            isPro = true
+        }
+        else{
+            assert false
+        }
+        then: "check SNMP enabled"
+        if (isPro == true) {
+            if (page.snmpEnabled.text().toLowerCase().equals("On")) {
+                snmpEnabled = true
+            }
+        }
+        when: "check edit snmp button displayed"
+        if (page.editSnmpButton.isDisplayed()) {
+            page.editSnmpButton.click()
+
+        }
+
+        then:
+        if(page.chkSNMPDiv.isDisplayed()){
+            page.chkSNMPDiv.click()
+            page.snmpEnabled.text().toLowerCase().equals("On")
+        }
+        if (waitFor(10) { page.editSnmpOkButton.isDisplayed() }) {
+            page.txtPrivkey.value("")
+            page.editSnmpOkButton.click()
+        }
+
+        when: "check auth key validation"
+        if (snmpEnabled == true) {
+            if (page.errorPrivkey.isDisplayed()) {
+                page.errorPrivkey.text().toLowerCase().equals("This field is required")
+                println("PASS")
+            } else {
+                println("FAIL: Test didn't pass")
+                assert false
+            }
+        }
+        then:
+        assert true
+
+        when: "check no auth condition"
+        page.ddlAuthProtocol.value("NoAuth")
+        then: "click edit ok button"
+        if (waitFor(10) { page.editSnmpOkButton.isDisplayed() }) {
+            page.txtPrivkey.value("")
+            page.txtTarget.value("10.10.1.2:89")
+            page.editSnmpOkButton.click()
+        }
+        if (snmpEnabled == true) {
+            if (page.errorPrivkey.isDisplayed()) {
+                assert false
+                println("No validation required")
+            } else {
+                println("FAIL: Test didn't pass")
+                assert true
+            }
+        }
+
+        when: "check auth key with username given and auth given"
+        page.txtUsername.value("sfd")
+        then: "click edit ok button"
+        if (waitFor(10) { page.editSnmpOkButton.isDisplayed() }) {
+            page.txtPrivkey.value("")
+            page.txtTarget.value("10.10.1.2:89")
+            page.editSnmpOkButton.click()
+        }
+        if (snmpEnabled == true) {
+            if (page.errorPrivkey.isDisplayed()) {
+                assert true
+                page.errorPrivkey.text().toLowerCase().equals("This field is required")
+            } else {
+                println("FAIL: Test didn't pass")
+                assert false
+            }
+        }
+
+        when: "check max 6 character auth key validation with username given and auth given"
+        page.txtUsername.value("sfd")
+        then: "click edit ok button"
+        if (waitFor(10) { page.editSnmpOkButton.isDisplayed() }) {
+            page.txtPrivkey.value("df")
+            page.txtTarget.value("10.10.1.2:89")
+            page.editSnmpOkButton.click()
+        }
+        if (snmpEnabled == true) {
+            if (page.errorPrivkey.isDisplayed()) {
+                assert true
+                page.errorPrivkey.text().toLowerCase().equals("Please enter at least 8 characters.")
+            } else {
+                println("FAIL: Test didn't pass")
+                assert false
+            }
+        }
+
+    }
+
+    def editSNMPWhenOff(){
+        int count = 0
+        testStatus = false
+        boolean isPro = false
+        boolean snmpEnabled = false
+
+        expect: 'at Admin Page'
+
+        when: "check Pro version"
+
+        if (waitFor(10){page.snmpTitle.isDisplayed()}) {
+            isPro = true
+        }
+        else{
+            assert false
+        }
+        then: "check SNMP enabled"
+        if (isPro == true) {
+            if (page.snmpEnabled.text().toLowerCase().equals("On")) {
+                snmpEnabled = true
+            }
+            else{
+                println("SNMP is Off")
+            }
+        }
+        when: "check edit snmp button displayed"
+        if (page.editSnmpButton.isDisplayed()) {
+            page.editSnmpButton.click()
+
+        }
+        then: "click edit ok button"
+        if (waitFor(10) { page.editSnmpOkButton.isDisplayed() }) {
+            page.editSnmpOkButton.click()
+            println("must save SNMP config")
+        }
+        when:"click confirm ok button"
+        if(waitFor(10){page.btnSaveSnmp.isDisplayed()}){
+            page.btnSaveSnmp.click()
+        }
+        then:"check save status"
+            if(page.loadingSnmp.isDisplayed()){
+                //need to check saved data here
+                println("save is working properly")
+            }
+
+
+    }
+
+    def editSNMPWhenOn(){
+        int count = 0
+        testStatus = false
+        boolean isPro = false
+        boolean snmpEnabled = false
+
+        expect: 'at Admin Page'
+
+        when: "check Pro version"
+
+        if (waitFor(10){page.snmpTitle.isDisplayed()}) {
+            isPro = true
+        }
+        else{
+            assert false
+        }
+        then: "check SNMP enabled"
+        if (isPro == true) {
+            if (page.snmpEnabled.text().toLowerCase().equals("On")) {
+                snmpEnabled = true
+            }
+        }
+        when: "check edit snmp button displayed"
+        if (page.editSnmpButton.isDisplayed()) {
+            page.editSnmpButton.click()
+
+        }
+
+        then:
+        if(page.chkSNMPDiv.isDisplayed()){
+            page.chkSNMPDiv.click()
+            page.snmpEnabled.text().toLowerCase().equals("On")
+        }
+
+        when: "check edit snmp button displayed"
+        if (page.editSnmpButton.isDisplayed()) {
+            page.editSnmpButton.click()
+
+        }
+        then: "click edit ok button"
+        if (waitFor(10) { page.editSnmpOkButton.isDisplayed() }) {
+            page.txtTarget.value("10.10.1.2:89")
+            page.editSnmpOkButton.click()
+            println("must save SNMP config")
+        }
+        when:"click confirm ok button"
+        if(waitFor(10){page.btnSaveSnmp.isDisplayed()}){
+            page.btnSaveSnmp.click()
+        }
+        then:"check save status"
+        if(page.loadingSnmp.isDisplayed()){
+            //need to check saved data here
+            println("save is working properly")
+        }
+
 
     }
 }

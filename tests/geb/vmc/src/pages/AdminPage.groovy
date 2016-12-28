@@ -287,8 +287,14 @@ class AdminPage extends VoltDBManagementCenterPage {
         txtCommunity                    {$("#txtCommunity")}
         txtAuthkey                      {$("#txtAuthkey")}
         txtPrivkey                      {$("#txtPrivKey")}
+        txtTarget                       {$("#txtTarget")}
 
-
+        chkSNMPDiv                      {$("#snmpOption > div.icheckbox_square-aero.customCheckbox > ins")}
+        errorAuthkey                    {$("#errorAuthkey")}
+        ddlAuthProtocol                 {$("#ddlAuthProtocol")}
+        txtUsername                     {$("#txtUsername")}
+        btnSaveSnmp                     {$("#btnSaveSnmp")}
+        loadingSnmp                     {$("#loadingSnmp")}
 
     }
     static at = {
