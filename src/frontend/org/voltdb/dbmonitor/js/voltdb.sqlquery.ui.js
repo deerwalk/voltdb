@@ -738,6 +738,7 @@ $(document).ready(function () {
             $('#querybox-'+tab_counter).text(tabQuery == undefined ? '' : tabQuery)
             SQLQueryRender.addQueryBtn(tab_counter)
 
+
             $('#exportType-' + tab_counter).change(function () {
                 var tab_id = $(this).attr('id').split('-')[1]
                 if ($('#exportType-'+ tab_id).val() == 'HTML') {
@@ -765,6 +766,11 @@ $(document).ready(function () {
             $("#new-query").on('click', function() {
                 SQLQueryRender.createQueryTab()
                 tab_counter = tab_counter - 1
+
+                if($("#querybox-" + tab_counter).parent().find(".gutter").length != 0){
+                    $("#querybox-" + tab_counter).parent().find(".gutter").remove()
+                }
+
                 if($("#querybox-" + tab_counter).parent().find(".gutter").length == 0){
                     if(isMobile == false){
                         VoltDbUI.vars['gutterInstanceVer' + tab_counter] = Split(['#querybox-' + tab_counter, '#blockContainer'+ tab_counter], {
