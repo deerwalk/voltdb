@@ -767,7 +767,7 @@ $(document).ready(function () {
                 tab_counter = tab_counter - 1
                 if($("#querybox-" + tab_counter).parent().find(".gutter").length == 0){
                     if(isMobile == false){
-                        Split(['#querybox-' + tab_counter, '#blockContainer'+ tab_counter], {
+                        VoltDbUI.vars['gutterInstanceVer' + tab_counter] = Split(['#querybox-' + tab_counter, '#blockContainer'+ tab_counter], {
                             direction: 'vertical',
                             sizes: [30, 70],
                             gutterSize: 15,
