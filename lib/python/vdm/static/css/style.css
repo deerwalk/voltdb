@@ -835,7 +835,7 @@ ul.addServerList li:nth-child(1) {
 	height: 53px;
 	position: relative;
 	background: #fbfbfb;
-	border: 1px solid #aaa;
+	border: 1px solid #ccc;
 	border-bottom:none;
 }
 .mainContent h1 {
@@ -976,7 +976,7 @@ ul.addServerList li:nth-child(1) {
 }
 .drWrapperAdmin {
 	padding: 20px 0 0 0;
-	border-top:1px solid #ccc;
+
 }
 .headerAdminContent {
 /*	height: 53px;*/
@@ -993,7 +993,7 @@ ul.addServerList li:nth-child(1) {
 .drAdminHeaderRight {
 	float: right;
 	/*width: 65px;*/
-	padding-right:46px;
+	padding-right:34px;
 }
 .replicaWrapper {
 	position: relative;
@@ -1780,14 +1780,13 @@ color: grey;
 
 /******************SNMP*************************/
 
+
 .snmpSelect{ width:150px;}
-.onIconSNMP {position: relative;
-    right: 48px;}
-.onOffSNMP {
-    position: relative;
-    right: -21px;
-    top: -6px;
-}
+
+.onIconSNMP {}
+.onOffSNMP {}
+#chkDrOnOffVal, #chkSNMPOnOffVal { position:relative; top:3px;}
+
 .onOffSNMPPopup {left:5px;}
 
 /************Media Queries for mobile compatibility***************/
