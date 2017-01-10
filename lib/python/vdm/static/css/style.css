@@ -1936,7 +1936,7 @@ ul.drList {
 }
 @media (max-width: 980px) {
 	
-.mainTblLeft, .mainTblRight { float:none; width:100%; overflow:auto;}	
+.mainTblLeft, .mainTblRight { float:none; width:100%; overflow-x:auto; overflow-y:hidden}
 }
 @media (min-width: 768px) and (max-width: 980px) {
 .modal.custom .modifiedModalCreateDB {
