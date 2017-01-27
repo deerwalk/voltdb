@@ -1277,9 +1277,9 @@ var loadPage = function (serverName, portid) {
                             consumerDbId = drRoleDetail['DRROLE'][i - 1][2];
                             replicaLatency = [];
                             for (var key in response) {
-                                for (var i = 0; i <= response[key].length - 1; i++) {
-                                    if(response[key][i].CONSUMERCLUSTERID == consumerDbId){
-                                        replicaLatency.push(response[key][i].LASTQUEUEDTIMESTAMP - response[key][i].LASTACKTIMESTAMP);
+                                for (var j = 0; j <= response[key].length - 1; j++) {
+                                    if(response[key][j].CONSUMERCLUSTERID == consumerDbId){
+                                        replicaLatency.push(response[key][j].LASTQUEUEDTIMESTAMP - response[key][j].LASTACKTIMESTAMP);
                                     }
                                 }
                             }
@@ -1298,6 +1298,13 @@ var loadPage = function (serverName, portid) {
                             }
                             else{
                                 displayArrow = "arrowSingle";
+                            }
+                            var displayTableCss = "display:block";
+                            if($("#showHideDrBlock_"+ i).hasClass("expanded")){
+                                displayTableCss = "display:block";
+                            }
+                            else{
+                                displayTableCss = "display:none";
                             }
 
                             var htmlContent = '<div class="containerMain1" id="containerMain_'+ i + '">' +
@@ -1324,30 +1331,28 @@ var loadPage = function (serverName, portid) {
                             var htmlGraph =   '        <div class="menu_body drBody" style="'+ displayCss +'">' +
 
                                               '            <div class="DRContantWrap">' +
-                                              '<h1>No Data Available</h1>' +
-    //                                          '                <div id="mainGraphBlock' + i + '">' +
-    //                                          '                    <div class="errorMsgLocalStorageFull" style="display:none">' +
-    //                                          '                        <div class="errorMsgLocalWrapper">' +
-    //                                          '                            <img src="css/resources/images/alert.png" alt="Alert"/>' +
-    //                                          '                        </div>' +
-    //                                          '                        <div class="textMsgLocalWrapper">' +
-    //                                          '                            <p>Local storage is full. Please delete some saved queries from SQL Query tab or minimize the retained time interval using the above sliding window.</p>' +
-    //                                          '                        </div>' +
-    //                                          '                        <div class="clear"></div>' +
-    //                                          '                    </div>' +
-    //                                          '                    <div class="graphChart" id="graphChart_' + i + '">' +
-    //                                          '<h1>No Data Available</h1>' +
-    ////                                          '                        <div id="ChartDrReplicationRate_' + i + '" class="chart chartDR" style="display: block">' +
-    ////                                          '                            <div class="chartHeader">' +
-    ////                                          '                                <h1>Database Replication (DR)' +
-    ////                                          '                                    <a href="#" class="downloadBtnChart" onclick=' +
-    ////                                          '                                         downloadCSV(event, { filename: "DrReplication-data" }, "dataReplication");' +
-    ////                                          '                                     > <img class="downloadCls" src="css/resources/images/downloadBtn.png" alt="download" title="Download data as CSV"/></a>' +
-    ////                                          '                                    <div class="clear"></div>' +
-    ////                                          '                                </h1>' +
-    ////                                          '                            </div>' +
-    ////                                          '                            <svg id="visualizationDrReplicationRate_' + i + '" width="100%" height="400"></svg>' +
-    //                                          '                        </div>' +
+                                              '                <div id="mainGraphBlock' + i + '">' +
+                                              '                    <div class="errorMsgLocalStorageFull" style="display:none">' +
+                                              '                        <div class="errorMsgLocalWrapper">' +
+                                              '                            <img src="css/resources/images/alert.png" alt="Alert"/>' +
+                                              '                        </div>' +
+                                              '                        <div class="textMsgLocalWrapper">' +
+                                              '                            <p>Local storage is full. Please delete some saved queries from SQL Query tab or minimize the retained time interval using the above sliding window.</p>' +
+                                              '                        </div>' +
+                                              '                        <div class="clear"></div>' +
+                                              '                    </div>' +
+                                              '                    <div class="graphChart" id="graphChart_' + i + '">' +
+                                              '                        <div id="ChartDrReplicationRate_' + i + '" class="chart chartDR" style="display: block">' +
+                                              '                            <div class="chartHeader">' +
+                                              '                                <h1>Database Replication (DR)' +
+                                              '                                    <a href="#" class="downloadBtnChart" onclick=' +
+                                              '                                         downloadCSV(event, { filename: "DrReplication-data" }, "dataReplication");' +
+                                              '                                     > <img class="downloadCls" src="css/resources/images/downloadBtn.png" alt="download" title="Download data as CSV"/></a>' +
+                                              '                                    <div class="clear"></div>' +
+                                              '                                </h1>' +
+                                              '                            </div>' +
+                                              '                            <svg id="visualizationDrReplicationRate_' + i + '" width="100%" height="400"></svg>' +
+                                              '                        </div>' +
                                               '                    </div>' +
                                               '                </div>'
 
@@ -1377,7 +1382,7 @@ var loadPage = function (serverName, portid) {
                                               '                        </div>' +
                                               '                        <div class="clear"></div>' +
                                               '                    </div>' +
-                                              '                    <div id="drSection_' + i + '" class="drShowHide" style="display:none;">' +
+                                              '                    <div id="drSection_' + i + '" class="drShowHide_' + i + '" style="'+displayTableCss+'">' +
                                               '                        <div id="drMasterSection_' + i + '" class="masterWrapper" style="display:block;">' +
                                               '                            <div id="tblMAster_wrapper_' + i + '" class="dataTables_wrapper no-footer">' +
                                               '                                <div class="tabs-filter-wrapperDR">' +
@@ -1448,7 +1453,7 @@ var loadPage = function (serverName, portid) {
                                               '</div>';
 
 
-                            $("#dr").append(htmlContent + htmlGraph)
+                            $("#dr").append(htmlContent + htmlGraph + htmlDrTable)
 
                             $("#drPending_" + i).html('');
                             if(drRoleDetail['DRROLE'][i - 1][1] == "PENDING"){
@@ -1470,6 +1475,21 @@ var loadPage = function (serverName, portid) {
                                     $(this).addClass('collapsedDR');
                                 }
                                 $(this).next("div.menu_body").slideToggle(300).siblings("div.menu_body").slideUp("slow");
+                            });
+
+                            $('#showHideDrBlock_2').click(function () {
+                                $(".drShowHide_2").toggle();
+                                var $this = $(this);
+                                var drState = $(".drShowHide_2").css('display');
+                                if (drState == 'none') {
+                                    $this.removeClass('expanded');
+                                    $this.addClass('collapsed');
+
+                                } else {
+                                    $this.removeClass('collapsed');
+                                    $this.addClass('expanded');
+
+                                }
                             });
                      }
                   }
