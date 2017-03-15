@@ -196,6 +196,22 @@ $(document).ready(function () {
         }
     });
 
+    //Show Hide Graph Block
+    $('#showHideImporterGraphBlock').click(function () {
+        var graphState = $("#mainImporterGraphBlock").css('display');
+        if (graphState == 'none') {
+            $(".showhideImporterIcon").removeClass('collapsed');
+            $(".showhideImporterIcon").addClass('expanded');
+        } else {
+            $(".showhideImporterIcon").removeClass('expanded');
+            $(".showhideImporterIcon").addClass('collapsed');
+        }
+        $('#mainImporterGraphBlock').slideToggle();
+
+        //MonitorGraphUI.UpdateCharts();
+    });
+
+
     //DR Show/hide toggle
     // Show Hide Graph Block
     $('#showHideDrBlock').click(function () {
@@ -704,6 +720,11 @@ var loadPage = function (serverName, portid) {
                 } else {
                     saveSessionCookie("current-tab", NavigationTabs.DBMonitor);
                 }
+            } else if (curTab == NavigationTabs.Importer) {
+                $("#overlay").show();
+                setTimeout(function () { $("#navImporter > a").trigger("click"); }, 100);
+            } else{
+                setTimeout(function () { $("#navDbmonitor > a").trigger("click"); }, 100);
             }
         }
     };
@@ -2263,6 +2284,7 @@ var loadPage = function (serverName, portid) {
 
     configureUserPreferences();
     adjustGraphSpacing();
+    adjustImporterGraphSpacing();
     saveThreshold();
 
     $('#showMyHelp').popup();
@@ -2377,7 +2399,8 @@ var NavigationTabs = {
     Admin: 2,
     Schema: 3,
     SQLQuery: 4,
-    DR: 5
+    DR: 5,
+    Importer: 6
 };
 
 var getCurrentTab = function () {
@@ -2398,6 +2421,9 @@ var getCurrentTab = function () {
     } else if (activeLinkId == "navDR"){
         $(".nvtooltip").show();
         return NavigationTabs.DR;
+    } else if (activeLinkId ==  "navImporter"){
+        $(".nvtooltip").show();
+        return NavigationTabs.Importer;
     }
     $(".nvtooltip").show();
     return NavigationTabs.DBMonitor;
@@ -2573,6 +2599,22 @@ var adjustGraphSpacing = function () {
             graphList[i].removeClass("left right");
             graphList[i].addClass(css);
 
+            if (css == "left")
+                css = "right";
+            else
+                css = "left";
+        }
+    }
+};
+
+//Adjust graph spacing for importer graph
+var adjustImporterGraphSpacing = function() {
+    var graphList = [$("#chartOutTransaction"), $("#chartSuccessRate"), $("#chartFailureRate")];
+    var css = "left";
+    for (var i = 0; i < graphList.length; i++) {
+        if (graphList[i].is(':visible')) {
+            graphList[i].removeClass("left right");
+            graphList[i].addClass(css);
             if (css == "left")
                 css = "right";
             else

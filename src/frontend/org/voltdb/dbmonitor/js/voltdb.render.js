@@ -396,6 +396,14 @@ function alertNodeClicked(obj) {
             });
         };
 
+        this.getImporterGraphInformation = function (onInformationLoaded) {
+            var importerDetails = {};
+            VoltDBService.GetImporterInformation(function (connection) {
+                getImporterDetails(connection, importerDetails);
+                onInformationLoaded(importerDetails);
+            });
+        };
+
         //Check if DR is enable or not
         this.GetDrStatusInformation = function (onInformationLoaded) {
             var drStatus = {};
@@ -1316,6 +1324,56 @@ function alertNodeClicked(obj) {
                 sysMemory[hostName]["TIMESTAMP"] = info[colIndex["TIMESTAMP"]];
                 sysMemory[hostName]["PERCENT_USED"] = info[colIndex["PERCENT_USED"]];
             });
+        };
+
+        var getImporterDetails = function (connection, importerDetails) {
+            var colIndex = {};
+            var counter = 0;
+
+            if (connection.Metadata['@Statistics_IMPORTER'] == null) {
+                return;
+            }
+
+            connection.Metadata['@Statistics_IMPORTER'].schema.forEach(function (columnInfo) {
+                if (columnInfo["name"] == "TIMESTAMP" || columnInfo["name"] == "HOSTNAME"
+                || columnInfo["name"] == "SUCCESSES" || columnInfo["name"] == "FAILURES"
+                || columnInfo["name"] == "OUTSTANDING_REQUESTS")
+                    colIndex[columnInfo["name"]] = counter;
+                counter++;
+            });
+
+            if (!importerDetails.hasOwnProperty('DETAILS')) {
+                importerDetails['DETAILS'] = {};
+            }
+
+            if(connection.Metadata['@Statistics_IMPORTER'].data.length > 0){
+                var timeStamp;
+                var success = 0;
+                var failures = 0;
+                var outStanding = 0;
+                var hostName;
+                var rowCount = connection.Metadata['@Statistics_IMPORTER'].data.length
+                connection.Metadata['@Statistics_IMPORTER'].data.forEach(function (info) {
+                    timeStamp = info[colIndex["TIMESTAMP"]];
+                    outStanding = info[colIndex["OUTSTANDING_REQUESTS"]];
+                    hostName = info[colIndex["HOSTNAME"]];
+                    success += info[colIndex["SUCCESSES"]];
+                    failures += info[colIndex["FAILURES"]];
+                });
+
+                importerDetails['DETAILS']["TIMESTAMP"] = timeStamp;
+                importerDetails['DETAILS']["HOSTNAME"] = hostName;
+                importerDetails['DETAILS']["SUCCESSES"] = (success / rowCount) * 100;
+                importerDetails['DETAILS']["FAILURES"] = (failures / rowCount) * 100;
+                importerDetails['DETAILS']["OUTSTANDING_REQUESTS"] = failures;
+            } else {
+                importerDetails['DETAILS']["TIMESTAMP"] = Date.now();
+                importerDetails['DETAILS']["HOSTNAME"] = 'dwnpCpu';
+                importerDetails['DETAILS']["SUCCESSES"] = (Math.floor((Math.random() * 10) + 1) / 2) * 100;
+                importerDetails['DETAILS']["FAILURES"] = (Math.floor((Math.random() * 10) + 1) / 2) * 100;
+                importerDetails['DETAILS']["OUTSTANDING_REQUESTS"] = failures;
+            }
+
         };
 
         var getLiveClientData = function (connection, clientInfo) {
