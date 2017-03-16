@@ -1363,16 +1363,17 @@ function alertNodeClicked(obj) {
 
                 importerDetails['DETAILS']["TIMESTAMP"] = timeStamp;
                 importerDetails['DETAILS']["HOSTNAME"] = hostName;
-                importerDetails['DETAILS']["SUCCESSES"] = (success / rowCount) * 100;
-                importerDetails['DETAILS']["FAILURES"] = (failures / rowCount) * 100;
-                importerDetails['DETAILS']["OUTSTANDING_REQUESTS"] = failures;
-            } else {
-                importerDetails['DETAILS']["TIMESTAMP"] = Date.now();
-                importerDetails['DETAILS']["HOSTNAME"] = 'dwnpCpu';
-                importerDetails['DETAILS']["SUCCESSES"] = (Math.floor((Math.random() * 10) + 1) / 2) * 100;
-                importerDetails['DETAILS']["FAILURES"] = (Math.floor((Math.random() * 10) + 1) / 2) * 100;
-                importerDetails['DETAILS']["OUTSTANDING_REQUESTS"] = failures;
+                importerDetails['DETAILS']["SUCCESSES"] = success / rowCount;
+                importerDetails['DETAILS']["FAILURES"] = failures / rowCount;
+                importerDetails['DETAILS']["OUTSTANDING_REQUESTS"] = outStanding;
             }
+//            else {
+//                importerDetails['DETAILS']["TIMESTAMP"] = Date.now();
+//                importerDetails['DETAILS']["HOSTNAME"] = 'dwnpCpu';
+//                importerDetails['DETAILS']["SUCCESSES"] = (Math.floor((Math.random() * 3) + 1) / 2);
+//                importerDetails['DETAILS']["FAILURES"] = (Math.floor((Math.random() * 3) + 1) / 2);
+//                importerDetails['DETAILS']["OUTSTANDING_REQUESTS"] = 0;//Math.floor((Math.random() * 3) + 1);
+//            }
 
         };
 

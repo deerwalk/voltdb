@@ -69,7 +69,7 @@
                                 <li id="navSchema"><a href="#o">Schema</a></li>
                                 <li id="navSqlQuery"><a href="#">SQL Query</a></li>
                                 <li id="navDR" style="display: none;"><a href="#">DR</a></li>
-                                <li id="navImporter" ><a href="#">Importer</a></li>
+                                <li id="navImporter" style="display: none;"><a href="#">Importer</a></li>
                             </ul>
                         </nav>
                     </div>
@@ -1156,7 +1156,7 @@
                         <ul class="rightShowhideList" id="showHideRightImportList">
                             <li class="viewSelect">
                                 <label>View</label>
-                                <select id="graphView1">
+                                <select id="importerGraphView">
                                     <option selected="selected">Seconds</option>
                                     <option>Minutes</option>
                                     <option>Days</option>
@@ -1167,7 +1167,7 @@
                     <div class="clear"></div>
                 </div>
                 <div id="mainImporterGraphBlock">
-                    <div class="errorMsgLocalStorageFull" style="display:none">
+                    <div class="errorImporterMsgLocalStorageFull" style="display:none">
                         <div class="errorMsgLocalWrapper">
                             <img src="css/resources/images/alert.png" alt="Alert"/>
                         </div>
@@ -1180,16 +1180,16 @@
                         <div id="chartOutTransaction" class="chart">
                             <div class="chartHeader" id="chartOutTransHeader">
                                 <h1>Outstanding Transaction<span class="activeServerName" title=""></span>
-                                <a href="#" class="downloadBtnChart" onclick='downloadCSV(event, { filename: "cpu-data" }, "cpu");'> <img class="downloadCls" src="css/resources/images/downloadBtn.png" alt="download" title="Download data as CSV"/></a>
+                                <a href="#" class="downloadBtnChart" onclick='downloadCSV(event, { filename: "outstanding-transaction-data" }, "outTrans");'> <img class="downloadCls" src="css/resources/images/downloadBtn.png" alt="download" title="Download data as CSV"/></a>
                                 <div class="clear"></div>
                                 </h1>
                             </div>
                             <svg id="visualisationOutTrans" width="100%" height="350"></svg>
                         </div>
                         <div id="chartSuccessRate" class="chart">
-                            <div class="chartHeader" id="chartSuccessRatgeHeader">
+                            <div class="chartHeader" id="chartSuccessRateHeader">
                                 <h1>Success Rate<span class="activeServerName" title=""></span>
-                                 <a href="#" class="downloadBtnChart" onclick='downloadCSV(event, { filename: "memory-data" }, "memory");'> <img class="downloadCls" src="css/resources/images/downloadBtn.png" alt="download" title="Download data as CSV"/></a>
+                                 <a href="#" class="downloadBtnChart" onclick='downloadCSV(event, { filename: "success-rate-data" }, "successRate");'> <img class="downloadCls" src="css/resources/images/downloadBtn.png" alt="download" title="Download data as CSV"/></a>
                                 <div class="clear"></div>
                                 </h1>
                             </div>
@@ -1198,7 +1198,7 @@
                         <div id="chartFailureRate" class="chart">
                             <div class="chartHeader">
                                 <h1>Failure Rate<span class="activeServerName" title=""></span>
-                                <a href="#" class="downloadBtnChart" onclick='downloadCSV(event, { filename: "clusterTransaction-data" }, "transaction");'> <img class="downloadCls" src="css/resources/images/downloadBtn.png" alt="download" title="Download data as CSV"/></a>
+                                <a href="#" class="downloadBtnChart" onclick='downloadCSV(event, { filename: "failure-rate-data" }, "failureRate");'> <img class="downloadCls" src="css/resources/images/downloadBtn.png" alt="download" title="Download data as CSV"/></a>
                                 <div class="clear"></div>
                                 </h1>
                             </div>

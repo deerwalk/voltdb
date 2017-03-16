@@ -5,6 +5,7 @@
         var RETAINED_TIME_INTERVAL = 60; //60 means graph data within 60 minutes time interval will be stored in local storage.
         var currentView = "Seconds";
         var currentViewDr = "Seconds";
+        var currentViewImporter = "Seconds"
         var cpuSecCount = 0;
         var cpuMinCount = 0;
         var cmdLogSecCount = 0;
@@ -19,6 +20,12 @@
         var partitionMinCount = 0;
         var drSecCount = 0;
         var drMinCount = 0;
+        var outTransSecCount = 0;
+        var outTransMinCount = 0;
+        var successRateSecCount = 0;
+        var successRateMinCount = 0;
+        var failureRateSecCount = 0;
+        var failureRateMinCount = 0;
         var totalEmptyData = 121;
         var totalEmptyDataForMinutes = 121;
         var totalEmptyDataForDays = 360;
@@ -28,6 +35,9 @@
         var transactionChart;
         var partitionChart;
         var drReplicationChart;
+        var outTransChart;
+        var successRateChart;
+        var failureRateChart;
         var drReplicationCharts = {};
         var cmdLogChart;
         var cmdLogOverlay = [];
@@ -41,6 +51,9 @@
         var ChartTransactions = nv.models.lineChart();
         var ChartPartitionIdleTime = nv.models.lineChart();
         var ChartDrReplicationRate = nv.models.lineChart();
+        var ChartOutTrans = nv.models.lineChart();
+        var ChartSuccessRate =  nv.models.lineChart();
+        var ChartFailureRate = nv.models.lineChart();
         var drChartList = {}
         var ChartCommandlog = nv.models.lineChart();
         var dataMapperSec = {};
@@ -207,6 +220,24 @@
             "key": "CPU",
             "values": getEmptyDataOptimized(),
             "color": "rgb(164, 136, 5)"
+        }];
+
+        var dataOutTrans = [{
+            "key": "Outstanding Transactions",
+            "values": getEmptyDataOptimized(),
+            "color": "rgb(164, 136, 5)"
+        }];
+
+        var dataSuccessRate = [{
+            "key": "Success Rate",
+            "values": getEmptyDataOptimized(),
+            "color": "rgb(164, 136, 5)"
+        }];
+
+        var dataFailureRate = [{
+            "key": "Failure Rate",
+            "values": getEmptyDataOptimized(),
+            "color": "rgb(27, 135, 200)"
         }];
 
         var dataRam = [{
@@ -441,6 +472,102 @@
            callback:function() {
                ChartCommandlog.useInteractiveGuideline(true);
                return ChartCommandlog;
+           }
+        });
+
+        nv.addGraph({
+            generate: function () {
+                ChartOutTrans.xAxis
+                    .tickFormat(function (d) {
+                        return d3.time.format('%X')(new Date(d));
+                    });
+
+                ChartOutTrans.xAxis.rotateLabels(-20);
+
+                ChartOutTrans.yAxis
+                    .tickFormat(d3.format(',.2f'));
+
+                ChartOutTrans.yAxis
+                    .axisLabel('(%)')
+                    .axisLabelDistance(10);
+
+                ChartOutTrans.margin({ left: 100 });
+                ChartOutTrans.lines.forceY([0, 0.1]);
+
+                d3.select('#visualisationOutTrans')
+                    .datum(dataOutTrans)
+                    .transition().duration(500)
+                    .call(ChartOutTrans);
+
+                nv.utils.windowResize(ChartOutTrans.update);
+           },
+           callback:function() {
+               ChartOutTrans.useInteractiveGuideline(true);
+               return ChartOutTrans;
+           }
+        });
+
+        nv.addGraph({
+            generate: function () {
+                ChartSuccessRate.xAxis
+                    .tickFormat(function (d) {
+                        return d3.time.format('%X')(new Date(d));
+                    });
+
+                ChartSuccessRate.xAxis.rotateLabels(-20);
+
+                ChartSuccessRate.yAxis
+                    .tickFormat(d3.format(',.2f'));
+
+                ChartSuccessRate.yAxis
+                    .axisLabel('(%)')
+                    .axisLabelDistance(10);
+
+                ChartSuccessRate.margin({ left: 100 });
+                ChartSuccessRate.lines.forceY([0, 0.1]);
+
+                d3.select('#visualisationSuccessRate')
+                    .datum(dataSuccessRate)
+                    .transition().duration(500)
+                    .call(ChartSuccessRate);
+
+                nv.utils.windowResize(ChartSuccessRate.update);
+           },
+           callback:function() {
+               ChartSuccessRate.useInteractiveGuideline(true);
+               return ChartSuccessRate;
+           }
+        });
+
+        nv.addGraph({
+            generate: function () {
+                ChartFailureRate.xAxis
+                    .tickFormat(function (d) {
+                        return d3.time.format('%X')(new Date(d));
+                    });
+
+                ChartFailureRate.xAxis.rotateLabels(-20);
+
+                ChartFailureRate.yAxis
+                    .tickFormat(d3.format(',.2f'));
+
+                ChartFailureRate.yAxis
+                    .axisLabel('(%)')
+                    .axisLabelDistance(10);
+
+                ChartFailureRate.margin({ left: 100 });
+                ChartFailureRate.lines.forceY([0, 0.1]);
+
+                d3.select('#visualisationFailureRate')
+                    .datum(dataFailureRate)
+                    .transition().duration(500)
+                    .call(ChartFailureRate);
+
+                nv.utils.windowResize(ChartFailureRate.update);
+           },
+           callback:function() {
+               ChartFailureRate.useInteractiveGuideline(true);
+               return ChartFailureRate;
            }
         });
 
@@ -740,6 +867,36 @@
             changeDrAxisTimeFormat(view)
         }
 
+        this.AddImporterGraph = function (view, outTransChartObj, successRateChartObj, failureRateChartObj) {
+            outTransChart = outTransChartObj;
+            successRateChart = successRateChartObj;
+            failureRateChart = failureRateChartObj;
+            currentViewImporter = view;
+
+            Monitors['outTransData'] = getEmptyDataOptimized();
+            Monitors['outTransDataMin'] = getEmptyDataForMinutesOptimized();
+            Monitors['outTransDataDay'] = getEmptyDataForDaysOptimized();
+            Monitors['outTransFirstData'] = true;
+            Monitors['outTransMaxTimeStamp'] = null;
+
+            Monitors['successRateData'] = getEmptyDataOptimized();
+            Monitors['successRateDataMin'] = getEmptyDataForMinutesOptimized();
+            Monitors['successRateDataDay'] = getEmptyDataForDaysOptimized();
+            Monitors['successRateFirstData'] = true;
+            Monitors['successRateMaxTimeStamp'] = null;
+
+            Monitors['failureRateData'] = getEmptyDataOptimized();
+            Monitors['failureRateDataMin'] = getEmptyDataForMinutesOptimized();
+            Monitors['failureRateDataDay'] = getEmptyDataForDaysOptimized();
+            Monitors['failureRateFirstData'] = true;
+            Monitors['failureRateMaxTimeStamp'] = null;
+
+            dataOutTrans[0]["values"] = getEmptyDataForView(view);
+            dataSuccessRate[0]["values"] = getEmptyDataForView(view);
+            dataFailureRate[0]["values"] = getEmptyDataForView(view);
+            changeAxisTimeFormat(view);
+        };
+
         this.RefreshGraph = function (view) {
             currentView = view;
             if (view == 'Days') {
@@ -766,7 +923,7 @@
             }
 
             nv.utils.windowResize(ChartCpu.update);
-            changeAxisTimeFormat(view);
+            changeImporterAxisTimeFormat(view);
         };
 
         this.RefreshDrGraph = function (view) {
@@ -787,6 +944,25 @@
             changeDrAxisTimeFormat(view);
         };
 
+        this.RefreshImporterGraph = function (view) {
+            currentViewImporter = view;
+            if (view == 'Days') {
+                dataOutTrans[0]["values"] = Monitors.outTransDataDay;
+                dataSuccessRate[0]["values"] = Monitors.successRateDataDay;
+                dataFailureRate[0]["values"] = Monitors.failureRateDataDay;
+            } else if (view == 'Minutes') {
+                dataOutTrans[0]["values"] = Monitors.outTransDataMin;
+                dataSuccessRate[0]["values"] = Monitors.failureRateDataMin;
+                dataFailureRate[0]["values"] = Monitors.failureRateDataMin;
+            } else {
+                dataOutTrans[0]["values"] = Monitors.outTransData;
+                dataSuccessRate[0]["values"] = Monitors.successRateData;
+                dataFailureRate[0]["values"] = Monitors.failureRateData;
+            }
+
+            changeImporterAxisTimeFormat(view);
+        };
+
         this.UpdateCharts = function () {
             if (ramChart.is(":visible"))
                 ChartRam.update();
@@ -805,6 +981,17 @@
 
             if (cmdLogChart.is(":visible"))
                 ChartCommandlog.update();
+        };
+
+        this.UpdateImporterCharts = function () {
+            if (outTransChart.is(":visible"))
+                ChartOutTrans.update();
+
+            if (successRateChart.is(":visible"))
+                ChartSuccessRate.update();
+
+            if (failureRateChart.is(":visible"))
+                ChartFailureRate.update();
         };
 
         this.UpdateDrCharts = function () {
@@ -909,6 +1096,26 @@
                         });
                 }
             }
+        };
+
+        var changeImporterAxisTimeFormat = function (view) {
+            var dateFormat = '%X';
+            if (view == 'Days')
+                dateFormat = '%d %b %X';
+
+            ChartOutTrans.xAxis
+                .tickFormat(function (d) {
+                    return d3.time.format(dateFormat)(new Date(d));
+                });
+            ChartSuccessRate.xAxis
+                .tickFormat(function (d) {
+                    return d3.time.format(dateFormat)(new Date(d));
+                });
+            ChartFailureRate.xAxis
+                .tickFormat(function (d) {
+                    return d3.time.format(dateFormat)(new Date(d));
+                });
+
         };
 
         var dataView = {
@@ -1512,7 +1719,7 @@
                     cpuDataMin = sliceFirstData(cpuDataMin, dataView.Minutes);
                     if (timeStamp == monitor.cpuMaxTimeStamp) {
                         cpuDataMin.push({ "x": new Date(timeStamp), "y": cpuDataMin[cpuDataMin.length - 1].y });
-                        cpuDetailsArrMin = saveLocalStorageInterval(cpuDetailsArrMin, {"timestamp": new Date(timeStamp), "percentUsed": cpuData[cpuData.length - 1].y}, MonitorGraphUI.timeUnit.min  )
+                        cpuDetailsArrMin = saveLocalStorageInterval(cpuDetailsArrMin, {"timestamp": new Date(timeStamp), "percentUsed": cpuDataMin[cpuDataMin.length - 1].y}, MonitorGraphUI.timeUnit.min  )
                     } else {
                         cpuDataMin.push({ "x": new Date(timeStamp), "y": percentageUsage });
                         cpuDetailsArrMin = saveLocalStorageInterval(cpuDetailsArrMin, {"timestamp": new Date(timeStamp), "percentUsed": percentageUsage}, MonitorGraphUI.timeUnit.min  )
@@ -1524,7 +1731,7 @@
                     cpuDataDay = sliceFirstData(cpuDataDay, dataView.Days);
                     if (timeStamp == monitor.cpuMaxTimeStamp) {
                         cpuDataDay.push({ "x": new Date(timeStamp), "y": cpuDataDay[cpuDataDay.length - 1].y });
-                        cpuDetailsArrDay = saveLocalStorageInterval(cpuDetailsArrDay, {"timestamp": new Date(timeStamp), "percentUsed": cpuData[cpuData.length - 1].y}, MonitorGraphUI.timeUnit.day  )
+                        cpuDetailsArrDay = saveLocalStorageInterval(cpuDetailsArrDay, {"timestamp": new Date(timeStamp), "percentUsed": cpuDataDay[cpuDataDay.length - 1].y}, MonitorGraphUI.timeUnit.day  )
                     } else {
                         cpuDataDay.push({ "x": new Date(timeStamp), "y": percentageUsage });
                         cpuDetailsArrDay = saveLocalStorageInterval(cpuDetailsArrDay, {"timestamp": new Date(timeStamp), "percentUsed": percentageUsage}, MonitorGraphUI.timeUnit.day )
@@ -2258,6 +2465,417 @@
                         drChartList['ChartDrReplicationRate_' + drChartIds[i]].update();
                 }
             }
+        };
+
+        this.RefreshOutTransGraph = function (outTransDetails, graphView, currentTab) {
+            debugger;
+            var monitor = Monitors;
+            var outTransDetailsArr = []
+            var outTransDetailsArrMin = []
+            var outTransDetailsArrDay = []
+
+            var outTransData = monitor.outTransData;
+            var outTransDataMin = monitor.outTransDataMin;
+            var outTransDataDay = monitor.outTransDataDay;
+            var outTransDetail = outTransDetails;
+
+            if ($.isEmptyObject(outTransDetail) || outTransDetail == undefined || !outTransDetail.hasOwnProperty('DETAILS')
+            || outTransDetail['DETAILS'].OUTSTANDING_REQUESTS == undefined || outTransDetail['DETAILS'].TIMESTAMP == undefined)
+                return;
+
+            if(localStorage.outTransDetailsMin != undefined)
+                outTransDetailsArrMin = getFormattedDataFromLocalStorage(JSON.parse(localStorage.outTransDetailsMin))
+            else {
+                outTransDetailsArrMin = JSON.stringify(convertDataFormat(outTransDataMin, 'timestamp', 'outstandingRequest'))
+                outTransDetailsArrMin = JSON.parse(outTransDetailsArrMin)
+            }
+
+            if(localStorage.outTransDetailsDay != undefined)
+                outTransDetailsArrDay = getFormattedDataFromLocalStorage(JSON.parse(localStorage.outTransDetailsDay))
+            else {
+                outTransDetailsArrDay = JSON.stringify(convertDataFormat(outTransDataDay, 'timestamp', 'outstandingRequest'))
+                outTransDetailsArrDay = JSON.parse(outTransDetailsArrDay)
+            }
+
+            if(localStorage.outTransDetails != undefined){
+                outTransDetailsArr = getFormattedDataFromLocalStorage(JSON.parse(localStorage.outTransDetails))
+            } else {
+                outTransDetailsArr =  JSON.stringify(convertDataFormat(outTransData, 'timestamp', 'outstandingRequest'))
+                outTransDetailsArr =  JSON.parse(outTransDetailsArr)
+            }
+
+            if(monitor.outTransFirstData){
+                if(outTransDetailsArr.length > 0 && !(currentTime.getTime() - (new Date(outTransDetailsArr[outTransDetailsArr.length - 1].timestamp)).getTime() > MonitorGraphUI.enumMaxTimeGap.secGraph)){
+                    outTransData = []
+                    for(var i = 0; i< outTransDetailsArr.length; i++){
+                        outTransData = sliceFirstData(outTransData, dataView.Seconds);
+                        outTransData.push({"x": new Date(outTransDetailsArr[i].timestamp),
+                            "y": outTransDetailsArr[i].outstandingRequest
+                        })
+                    }
+                }
+
+                if(outTransDetailsArrMin.length > 0 && !(currentTime.getTime() - (new Date(outTransDetailsArrMin[outTransDetailsArrMin.length - 1].timestamp)).getTime() > MonitorGraphUI.enumMaxTimeGap.minGraph)){
+                    outTransDataMin = []
+                    for(var j = 0; j< outTransDetailsArrMin.length; j++){
+                        outTransDataMin = sliceFirstData(outTransDataMin, dataView.Minutes);
+                        outTransDataMin.push({"x": new Date(outTransDetailsArrMin[j].timestamp),
+                            "y": outTransDetailsArrMin[j].outstandingRequest
+                        })
+                    }
+                }
+
+                if(outTransDetailsArrDay.length > 0 && !(currentTime.getTime() - (new Date(outTransDetailsArrDay[outTransDetailsArrDay.length - 1].timestamp)).getTime() > MonitorGraphUI.enumMaxTimeGap.dayGraph)){
+                    outTransDataDay = []
+                    for(var k = 0; k< outTransDetailsArrDay.length; k++){
+                        outTransDataDay = sliceFirstData(outTransDataDay, dataView.Days );
+                        outTransDataDay.push({"x": new Date(outTransDetailsArrDay[k].timestamp),
+                            "y": outTransDetailsArrDay[k].outstandingRequest
+                        })
+                    }
+                }
+            }
+
+            var outstandingRequest = outTransDetail["DETAILS"].OUTSTANDING_REQUESTS * 1;
+            var timeStamp = outTransDetail["DETAILS"].TIMESTAMP;
+
+
+            if (timeStamp >= monitor.outTransMaxTimeStamp) {
+                if (outTransSecCount >= 6 || monitor.outTransFirstData) {
+                    outTransDataMin = sliceFirstData(outTransDataMin, dataView.Minutes);
+                    if (timeStamp == monitor.outTransMaxTimeStamp) {
+                        outTransDataMin.push({ "x": new Date(timeStamp), "y": outTransDataMin[outTransDataMin.length - 1].y });
+                        outTransDetailsArrMin = saveLocalStorageInterval(outTransDetailsArrMin, {"timestamp": new Date(timeStamp), "outstandingRequest": outTransDataMin[outTransDataMin.length - 1].y}, MonitorGraphUI.timeUnit.min  )
+                    } else {
+                        outTransDataMin.push({ "x": new Date(timeStamp), "y": outstandingRequest });
+                        outTransDetailsArrMin = saveLocalStorageInterval(outTransDetailsArrMin, {"timestamp": new Date(timeStamp), "outstandingRequest": outstandingRequest}, MonitorGraphUI.timeUnit.min  )
+                    }
+                    Monitors.outTransDataMin = outTransDataMin;
+                    outTransSecCount = 0;
+                }
+                if (outTransMinCount >= 60 || monitor.outTransFirstData) {
+                    outTransDataDay = sliceFirstData(outTransDataDay, dataView.Days);
+                    if (timeStamp == monitor.outTransMaxTimeStamp) {
+                        outTransDataDay.push({ "x": new Date(timeStamp), "y": outTransDataDay[outTransDataDay.length - 1].y });
+                        outTransDetailsArrDay = saveLocalStorageInterval(outTransDetailsArrDay, {"timestamp": new Date(timeStamp), "outstandingRequest": outTransDataDay[outTransDataDay.length - 1].y}, MonitorGraphUI.timeUnit.day  )
+                    } else {
+                        outTransDataDay.push({ "x": new Date(timeStamp), "y": outstandingRequest });
+                        outTransDetailsArrDay = saveLocalStorageInterval(outTransDetailsArrDay, {"timestamp": new Date(timeStamp), "outstandingRequest": outstandingRequest}, MonitorGraphUI.timeUnit.day )
+                    }
+                    Monitors.outTransDataDay = outTransDataDay;
+                    outTransMinCount = 0;
+                }
+                outTransData = sliceFirstData(outTransData, dataView.Seconds);
+                if (timeStamp == monitor.outTransMaxTimeStamp) {
+                    outTransData.push({ "x": new Date(timeStamp), "y": outTransData[outTransData.length - 1].y });
+                    outTransDetailsArr = saveLocalStorageInterval(outTransDetailsArr, {"timestamp": new Date(timeStamp), "outstandingRequest": outTransData[outTransData.length - 1].y}, MonitorGraphUI.timeUnit.sec  )
+                } else {
+                    outTransData.push({ "x": new Date(timeStamp), "y": outstandingRequest });
+                    outTransDetailsArr = saveLocalStorageInterval(outTransDetailsArr, {"timestamp": new Date(timeStamp), "outstandingRequest": outstandingRequest}, MonitorGraphUI.timeUnit.sec  )
+                }
+                try{
+                    $(".errorImporterMsgLocalStorageFull").hide();
+                    localStorage.outTransDetails = JSON.stringify(outTransDetailsArr)
+                    localStorage.outTransDetailsMin = JSON.stringify(outTransDetailsArrMin)
+                    localStorage.outTransDetailsDay = JSON.stringify(outTransDetailsArrDay)
+                } catch(e) {
+                    $(".errorImporterMsgLocalStorageFull").show();
+                }
+                Monitors.outTransData = outTransData;
+                monitor.outTransFirstData = false;
+
+                if (graphView == 'Minutes')
+                    dataOutTrans[0]["values"] = outTransDataMin;
+                else if (graphView == 'Days')
+                    dataOutTrans[0]["values"] = outTransDataDay;
+                else {
+                    dataOutTrans[0]["values"] = outTransData;
+
+                }
+
+                if (currentTab == NavigationTabs.Importer && currentView == graphView && outTransChart.is(":visible")) {
+                    d3.select('#visualisationOutTrans')
+                        .datum(dataOutTrans)
+                        .transition().duration(500)
+                        .call(ChartOutTrans);
+                }
+            }
+            if (timeStamp > monitor.outTransMaxTimeStamp)
+                monitor.outTransMaxTimeStamp = timeStamp;
+            outTransSecCount++;
+            outTransMinCount++;
+        };
+
+        this.RefreshSuccessRateGraph = function (successRateDetails, graphView, currentTab) {
+            var monitor = Monitors;
+            var dataSuccessRateSec = monitor.successRateData;
+            var dataSuccessRateMin = monitor.successRateDataMin;
+            var dataSuccessRateDay = monitor.successRateDataDay;
+            var successRateDetail = successRateDetails;
+            var x = 0;
+            var y = 0;
+            var successRateDetailsArr = []
+            var successRateDetailsArrMin = []
+            var successRateDetailsArrDay = []
+
+            if ($.isEmptyObject(successRateDetail) || successRateDetail == undefined || successRateDetail['DETAILS'].SUCCESSES == undefined
+            || successRateDetail['DETAILS'].TIMESTAMP == undefined)
+                return;
+
+            if(localStorage.successRateDetailsMin != undefined){
+                successRateDetailsArrMin = getFormattedDataFromLocalStorage(JSON.parse(localStorage.successRateDetailsMin))
+            } else {
+                successRateDetailsArrMin = JSON.stringify(convertDataFormat(dataSuccessRateMin, 'timestamp', 'successRate'))
+                successRateDetailsArrMin = JSON.parse(successRateDetailsArrMin)
+            }
+
+
+            if(localStorage.successRateDetails != undefined){
+                successRateDetailsArr = getFormattedDataFromLocalStorage(JSON.parse(localStorage.successRateDetails))
+            } else {
+                successRateDetailsArr = JSON.stringify(convertDataFormat(dataSuccessRateSec, 'timestamp', 'successRate'))
+                successRateDetailsArr = JSON.parse(successRateDetailsArr)
+            }
+
+            if(localStorage.successRateDetailsDay != undefined){
+                successRateDetailsArrDay = getFormattedDataFromLocalStorage(JSON.parse(localStorage.successRateDetailsDay))
+            } else {
+                successRateDetailsArrDay = JSON.stringify(convertDataFormat(dataSuccessRateDay, 'timestamp', 'successRate'))
+                successRateDetailsArrDay = JSON.parse(successRateDetailsArrDay)
+            }
+
+            if(monitor.successRateFirstData){
+                if(successRateDetailsArr.length > 0 && !(currentTime.getTime() - (new Date(successRateDetailsArr[successRateDetailsArr.length - 1].timestamp)).getTime() > MonitorGraphUI.enumMaxTimeGap.secGraph)){
+                    dataSuccessRateSec = []
+                    for(var i = 0; i< successRateDetailsArr.length; i++){
+                        dataSuccessRateSec = sliceFirstData(dataSuccessRateSec, dataView.Seconds);
+                        dataSuccessRateSec.push({"x": new Date(successRateDetailsArr[i].timestamp),
+                            "y": successRateDetailsArr[i].successRate
+                        })
+                    }
+                }
+                if(successRateDetailsArrMin.length > 0 && !(currentTime.getTime() - (new Date(successRateDetailsArrMin[successRateDetailsArrMin.length - 1].timestamp)).getTime() > MonitorGraphUI.enumMaxTimeGap.minGraph)){
+                    dataSuccessRateMin = []
+                    for(var j = 0; j< successRateDetailsArrMin.length; j++){
+                        dataSuccessRateMin = sliceFirstData(dataSuccessRateMin, dataView.Minutes);
+                        dataSuccessRateMin.push({"x": new Date(successRateDetailsArrMin[j].timestamp),
+                            "y": successRateDetailsArrMin[j].successRate
+                        })
+                    }
+                }
+
+                if(successRateDetailsArrDay.length > 0 && !(currentTime.getTime() - (new Date(successRateDetailsArrDay[successRateDetailsArrDay.length - 1].timestamp)).getTime() > MonitorGraphUI.enumMaxTimeGap.dayGraph)){
+                    dataSuccessRateDay = []
+                    for(var k = 0; k< successRateDetailsArrDay.length; k++){
+                        dataSuccessRateDay = sliceFirstData(dataSuccessRateDay, dataView.Days);
+                        dataSuccessRateDay.push({"x": new Date(successRateDetailsArrDay[k].timestamp),
+                            "y": successRateDetailsArrDay[k].successRate
+                        })
+                    }
+                }
+            }
+
+            var successRateTimeStamp = new Date(successRateDetail['DETAILS'].TIMESTAMP);
+
+            if (successRateTimeStamp >= monitor.successRateMaxTimeStamp) {
+                var successRate = successRateDetail['DETAILS'].SUCCESSES * 1;
+
+                if (successRateSecCount >= 6 || monitor.successRateFirstData) {
+                    dataSuccessRateMin = sliceFirstData(dataSuccessRateMin, dataView.Minutes);
+                    if (successRateTimeStamp == monitor.successRateMaxTimeStamp) {
+                        dataSuccessRateMin.push({ "x": new Date(successRateTimeStamp), "y": dataSuccessRateMin[dataSuccessRateMin.length - 1].y });
+                        successRateDetailsArrMin = saveLocalStorageInterval(successRateDetailsArrMin, {"timestamp": new Date(successRateTimeStamp), "successRate": dataSuccessRateMin[dataSuccessRateMin.length - 1].y })
+                    } else {
+                        dataSuccessRateMin.push({ 'x': new Date(successRateTimeStamp), 'y': successRate });
+                        successRateDetailsArrMin = saveLocalStorageInterval(successRateDetailsArrMin, {"timestamp": new Date(successRateTimeStamp), "successRate": successRate })
+                    }
+                    Monitors.successRateDataMin = dataSuccessRateMin;
+                    successRateSecCount = 0;
+                }
+
+                if (successRateMinCount >= 60 || monitor.successRateFirstData) {
+                    dataSuccessRateDay = sliceFirstData(dataSuccessRateDay, dataView.Days);
+                    if (successRateTimeStamp == monitor.successRateMaxTimeStamp) {
+                        dataSuccessRateDay.push({ "x": new Date(successRateTimeStamp), "y": dataSuccessRateDay[dataSuccessRateDay.length - 1].y });
+                        successRateDetailsArrDay = saveLocalStorageInterval(successRateDetailsArrDay, {"timestamp": new Date(successRateTimeStamp), "successRate": dataSuccessRateDay[dataSuccessRateDay.length - 1].y})
+                    } else {
+                        dataSuccessRateDay.push({ 'x': new Date(successRateTimeStamp), 'y': successRate });
+                        successRateDetailsArrDay = saveLocalStorageInterval(successRateDetailsArrDay, {"timestamp": new Date(successRateTimeStamp), "successRate": successRate})
+                    }
+                    Monitors.successRateDataDay = dataSuccessRateDay;
+                    successRateMinCount = 0;
+                }
+
+                dataSuccessRateSec = sliceFirstData(dataSuccessRateSec, dataView.Seconds);
+                if (successRateTimeStamp == monitor.successRateMaxTimeStamp) {
+                    dataSuccessRateSec.push({ "x": new Date(successRateTimeStamp), "y": dataSuccessRateSec[dataSuccessRateSec.length - 1].y });
+                    successRateDetailsArr = saveLocalStorageInterval(successRateDetailsArr, {"timestamp": new Date(successRateTimeStamp), "successRate": dataSuccessRateSec[dataSuccessRateSec.length - 1].y})
+                } else {
+                    dataSuccessRateSec.push({ 'x': new Date(successRateTimeStamp), 'y': successRate });
+                    successRateDetailsArr = saveLocalStorageInterval(successRateDetailsArr, {"timestamp": new Date(successRateTimeStamp), "successRate": successRate})
+                }
+                Monitors.successRateData = dataSuccessRateSec;
+
+
+                localStorage.successRateDetails = JSON.stringify(successRateDetailsArr)
+                localStorage.successRateDetailsMin = JSON.stringify(successRateDetailsArrMin)
+                localStorage.successRateDetailsDay = JSON.stringify(successRateDetailsArrDay)
+
+                if (graphView == 'Minutes')
+                    dataSuccessRate[0]["values"] = dataSuccessRateMin;
+                else if (graphView == 'Days')
+                    dataSuccessRate[0]["values"] = dataSuccessRateDay;
+                else
+                    dataSuccessRate[0]["values"] = dataSuccessRateSec;
+
+                if (currentTab == NavigationTabs.Importer && currentView == graphView && successRateChart.is(":visible")) {
+                    d3.select('#visualisationSuccessRate')
+                        .datum(dataSuccessRate)
+                        .transition().duration(500)
+                        .call(ChartSuccessRate);
+                }
+                monitor.successRateFirstData = false;
+            }
+            if (successRateTimeStamp > monitor.successRateMaxTimeStamp)
+                monitor.successRateMaxTimeStamp = successRateTimeStamp;
+            successRateSecCount++;
+            successRateMinCount++;
+        };
+
+        this.RefreshFailureRateGraph = function (failureRateDetails, graphView, currentTab) {
+            var monitor = Monitors;
+            var dataFailureRateSec = monitor.failureRateData;
+            var dataFailureRateMin = monitor.failureRateDataMin;
+            var dataFailureRateDay = monitor.failureRateDataDay;
+            var failureRateDetail = failureRateDetails;
+            var x = 0;
+            var y = 0;
+            var failureRateDetailsArr = []
+            var failureRateDetailsArrMin = []
+            var failureRateDetailsArrDay = []
+
+            if ($.isEmptyObject(failureRateDetail) || failureRateDetail == undefined || failureRateDetail['DETAILS'].FAILURES == undefined
+            || failureRateDetail['DETAILS'].TIMESTAMP == undefined)
+                return;
+
+            if(localStorage.failureRateDetailsMin != undefined){
+                failureRateDetailsArrMin = getFormattedDataFromLocalStorage(JSON.parse(localStorage.failureRateDetailsMin))
+            } else {
+                failureRateDetailsArrMin = JSON.stringify(convertDataFormat(dataFailureRateMin, 'timestamp', 'failureRate'))
+                failureRateDetailsArrMin = JSON.parse(failureRateDetailsArrMin)
+            }
+
+
+            if(localStorage.failureRateDetails != undefined){
+                failureRateDetailsArr = getFormattedDataFromLocalStorage(JSON.parse(localStorage.failureRateDetails))
+            } else {
+                failureRateDetailsArr = JSON.stringify(convertDataFormat(dataFailureRateSec, 'timestamp', 'failureRate'))
+                failureRateDetailsArr = JSON.parse(failureRateDetailsArr)
+            }
+
+            if(localStorage.failureRateDetailsDay != undefined){
+                failureRateDetailsArrDay = getFormattedDataFromLocalStorage(JSON.parse(localStorage.failureRateDetailsDay))
+            } else {
+                failureRateDetailsArrDay = JSON.stringify(convertDataFormat(dataFailureRateDay, 'timestamp', 'failureRate'))
+                failureRateDetailsArrDay = JSON.parse(failureRateDetailsArrDay)
+            }
+
+            if(monitor.failureRateFirstData){
+                if(failureRateDetailsArr.length > 0 && !(currentTime.getTime() - (new Date(failureRateDetailsArr[failureRateDetailsArr.length - 1].timestamp)).getTime() > MonitorGraphUI.enumMaxTimeGap.secGraph)){
+                    dataFailureRateSec = []
+                    for(var i = 0; i< failureRateDetailsArr.length; i++){
+                        dataFailureRateSec = sliceFirstData(dataFailureRateSec, dataView.Seconds);
+                        dataFailureRateSec.push({"x": new Date(failureRateDetailsArr[i].timestamp),
+                            "y": failureRateDetailsArr[i].failureRate
+                        })
+                    }
+                }
+                if(failureRateDetailsArrMin.length > 0 && !(currentTime.getTime() - (new Date(failureRateDetailsArrMin[failureRateDetailsArrMin.length - 1].timestamp)).getTime() > MonitorGraphUI.enumMaxTimeGap.minGraph)){
+                    dataFailureRateMin = []
+                    for(var j = 0; j< failureRateDetailsArrMin.length; j++){
+                        dataFailureRateMin = sliceFirstData(dataFailureRateMin, dataView.Minutes);
+                        dataFailureRateMin.push({"x": new Date(failureRateDetailsArrMin[j].timestamp),
+                            "y": failureRateDetailsArrMin[j].failureRate
+                        })
+                    }
+                }
+
+                if(failureRateDetailsArrDay.length > 0 && !(currentTime.getTime() - (new Date(failureRateDetailsArrDay[failureRateDetailsArrDay.length - 1].timestamp)).getTime() > MonitorGraphUI.enumMaxTimeGap.dayGraph)){
+                    dataFailureRateDay = []
+                    for(var k = 0; k< failureRateDetailsArrDay.length; k++){
+                        dataFailureRateDay = sliceFirstData(dataFailureRateDay, dataView.Days);
+                        dataFailureRateDay.push({"x": new Date(failureRateDetailsArrDay[k].timestamp),
+                            "y": failureRateDetailsArrDay[k].failureRate
+                        })
+                    }
+                }
+            }
+
+            var failureRateTimeStamp = new Date(failureRateDetail['DETAILS'].TIMESTAMP);
+
+            if (failureRateTimeStamp >= monitor.failureRateMaxTimeStamp) {
+                var failureRate = failureRateDetail['DETAILS'].FAILURES * 1;
+
+                if (failureRateSecCount >= 6 || monitor.failureRateFirstData) {
+                    dataFailureRateMin = sliceFirstData(dataFailureRateMin, dataView.Minutes);
+                    if (failureRateTimeStamp == monitor.failureRateMaxTimeStamp) {
+                        dataFailureRateMin.push({ "x": new Date(failureRateTimeStamp), "y": dataFailureRateMin[dataFailureRateMin.length - 1].y });
+                        failureRateDetailsArrMin = saveLocalStorageInterval(failureRateDetailsArrMin, {"timestamp": new Date(failureRateTimeStamp), "failureRate": dataFailureRateMin[dataFailureRateMin.length - 1].y })
+                    } else {
+                        dataFailureRateMin.push({ 'x': new Date(failureRateTimeStamp), 'y': failureRate });
+                        failureRateDetailsArrMin = saveLocalStorageInterval(failureRateDetailsArrMin, {"timestamp": new Date(failureRateTimeStamp), "failureRate": failureRate })
+                    }
+                    Monitors.failureRateDataMin = dataFailureRateMin;
+                    failureRateSecCount = 0;
+                }
+
+                if (failureRateMinCount >= 60 || monitor.failureRateFirstData) {
+                    dataFailureRateDay = sliceFirstData(dataFailureRateDay, dataView.Days);
+                    if (failureRateTimeStamp == monitor.failureRateMaxTimeStamp) {
+                        dataFailureRateDay.push({ "x": new Date(failureRateTimeStamp), "y": dataFailureRateDay[dataFailureRateDay.length - 1].y });
+                        failureRateDetailsArrDay = saveLocalStorageInterval(failureRateDetailsArrDay, {"timestamp": new Date(failureRateTimeStamp), "failureRate": dataFailureRateDay[dataFailureRateDay.length - 1].y})
+                    } else {
+                        dataFailureRateDay.push({ 'x': new Date(failureRateTimeStamp), 'y': failureRate });
+                        failureRateDetailsArrDay = saveLocalStorageInterval(failureRateDetailsArrDay, {"timestamp": new Date(failureRateTimeStamp), "failureRate": failureRate})
+                    }
+                    Monitors.failureRateDataDay = dataFailureRateDay;
+                    failureRateMinCount = 0;
+                }
+
+                dataFailureRateSec = sliceFirstData(dataFailureRateSec, dataView.Seconds);
+                if (failureRateTimeStamp == monitor.failureRateMaxTimeStamp) {
+                    dataFailureRateSec.push({ "x": new Date(failureRateTimeStamp), "y": dataFailureRateSec[dataFailureRateSec.length - 1].y });
+                    failureRateDetailsArr = saveLocalStorageInterval(failureRateDetailsArr, {"timestamp": new Date(failureRateTimeStamp), "failureRate": dataFailureRateSec[dataFailureRateSec.length - 1].y})
+                } else {
+                    dataFailureRateSec.push({ 'x': new Date(failureRateTimeStamp), 'y': failureRate });
+                    failureRateDetailsArr = saveLocalStorageInterval(failureRateDetailsArr, {"timestamp": new Date(failureRateTimeStamp), "failureRate": failureRate})
+                }
+                Monitors.failureRateData = dataFailureRateSec;
+
+
+                localStorage.failureRateDetails = JSON.stringify(failureRateDetailsArr)
+                localStorage.failureRateDetailsMin = JSON.stringify(failureRateDetailsArrMin)
+                localStorage.failureRateDetailsDay = JSON.stringify(failureRateDetailsArrDay)
+
+                if (graphView == 'Minutes')
+                    dataFailureRate[0]["values"] = dataFailureRateMin;
+                else if (graphView == 'Days')
+                    dataFailureRate[0]["values"] = dataFailureRateDay;
+                else
+                    dataFailureRate[0]["values"] = dataFailureRateSec;
+
+                if (currentTab == NavigationTabs.Importer && currentView == graphView && successRateChart.is(":visible")) {
+                    d3.select('#visualisationFailureRate')
+                        .datum(dataFailureRate)
+                        .transition().duration(500)
+                        .call(ChartFailureRate);
+                }
+                monitor.failureRateFirstData = false;
+            }
+            if (failureRateTimeStamp > monitor.failureRateMaxTimeStamp)
+                monitor.failureRateMaxTimeStamp = failureRateTimeStamp;
+            failureRateSecCount++;
+            failureRateMinCount++;
         };
     });
 
