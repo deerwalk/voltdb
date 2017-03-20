@@ -2937,7 +2937,7 @@ function loadAdminPage() {
             var contents = '' +
                 '<table width="100%" cellpadding="0" cellspacing="0" class="configurTbl">' +
                 '<tr id="Tr1">' +
-                '    <td>Stream</td>' +
+                '    <td>Target</td>' +
                 '    <td width="15%">' +
                 '       <input id="txtStream" name="txtStream" type="text" size="38">' +
                 '       <label id="errorStream" for="txtStream" class="error" style="display: none;"></label>' +
