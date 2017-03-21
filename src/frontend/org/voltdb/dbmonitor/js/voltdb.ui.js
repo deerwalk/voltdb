@@ -756,6 +756,9 @@ var loadPage = function (serverName, portid) {
                 } else {
                     saveSessionCookie("current-tab", NavigationTabs.DBMonitor);
                 }
+            } else if (curTab == NavigationTabs.Importer) {
+                $("#overlay").show();
+                setTimeout(function () { $("#navImporter> a").trigger("click"); }, 100);
             } else{
                 setTimeout(function () { $("#navDbmonitor > a").trigger("click"); }, 100);
             }
@@ -1130,23 +1133,25 @@ var loadPage = function (serverName, portid) {
 
         voltDbRenderer.getImporterGraphInformation(function(importerDetails){
             if(!$.isEmptyObject(importerDetails) && !$.isEmptyObject(importerDetails['DETAILS'])){
-                var curTab = VoltDbUI.getCookie("current-tab");
                 graphView = $("#importerGraphView").val();
-                if(VoltDbUI.isFirstImporterLoad)
+
+                if(VoltDbUI.isFirstImporterLoad){
                     MonitorGraphUI.AddImporterGraph(VoltDbUI.getFromLocalStorage("graph-view"), $('#chartOutTransaction'), $('#chartSuccessRate'), $('#chartFailureRate'));
-                if (curTab == NavigationTabs.Importer && !$("#navImporter").hasClass('active') && VoltDbUI.isFirstImporterLoad){
-                    $("#overlay").show();
-                    setTimeout(function () { $("#navImporter> a").trigger("click"); }, 100);
+                    VoltDbUI.isFirstImporterLoad = false;
                 }
-                $('#navImporter').show();
 
                 MonitorGraphUI.RefreshOutTransGraph(importerDetails, graphView, getCurrentTab());
                 MonitorGraphUI.RefreshSuccessRateGraph(importerDetails, graphView, getCurrentTab());
                 MonitorGraphUI.RefreshFailureRateGraph(importerDetails, graphView, getCurrentTab());
+                $('#divNoImportDataMsg').hide();
+                $('#graphChartImporter').show();
+                adjustImporterGraphSpacing()
             } else {
-                $('#navImporter').hide()
+                $('#divNoImportDataMsg').show();
+                $('#graphChartImporter').hide();
             }
-            VoltDbUI.isFirstImporterLoad = false;
+
+
         });
 
         voltDbRenderer.GetPartitionIdleTimeInformation(function (partitionDetail) {

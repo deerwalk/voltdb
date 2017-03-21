@@ -1367,15 +1367,6 @@ function alertNodeClicked(obj) {
                 importerDetails['DETAILS']["FAILURES"] = failures / rowCount;
                 importerDetails['DETAILS']["OUTSTANDING_REQUESTS"] = outStanding;
             }
-            //for test data only
-            else {
-                importerDetails['DETAILS']["TIMESTAMP"] = Date.now();
-                importerDetails['DETAILS']["HOSTNAME"] = 'dwnpCpu';
-                importerDetails['DETAILS']["SUCCESSES"] = (Math.floor((Math.random() * 3) + 1) / 2);
-                importerDetails['DETAILS']["FAILURES"] = (Math.floor((Math.random() * 3) + 1) / 2);
-                importerDetails['DETAILS']["OUTSTANDING_REQUESTS"] = 0;//Math.floor((Math.random() * 3) + 1);
-            }
-
         };
 
         var getLiveClientData = function (connection, clientInfo) {
