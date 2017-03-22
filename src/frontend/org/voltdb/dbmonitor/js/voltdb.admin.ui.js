@@ -3089,6 +3089,8 @@ function loadAdminPage() {
                     if (VoltDbAdminConfig.newStreamMinmPropertyName.hasOwnProperty(properties[i].name) || VoltDbAdminConfig.newStreamMinmPropertyName.hasOwnProperty(properties[i].name + '_' + config.type)) {
                         if (properties[i].name == "broker.host" || properties[i].name == "amqp.uri") {
                             $("#selectRabbitMq").val(properties[i].name);
+                        } else if(properties[i].name == "metadata.broker.list" || properties[i].name == "bootstrap.servers") {
+                            $("#selectKafka").val(properties[i].name);
                         }
                         if ($(VoltDbAdminConfig.newStreamMinmPropertyName[properties[i].name]).length) {
                             $(VoltDbAdminConfig.newStreamMinmPropertyName[properties[i].name]).val(properties[i].value);
@@ -3217,18 +3219,17 @@ function loadAdminPage() {
                 adminEditObjects.addNewConfigLink.hide();
                 adminEditObjects.exportConfiguration.html(loadingConfig);
                 adminEditObjects.loadingConfiguration.show();
-
+                VoltDbAdminConfig.isExportLoading = true;
                 //Close the popup
                 popup.close();
 
                 voltDbRenderer.updateAdminConfiguration(adminConfigurations, function (result) {
-
                     if (result.status == "1") {
 
                         //Reload Admin configurations for displaying the updated value
                         voltDbRenderer.GetAdminDeploymentInformation(false, function (adminConfigValues, rawConfigValues) {
-                            adminEditObjects.loadingConfiguration.hide();
                             adminEditObjects.addNewConfigLink.show();
+                            adminEditObjects.loadingConfiguration.hide();
                             adminEditObjects.exportConfiguration.data("status", "value");
 
                             VoltDbAdminConfig.displayAdminConfiguration(adminConfigValues, rawConfigValues);
@@ -3236,8 +3237,8 @@ function loadAdminPage() {
 
                     } else {
                         setTimeout(function () {
-                            adminEditObjects.loadingConfiguration.hide();
                             adminEditObjects.addNewConfigLink.show();
+                            adminEditObjects.loadingConfiguration.hide();
                             adminEditObjects.exportConfiguration.data("status", "value");
                             adminEditObjects.exportConfiguration.html(currentConfig);
 
@@ -3255,6 +3256,7 @@ function loadAdminPage() {
                             $("#updateErrorPopupLink").trigger("click");
                         }, 3000);
                     }
+                    VoltDbAdminConfig.isExportLoading = false;
                 });
             });
 
@@ -4058,20 +4060,20 @@ function loadAdminPage() {
                 $('#txtEndpoint').attr("disabled", "disabled");
             }
         } else if (exportType.toUpperCase() == "KAFKA") {
-            if (!$('#txtMetadataBrokerList').length) {
+            if (!$('#selectKafka').length) {
                 exportProperties += '<tr class="newStreamMinProperty">' +
                     '   <td>' +
-                    '       <input size="15" id="txtMetadataBrokerList" name="txtMetadataBrokerList" value="metadata.broker.list" disabled="disabled" class="newStreamPropertyName newStreamProperty requiredProperty" type="text">' +
-                    '       <label id="errorMetadataBrokerList" for="txtMetadataBrokerList" class="error" style="display: none;"></label>' +
+                    '       <select id="selectKafka" name="selectKafka" class="newStreamPropertyName newStreamProperty  requiredProperty"> ' +
+                    '           <option>metadata.broker.list</option> ' +
+                    '           <option>bootstrap.servers</option> ' +
+                    '       </select>' +
                     '   </td>' +
                     '   <td>' +
-                    '       <input size="15" id="txtMetadataBrokerListValue" name="txtMetadataBrokerListValue" class="newStreamPropertyValue newStreamProperty" type="text">' +
-                    '       <label id="errorMetadataBrokerListValue" for="txtMetadataBrokerListValue" class="error" style="display: none;"></label>' +
+                    '       <input size="15" id="selectKafkaValue" name="selectKafkaValue" class="newStreamPropertyValue newStreamProperty" type="text">' +
+                    '       <label id="errorMetadataBrokerListValue" for="selectKafkaValue" class="error" style="display: none;"></label>' +
                     '   </td>' +
                     '   <td></td>' +
                     '</tr>';
-            } else {
-                $('#txtMetadataBrokerList').attr("disabled", "disabled");
             }
         } else if (exportType.toUpperCase() == "JDBC") {
             if (!$('#txtJdbcUrl').length) {
@@ -4157,6 +4159,8 @@ function loadAdminPage() {
                 removeDuplicate(this, "endpoint");
             } else if ($(this).val() == "metadata.broker.list") {
                 removeDuplicate(this, "metadata.broker.list");
+            }  else if ($(this).val() == "bootstrap.servers") {
+                removeDuplicate(this, "bootstrap.servers");
             } else if ($(this).val() == "jdbcurl") {
                 removeDuplicate(this, "jdbcurl");
             } else if ($(this).val() == "jdbcdriver") {
@@ -4186,6 +4190,8 @@ function loadAdminPage() {
             }
             if (propertyName == "broker.host" || propertyName == "amqp.uri") {
                 $("#selectRabbitMq").val(propertyName);
+            } else if (propertyName == "metadata.broker.list" || propertyName == "bootstrap.servers") {
+                $("#selectKafka").val(propertyName);
             }
         }
     };
@@ -4210,9 +4216,9 @@ function loadAdminPage() {
         }
 
         if (exportType.toUpperCase() == "KAFKA") {
-            setDefaultDisplay($("#txtMetadataBrokerList"));
+            setDefaultDisplay($("#selectKafka"));
         } else {
-            setNormalDisplay($("#txtMetadataBrokerList"));
+            setNormalDisplay($("#selectKafka"));
         }
 
         if (exportType.toUpperCase() == "JDBC") {
@@ -4238,7 +4244,7 @@ function loadAdminPage() {
     };
 
     var setDefaultDisplay = function (txtbox) {
-        if (txtbox.selector != "#selectRabbitMq")
+        if (txtbox.selector != "#selectRabbitMq" && txtbox.selector != "#selectKafka")
             txtbox.attr('disabled', 'disabled');
         var $row = txtbox.closest("tr");
         $('#tblAddNewProperty tr.headerProperty').after($row);
@@ -5014,6 +5020,7 @@ function loadAdminPage() {
     var iVoltDbAdminConfig = (function () {
 
         var currentRawAdminConfigurations;
+        this.isExportLoading = false;
         this.isCommandLogEnabled = false;
         this.isAdmin = false;
         this.registeredElements = [];
@@ -5036,7 +5043,8 @@ function loadAdminPage() {
             "nonce": "#txtnonceValue",
             "type": "#txtFileTypeValue",
             "endpoint_HTTP": "#txtEndpointValue",
-            "metadata.broker.list": "#txtMetadataBrokerListValue",
+            "metadata.broker.list": "#selectKafkaValue",
+            "bootstrap.servers": "#selectKafkaValue",
             "jdbcurl": "#txtJdbcUrlValue",
             "jdbcdriver": "#txtJdbcDriverValue",
             "broker.host": "#txtRabbitMqValue",
@@ -5293,7 +5301,6 @@ function loadAdminPage() {
         };
 
         var getExportProperties = function (data) {
-
             var result = "";
             if (data != undefined) {
 
