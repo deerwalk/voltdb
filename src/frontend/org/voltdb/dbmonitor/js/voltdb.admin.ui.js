@@ -3085,12 +3085,26 @@ function loadAdminPage() {
                 }
                 var count = 1;
                 var multiPropertyCount = 0;
+                var kafkaBootstrapServerStatus =  false;
+
+                if(config.type.toLowerCase() == "kafka"){
+                    for (var j = 0; j < properties.length; j++){
+                        if (properties[j].name == "bootstrap.servers"){
+                            kafkaBootstrapServerStatus = true;
+                            break;
+                        }
+                    }
+                }
+
                 for (var i = 0; i < properties.length; i++) {
+                    if (properties[i].name == "metadata.broker.list" && !kafkaBootstrapServerStatus){
+                        properties[i].name = "bootstrap.servers"
+                        kafkaBootstrapServerStatus = true;
+                    }
+
                     if (VoltDbAdminConfig.newStreamMinmPropertyName.hasOwnProperty(properties[i].name) || VoltDbAdminConfig.newStreamMinmPropertyName.hasOwnProperty(properties[i].name + '_' + config.type)) {
                         if (properties[i].name == "broker.host" || properties[i].name == "amqp.uri") {
                             $("#selectRabbitMq").val(properties[i].name);
-                        } else if(properties[i].name == "metadata.broker.list" || properties[i].name == "bootstrap.servers") {
-                            $("#selectKafka").val(properties[i].name);
                         }
                         if ($(VoltDbAdminConfig.newStreamMinmPropertyName[properties[i].name]).length) {
                             $(VoltDbAdminConfig.newStreamMinmPropertyName[properties[i].name]).val(properties[i].value);
@@ -4060,20 +4074,20 @@ function loadAdminPage() {
                 $('#txtEndpoint').attr("disabled", "disabled");
             }
         } else if (exportType.toUpperCase() == "KAFKA") {
-            if (!$('#selectKafka').length) {
+            if (!$('#txtBootstrapServersList').length) {
                 exportProperties += '<tr class="newStreamMinProperty">' +
                     '   <td>' +
-                    '       <select id="selectKafka" name="selectKafka" class="newStreamPropertyName newStreamProperty  requiredProperty"> ' +
-                    '           <option>metadata.broker.list</option> ' +
-                    '           <option>bootstrap.servers</option> ' +
-                    '       </select>' +
+                    '       <input size="15" id="txtBootstrapServersList" name="txtBootstrapServersList" value="bootstrap.servers" disabled="disabled" class="newStreamPropertyName newStreamProperty requiredProperty" type="text">' +
+                    '       <label id="errorMetadataBrokerList" for="txtBootstrapServersList" class="error" style="display: none;"></label>' +
                     '   </td>' +
                     '   <td>' +
-                    '       <input size="15" id="selectKafkaValue" name="selectKafkaValue" class="newStreamPropertyValue newStreamProperty" type="text">' +
-                    '       <label id="errorMetadataBrokerListValue" for="selectKafkaValue" class="error" style="display: none;"></label>' +
+                    '       <input size="15" id="txtBootstrapServersListValue" name="txtBootstrapServersListValue" class="newStreamPropertyValue newStreamProperty" type="text">' +
+                    '       <label id="errorMetadataBrokerListValue" for="txtBootstrapServersListValue" class="error" style="display: none;"></label>' +
                     '   </td>' +
                     '   <td></td>' +
                     '</tr>';
+            } else {
+                $('#txtBootstrapServersList').attr("disabled", "disabled");
             }
         } else if (exportType.toUpperCase() == "JDBC") {
             if (!$('#txtJdbcUrl').length) {
@@ -4157,9 +4171,7 @@ function loadAdminPage() {
                 removeDuplicate(this, "type");
             } else if ($(this).val() == "endpoint") {
                 removeDuplicate(this, "endpoint");
-            } else if ($(this).val() == "metadata.broker.list") {
-                removeDuplicate(this, "metadata.broker.list");
-            }  else if ($(this).val() == "bootstrap.servers") {
+            } else if ($(this).val() == "bootstrap.servers") {
                 removeDuplicate(this, "bootstrap.servers");
             } else if ($(this).val() == "jdbcurl") {
                 removeDuplicate(this, "jdbcurl");
@@ -4190,8 +4202,6 @@ function loadAdminPage() {
             }
             if (propertyName == "broker.host" || propertyName == "amqp.uri") {
                 $("#selectRabbitMq").val(propertyName);
-            } else if (propertyName == "metadata.broker.list" || propertyName == "bootstrap.servers") {
-                $("#selectKafka").val(propertyName);
             }
         }
     };
@@ -4216,9 +4226,9 @@ function loadAdminPage() {
         }
 
         if (exportType.toUpperCase() == "KAFKA") {
-            setDefaultDisplay($("#selectKafka"));
+            setDefaultDisplay($("#txtBootstrapServersList"));
         } else {
-            setNormalDisplay($("#selectKafka"));
+            setNormalDisplay($("#txtBootstrapServersList"));
         }
 
         if (exportType.toUpperCase() == "JDBC") {
@@ -4244,7 +4254,7 @@ function loadAdminPage() {
     };
 
     var setDefaultDisplay = function (txtbox) {
-        if (txtbox.selector != "#selectRabbitMq" && txtbox.selector != "#selectKafka")
+        if (txtbox.selector != "#selectRabbitMq")
             txtbox.attr('disabled', 'disabled');
         var $row = txtbox.closest("tr");
         $('#tblAddNewProperty tr.headerProperty').after($row);
@@ -5043,8 +5053,7 @@ function loadAdminPage() {
             "nonce": "#txtnonceValue",
             "type": "#txtFileTypeValue",
             "endpoint_HTTP": "#txtEndpointValue",
-            "metadata.broker.list": "#selectKafkaValue",
-            "bootstrap.servers": "#selectKafkaValue",
+            "bootstrap.servers": "#txtBootstrapServersListValue",
             "jdbcurl": "#txtJdbcUrlValue",
             "jdbcdriver": "#txtJdbcDriverValue",
             "broker.host": "#txtRabbitMqValue",
@@ -5308,7 +5317,6 @@ function loadAdminPage() {
                 if (adminEditObjects.exportConfiguration.data("status") == "loading") {
                     return;
                 }
-
                 for (var i = 0; i < data.length; i++) {
                     var stream = VoltDbAdminConfig.escapeHtml(data[i].target);
                     var type = data[i].type ? (" (" + VoltDbAdminConfig.escapeHtml(data[i].type) + ")") : "";
@@ -5338,8 +5346,22 @@ function loadAdminPage() {
                             '</tr>';
 
                     if (streamProperty && streamProperty.length > 0) {
+                        var isBootstrapServer = false;
+                        if(data[i].type.toLowerCase() == 'kafka'){
+                            for(var k = 0; k < streamProperty.length; k++){
+                                if(streamProperty[k].name == 'bootstrap.servers'){
+                                    isBootstrapServer = true;
+                                    break;
+                                }
+                            }
+                        }
 
                         for (var j = 0; j < streamProperty.length; j++) {
+                            if(streamProperty[j].name == 'metadata.broker.list' && !isBootstrapServer){
+                                streamProperty[j].name = 'bootstrap.servers';
+                                isBootstrapServer = true;
+                            }
+
                             var name = streamProperty[j].name;
                             var value = streamProperty[j].value;
 
