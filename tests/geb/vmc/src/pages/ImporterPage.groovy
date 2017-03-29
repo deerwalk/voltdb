@@ -37,6 +37,9 @@ class ImporterPage extends VoltDBManagementCenterPage {
         mainImporterGraphBlock      { $('#mainImporterGraphBlock') }
         showHideImporterGraphBlock  { $('#showHideImporterGraphBlock') }
         importerGraphView           { $('#importerGraphView')}
+        chartOutsTransDownloadBtn   { $('#chartOutTransHeader > h1 > a') }
+        chartSuccessDownloadBtn     { $('#chartSuccessRateHeader > h1 > a') }
+        chartFailureDownloadBtn     { $('#chartFailureRate > div.chartHeader > h1 > a') }
         chartOutsTransMin           { $('#visualisationOutTrans > g > g > g.nv-x.nv-axis.nvd3-svg > g > g.nv-axisMaxMin.nv-axisMaxMin-x.nv-axisMin-x > text') }
         chartOutsTransMax           { $('#visualisationOutTrans > g > g > g.nv-x.nv-axis.nvd3-svg > g > g.nv-axisMaxMin.nv-axisMaxMin-x.nv-axisMax-x > text') }
         chartSuccessRateMin         { $('#visualisationSuccessRate > g > g > g.nv-x.nv-axis.nvd3-svg > g > g.nv-axisMaxMin.nv-axisMaxMin-x.nv-axisMin-x > text') }

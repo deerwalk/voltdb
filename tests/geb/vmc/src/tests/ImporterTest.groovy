@@ -60,6 +60,95 @@ class ImporterTest extends TestBase {
         }
     }
 
+    def waitForTime(time){
+        try{
+            waitFor(time){ assert 1==0}
+        }catch(geb.waiting.WaitTimeoutException e){
+
+        }
+    }
+
+    def checkImporterTabOpened(){
+        when:
+        println("Process only if Importer is present.")
+        then:
+        if(isImporterTabVisible){
+            when:
+            waitFor(10){ page.importer.isDisplayed() }
+            then:
+            println("Importer page is opened.")
+        } else {
+            println("Importer tab is not available.")
+        }
+    }
+
+    def checkChartSectionAreDisplayed(){
+        when:
+        println("Process only if Importer tab is present.")
+        then:
+        if(isImporterTabVisible){
+            if(isChartDisplayed()){
+                waitFor(10){ page.chartOutTransaction.isDisplayed() }
+                waitFor(10){ page.chartSuccessRate.isDisplayed() }
+                waitFor(10){ page.chartFailureRate.isDisplayed() }
+            } else {
+                waitFor(10){ noChartMsg.isDisplayed() }
+            }
+        } else {
+            println("Importer tab is not available.")
+        }
+    }
+
+    def checkNoChartMsg(){
+        when:
+        println("Process only if Importer tab is present.")
+        then:
+        if(isImporterTabVisible){
+            if(!isChartDisplayed()) {
+                waitFor(10){ noChartMsg.isDisplayed() }
+                assert noChartMsg.jquery.html() == "\n" +
+                        "                            No data is available.\n" +
+                        "                        "
+            }
+        } else {
+            println("Importer tab is not available.")
+        }
+    }
+
+    def checkDownloadButtons(){
+        when:
+        println("Process only if Importer tab is present")
+        then:
+        if(isImporterTabVisible){
+            if(isChartDisplayed()) {
+                waitFor(5){ chartOutsTransDownloadBtn.isDisplayed() }
+                waitFor(5){ chartSuccessDownloadBtn.isDisplayed() }
+                waitFor(5){ chartFailureDownloadBtn.isDisplayed() }
+            }
+        } else {
+            println("Importer tab is not available.")
+        }
+    }
+
+    def expandCollapseImporterHeader(){
+        when:
+        if(isImporterTabVisible) {
+            when: "Check Importer Chart Header"
+            assert isImporterChartSectionDisplayed() == true
+            showHideImporterGraphBlock.click()
+            waitForTime(2)
+            assert isImporterChartSectionDisplayed() == false
+            showHideImporterGraphBlock.click()
+            waitForTime(2)
+            assert isImporterChartSectionDisplayed() == true
+        } else {
+            println("Importer tab is not available.")
+        }
+        then:
+        println("test completed.")
+
+    }
+
     def checkMinAndMaxValueInOutsTransGraphSeconds() {
         String stringMax
         String stringMin
