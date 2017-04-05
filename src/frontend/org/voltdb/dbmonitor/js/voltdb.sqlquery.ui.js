@@ -802,7 +802,7 @@ $(document).ready(function () {
                 SQLQueryRender.queryNameList.push(tabName == undefined ? 'Query' + tab_counter : tabName)
             }
 
-              function handlePaste (e) {
+            function handlePaste (e) {
                 var clipboardData, pastedData;
                 // Stop data actually being pasted into div
                 e.stopPropagation();
@@ -820,9 +820,6 @@ $(document).ready(function () {
             tab_counter++
             this.showHideNewTab()
             SQLQueryRender.enableDisableCrossTab()
-
-
-
         }
 
 
