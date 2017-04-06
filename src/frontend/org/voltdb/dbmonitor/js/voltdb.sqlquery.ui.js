@@ -176,7 +176,9 @@ $(document).ready(function () {
                     if(localStorage.queries != undefined){
                         queries = $.parseJSON(localStorage.queries)
                         $.each(queries, function(key){
-                            arr.push(key.split('_')[1])
+                            var keySplit = key.split('_')
+                            keySplit.shift()
+                            arr.push(keySplit.join('_'))
                         })
                     }
                     if ($.inArray(value, SQLQueryRender.queryNameList) != -1 || $.inArray(value, arr) != -1) {
