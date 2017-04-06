@@ -297,7 +297,9 @@ $(document).ready(function () {
         key_index = 0
         if(!$.isEmptyObject(queryData)){
             $.each(queryData, function(key){
-                if(key.split('_')[1] == oldName)
+                keySplit = key.split('_')
+                keySplit.shift()
+                if(keySplit.join('_') == oldName)
                     key_index = parseInt(key.split('_')[0])
             })
         }
@@ -881,7 +883,7 @@ $(document).ready(function () {
             $('#worktabs ul li').each(function(){
                 count++
             })
-            if(count == 11)
+            if(count >= 11)
                 $('#liNewQuery').hide()
             else
                 $('#liNewQuery').show()
