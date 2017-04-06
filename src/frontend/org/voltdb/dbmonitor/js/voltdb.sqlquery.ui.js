@@ -648,7 +648,9 @@ $(document).ready(function () {
             }
 
             $.each( queryData, function( key, value ) {
-                SQLQueryRender.createQueryTab(key.split('_')[1], value)
+                var keySplit = key.split('_')
+                keySplit.shift()
+                SQLQueryRender.createQueryTab(keySplit.join('_'), value)
             });
 
             if($.isEmptyObject(queryData)){
