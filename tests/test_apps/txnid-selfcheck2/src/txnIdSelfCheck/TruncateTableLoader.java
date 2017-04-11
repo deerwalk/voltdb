@@ -158,20 +158,26 @@ public class TruncateTableLoader extends BenchmarkThread {
         if (isStatusSuccess(clientResponse, shouldRollback, "swap", tableName)) {
             Benchmark.txnCount.incrementAndGet();
             nSwaps++;
-        }
 
-        // Confirm that the table-swap worked correctly, by checking the row counts
-        try {
-            rowCounts[0] = TxnId2Utils.getRowCount(client, tableName);
-            rowCounts[1] = TxnId2Utils.getRowCount(client, swapTableName);
-        } catch (Exception e) {
-            hardStop("getrowcount exception", e);
+            // Confirm that the table-swap worked correctly, by checking the row counts
+            // nb. swap is not supported with DR yet, with XDCR this check is likeley to fail
+            // unless we take other action or change the test.
+            try {
+                rowCounts[0] = TxnId2Utils.getRowCount(client, tableName);
+                rowCounts[1] = TxnId2Utils.getRowCount(client, swapTableName);
+            } catch (Exception e) {
+                hardStop("getrowcount exception", e);
+            }
+            int z = shouldRollback == 0 ? 0 : 1;
+            if (rowCounts[(z + 0) & 1] != swapRowCount || rowCounts[(z + 1) & 1] != tableRowCount) {
+                String message = swapProcName + " on " + tableName + ", " + swapTableName
+                        + " failed to swap row counts correctly: went from " + tableRowCount
+                        + ", " + swapRowCount + " to " + rowCounts[0] + ", " + rowCounts[1] + ", rollback: " + shouldRollback;
+                hardStop("TruncateTableLoader: " + message);
+            }
         }
-        if (rowCounts[0] != swapRowCount || rowCounts[1] != tableRowCount) {
-            String message = swapProcName+" on "+tableName+", "+swapTableName
-                    + " failed to swap row counts correctly: went from " + tableRowCount
-                    + ", " + swapRowCount + " to " + rowCounts[0] + ", " + rowCounts[1];
-            hardStop("TruncateTableLoader: " + message);
+        else {
+            hardStop(clientResponse.toString());
         }
         return rowCounts;
     }
@@ -199,6 +205,8 @@ public class TruncateTableLoader extends BenchmarkThread {
             nSwaps++;
         }
         // Confirm that the table-swap worked correctly, by checking the row counts
+        // nb. swap is not supported with DR yet, with XDCR this check is likeley to fail
+        // unless we take other action or change the test.
         try {
             rowCounts[0] = TxnId2Utils.getRowCount(client, tableName);
             rowCounts[1] = TxnId2Utils.getRowCount(client, swapTableName);
@@ -230,27 +238,8 @@ public class TruncateTableLoader extends BenchmarkThread {
             Benchmark.txnCount.incrementAndGet();
             nTruncates++;
         }
-
-        // Confirm that the truncate worked correctly, by checking the row count
-        // (even though the stored procedures themselves also check this)
-        long rowCount = -1;
-        try {
-            rowCount = TxnId2Utils.getRowCount(client, tableName);
-        } catch (Exception e) {
-            hardStop("getrowcount exception", e);
-        }
-        if (rowCount != 0) {
-            String truncateProcName = tableName.toUpperCase() + tp;
-            String message = "Table '"+tableName+"' has "+rowCount+" rows after truncate "
-                    + "(by stored proc "+truncateProcName+"): non-zero";
-            if ("TRUPTruncateTableSP".equals(truncateProcName)) {
-                // TRUPTruncateTableSP, being SP, does not truncate the entire
-                // table, so this situation is expected, and not fatal
-                log.warn(message + " (OK for SP)");
-            } else {
-                hardStop("TruncateTableLoader: " + message + "!");
-            }
-        }
+        // while we would like to check for zero rows in the table outside the txn this test will fail
+        // if, for example, with XDCR rows may be replicated from another cluster after the truncate txn.
     }
 
     @Override
@@ -358,18 +347,6 @@ public class TruncateTableLoader extends BenchmarkThread {
                         // on exception, log and end the thread, but don't kill the process
                         hardStop("TruncateTableLoader failed a TruncateTable or SwapTable ProcCallException call for table '"
                                 + tableName + "': " + e.getMessage());
-                    }
-                }
-                if (!TxnId2Utils.isConnectionTransactionCatalogOrServerUnavailableIssue(e.getClientResponse().getStatusString())) {
-                    long newRowCount = -1;
-                    try {
-                        newRowCount = TxnId2Utils.getRowCount(client, tableName);
-                    } catch (Exception e2) {
-                        hardStop("getrowcount exception", e2);
-                    }
-                    if (newRowCount != currentRowCount) {
-                        hardStop("TruncateTableLoader call to TruncateTable or SwapTable changed row count from " + currentRowCount
-                                + " to "+newRowCount+", despite rollback, for table '" + tableName + "': " + e.getMessage());
                     }
                 }
             }

@@ -254,7 +254,7 @@ public class UpdateApplicationCatalog extends VoltSystemProcedure {
 
             // Don't actually care about the returned table, just need to send something
             // back to the MPI scoreboard
-            DependencyPair success = new DependencyPair(DEP_updateCatalogSync,
+            DependencyPair success = new DependencyPair.TableDependencyPair(DEP_updateCatalogSync,
                     new VoltTable(new ColumnInfo[] { new ColumnInfo("UNUSED", VoltType.BIGINT) } ));
 
             if ( ! context.isLowestSiteId()) {
@@ -329,7 +329,7 @@ public class UpdateApplicationCatalog extends VoltSystemProcedure {
             // back to the MPI scoreboard
             log.info("Site " + CoreUtils.hsIdToString(m_site.getCorrespondingSiteId()) +
                     " acknowledged data and catalog prechecks.");
-            return new DependencyPair(DEP_updateCatalogSyncAggregate,
+            return new DependencyPair.TableDependencyPair(DEP_updateCatalogSyncAggregate,
                     new VoltTable(new ColumnInfo[] { new ColumnInfo("UNUSED", VoltType.BIGINT) } ));
         }
         else if (fragmentId == SysProcFragmentId.PF_updateCatalog) {
@@ -337,6 +337,8 @@ public class UpdateApplicationCatalog extends VoltSystemProcedure {
             String commands = Encoder.decodeBase64AndDecompress(catalogDiffCommands);
             int expectedCatalogVersion = (Integer)params.toArray()[1];
             boolean requiresSnapshotIsolation = ((Byte) params.toArray()[2]) != 0;
+            boolean hasSchemaChange = ((Byte) params.toArray()[3]) != 0;
+            boolean requiresNewExportGeneration = ((Byte) params.toArray()[4]) != 0;
 
             CatalogAndIds catalogStuff = null;
             try {
@@ -361,7 +363,9 @@ public class UpdateApplicationCatalog extends VoltSystemProcedure {
                         DeprecatedProcedureAPIAccess.getVoltPrivateRealTransactionId(this),
                         getUniqueId(),
                         catalogStuff.deploymentBytes,
-                        catalogStuff.getDeploymentHash());
+                        catalogStuff.getDeploymentHash(),
+                        hasSchemaChange,
+                        requiresNewExportGeneration);
 
                 // If the cluster is in master role only (not replica or XDCR), reset trackers.
                 // The producer would have been turned off by the code above already.
@@ -374,7 +378,7 @@ public class UpdateApplicationCatalog extends VoltSystemProcedure {
                 long uniqueId = m_runner.getUniqueId();
                 long spHandle = m_runner.getTxnState().getNotice().getSpHandle();
                 context.updateCatalog(commands, p.getFirst(), p.getSecond(),
-                        requiresSnapshotIsolation, uniqueId, spHandle);
+                        requiresSnapshotIsolation, uniqueId, spHandle, requiresNewExportGeneration);
 
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Site %s completed catalog update with catalog hash %s, deployment hash %s%s.",
@@ -400,11 +404,11 @@ public class UpdateApplicationCatalog extends VoltSystemProcedure {
 
             VoltTable result = new VoltTable(VoltSystemProcedure.STATUS_SCHEMA);
             result.addRow(VoltSystemProcedure.STATUS_OK);
-            return new DependencyPair(DEP_updateCatalog, result);
+            return new DependencyPair.TableDependencyPair(DEP_updateCatalog, result);
         }
         else if (fragmentId == SysProcFragmentId.PF_updateCatalogAggregate) {
             VoltTable result = VoltTableUtil.unionTables(dependencies.get(DEP_updateCatalog));
-            return new DependencyPair(DEP_updateCatalogAggregate, result);
+            return new DependencyPair.TableDependencyPair(DEP_updateCatalogAggregate, result);
         }
         else {
             VoltDB.crashLocalVoltDB(
@@ -446,7 +450,8 @@ public class UpdateApplicationCatalog extends VoltSystemProcedure {
     private final VoltTable[] performCatalogUpdateWork(
             String catalogDiffCommands,
             int expectedCatalogVersion,
-            byte requiresSnapshotIsolation)
+            byte requiresSnapshotIsolation,
+            byte hasSchemaChange, byte requiresNewExportGeneration)
     {
         SynthesizedPlanFragment[] pfs = new SynthesizedPlanFragment[2];
 
@@ -456,7 +461,7 @@ public class UpdateApplicationCatalog extends VoltSystemProcedure {
         pfs[0].outputDepId = DEP_updateCatalog;
         pfs[0].multipartition = true;
         pfs[0].parameters = ParameterSet.fromArrayNoCopy(
-                catalogDiffCommands, expectedCatalogVersion, requiresSnapshotIsolation);
+                catalogDiffCommands, expectedCatalogVersion, requiresSnapshotIsolation, hasSchemaChange, requiresNewExportGeneration);
 
         pfs[1] = new SynthesizedPlanFragment();
         pfs[1].fragmentId = SysProcFragmentId.PF_updateCatalogAggregate;
@@ -491,7 +496,9 @@ public class UpdateApplicationCatalog extends VoltSystemProcedure {
                            String[] reasonsForEmptyTables,
                            byte requiresSnapshotIsolation,
                            byte worksWithElastic,
-                           byte[] deploymentHash)
+                           byte[] deploymentHash,
+                           byte hasSchemaChange,
+                           byte requiresNewExportGeneration)
                                    throws Exception
     {
         assert(tablesThatMustBeEmpty != null);
@@ -587,7 +594,8 @@ public class UpdateApplicationCatalog extends VoltSystemProcedure {
         performCatalogUpdateWork(
                 catalogDiffCommands,
                 expectedCatalogVersion,
-                requiresSnapshotIsolation);
+                requiresSnapshotIsolation,
+                hasSchemaChange, requiresNewExportGeneration);
 
         VoltTable result = new VoltTable(VoltSystemProcedure.STATUS_SCHEMA);
         result.addRow(VoltSystemProcedure.STATUS_OK);

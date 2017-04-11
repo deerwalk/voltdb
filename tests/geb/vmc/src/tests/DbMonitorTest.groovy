@@ -3351,19 +3351,42 @@ class DbMonitorTest extends TestBase {
         page.storedProceduresCheckbox.click()
         then: 'Save Preference'
         page.savePreferencesBtn.click()
-
-        when: 'wait for filter in stored procedure'
-        waitFor(waitTime) { page.filterStoredProcedure.isDisplayed() }
-        then: 'enter the stored procedure name'
-        page.filterStoredProcedure.value(storedProcedureName)
-
-        when: 'save the value of resultingStoredProcedureName'
-        resultingStoredProcedureName = String.valueOf($("#storeProcedureBody > tr > td:nth-child(1)").text())
-        then: 'set created status'
-        if(resultingStoredProcedureName.trim().equals(storedProcedureName)) {
-            createdStatus = true
+        report 'savePreferencesBtn'
+        then: 'wait for filter in stored procedure and insert filter term'
+        try {
+          waitFor(waitTime) { page.filterStoredProcedure.isDisplayed() }
+          page.filterStoredProcedure.value(storedProcedureName)
+          report "1"
+        } catch (geb.waiting.WaitTimeoutException e) {
+          try {
+            $("#filterSP").isDisplayed()
+            $("#filterSP").value(storedProcedureName)
+            report "2"
+          } catch (geb.waiting.WaitTimeoutException exp) {
+          }
         }
 
+        when: 'save the value of resultingStoredProcedureName'
+        try {
+          waitFor(waitTime) { $("#storeProcedureBody > tr > td:nth-child(1)").isDisplayed() }
+          resultingStoredProcedureName = $("#storeProcedureBody > tr > td:nth-child(1)").text()
+        } catch(geb.error.RequiredPageContentNotPresent e) {
+          waitFor(waitTime) { $("#tblSP > tbody > tr > td.sorting_1").isDisplayed() }
+          resultingStoredProcedureName = $("#tblSP > tbody > tr > td:nth-child(1)").text()
+        } catch(geb.waiting.WaitTimeoutException e) {
+          waitFor(waitTime) { $("#tblSP > tbody > tr > td.sorting_1").isDisplayed() }
+          resultingStoredProcedureName = $("#tblSP > tbody > tr > td:nth-child(1)").text()
+        }
+        then: 'set created status'
+        println("The resultingStoredProcedureName is " + resultingStoredProcedureName)
+        // if(resultingStoredProcedureName.equals(storedProcedureName)) {
+        //     createdStatus = true
+        // }
+        try {
+          waitFor(waitTime) { $("#tblSP > tbody > tr > td:nth-child(1)").isDisplayed() }
+          createdStatus = true
+        } catch (geb.waiting.WaitTimeoutException e) {
+        }
         when: 'sql query tab is clicked'
         page.gotoSqlQuery()
         then: 'at sql query'
@@ -3373,6 +3396,7 @@ class DbMonitorTest extends TestBase {
         page.setQueryText(dropProcedureQuery)
         and: 'run the query'
         page.runQuery()
+        report 'checking'
         then: 'refresh the page'
         page.refreshquery.click()
 
@@ -3380,11 +3404,19 @@ class DbMonitorTest extends TestBase {
         page.gotoDbMonitor()
         then: 'at DbMonitor Page'
         at DbMonitorPage
-
-        when: 'wait for filter in stored procedure'
-        waitFor(waitTime) { page.filterStoredProcedure.isDisplayed() }
-        then: 'enter the stored procedure name'
-        page.filterStoredProcedure.value(storedProcedureName)
+        then: 'wait for filter in stored procedure  and insert filter term'
+        try {
+          waitFor(waitTime) { page.filterStoredProcedure.isDisplayed() }
+          page.filterStoredProcedure.value(storedProcedureName)
+          report "3"
+        } catch (geb.waiting.WaitTimeoutException e) {
+          try {
+            $("#filterSP").isDisplayed()
+            $("#filterSP").value(storedProcedureName)
+            report "4"
+          } catch (geb.waiting.WaitTimeoutException exp) {
+          }
+        }
 
         when: 'check deleted status'
         try {
@@ -3393,6 +3425,14 @@ class DbMonitorTest extends TestBase {
           deletedStatus = true
         } catch (geb.waiting.WaitTimeoutException e) {
         }
+        try {
+          waitFor(waitTime) { !$("#tblSP > tbody > tr > td.sorting_1").text().equals(storedProcedureName) }
+          waitFor(waitTime) { $("#tblSP > tbody > tr > td").isDisplayed() }
+          deletedStatus = true
+        } catch (geb.waiting.WaitTimeoutException e) {
+        }
+        println(createdStatus)
+        println(deletedStatus)
         then: 'display final result'
         if (createdStatus == true && deletedStatus == true) {
           println("addProcedureAndCheck - PASS")
