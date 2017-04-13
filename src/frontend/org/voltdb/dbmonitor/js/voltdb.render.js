@@ -1337,35 +1337,39 @@ function alertNodeClicked(obj) {
             connection.Metadata['@Statistics_IMPORTER'].schema.forEach(function (columnInfo) {
                 if (columnInfo["name"] == "TIMESTAMP" || columnInfo["name"] == "HOSTNAME"
                 || columnInfo["name"] == "SUCCESSES" || columnInfo["name"] == "FAILURES"
-                || columnInfo["name"] == "OUTSTANDING_REQUESTS")
+                || columnInfo["name"] == "OUTSTANDING_REQUESTS" || columnInfo["name"] == "IMPORTER_NAME")
                     colIndex[columnInfo["name"]] = counter;
                 counter++;
             });
 
-            if (!importerDetails.hasOwnProperty('DETAILS')) {
-                importerDetails['DETAILS'] = {};
-            }
-
-            if(connection.Metadata['@Statistics_IMPORTER'].data.length > 0){
-                var timeStamp;
+            if(connection.Metadata["@Statistics_IMPORTER"].data.length > 0){
+                var rowCount = connection.Metadata["@Statistics_IMPORTER"].data.length
                 var success = 0;
                 var failures = 0;
                 var outStanding = 0;
-                var hostName;
-                var rowCount = connection.Metadata['@Statistics_IMPORTER'].data.length
-                connection.Metadata['@Statistics_IMPORTER'].data.forEach(function (info) {
-                    timeStamp = info[colIndex["TIMESTAMP"]];
-                    outStanding = info[colIndex["OUTSTANDING_REQUESTS"]];
-                    hostName = info[colIndex["HOSTNAME"]];
+                var importerName = ""
+                connection.Metadata["@Statistics_IMPORTER"].data.forEach(function (info) {
+                    if(importerName != info[colIndex["IMPORTER_NAME"]]){
+                        importerName = info[colIndex["IMPORTER_NAME"]];
+                        success = 0;
+                        failures = 0;
+                        outStanding = 0;
+                    }
+                    if (!importerDetails.hasOwnProperty("SUCCESSES")) {
+                        importerDetails["SUCCESSES"] = {};
+                        importerDetails["FAILURES"]= {};
+                        importerDetails["OUTSTANDING_REQUESTS"]= {};
+                    }
+                    outStanding += info[colIndex["OUTSTANDING_REQUESTS"]];
                     success += info[colIndex["SUCCESSES"]];
                     failures += info[colIndex["FAILURES"]];
-                });
 
-                importerDetails['DETAILS']["TIMESTAMP"] = timeStamp;
-                importerDetails['DETAILS']["HOSTNAME"] = hostName;
-                importerDetails['DETAILS']["SUCCESSES"] = success / rowCount;
-                importerDetails['DETAILS']["FAILURES"] = failures / rowCount;
-                importerDetails['DETAILS']["OUTSTANDING_REQUESTS"] = outStanding;
+                    importerDetails["SUCCESSES"][importerName] = success;
+                    importerDetails["FAILURES"][importerName] = failures;
+                    importerDetails["OUTSTANDING_REQUESTS"][importerName] = outStanding;
+                    importerDetails["HOSTNAME"] = info[colIndex["HOSTNAME"]];
+                    importerDetails["TIMESTAMP"] = info[colIndex["TIMESTAMP"]];
+                });
             }
         };
 

@@ -1134,17 +1134,18 @@ var loadPage = function (serverName, portid) {
         });
 
         voltDbRenderer.getImporterGraphInformation(function(importerDetails){
-            if(!$.isEmptyObject(importerDetails) && !$.isEmptyObject(importerDetails['DETAILS'])){
+            if(!$.isEmptyObject(importerDetails)){
                 graphView = $("#importerGraphView").val();
-
+                MonitorGraphUI.SetImporterData(importerDetails)
+                //MonitorGraphUI.getImportData()
                 if(VoltDbUI.isFirstImporterLoad){
                     MonitorGraphUI.AddImporterGraph(VoltDbUI.getFromLocalStorage("graph-view"), $('#chartOutTransaction'), $('#chartSuccessRate'), $('#chartFailureRate'));
                     VoltDbUI.isFirstImporterLoad = false;
                 }
 
-                MonitorGraphUI.RefreshOutTransGraph(importerDetails, graphView, getCurrentTab());
-                MonitorGraphUI.RefreshSuccessRateGraph(importerDetails, graphView, getCurrentTab());
-                MonitorGraphUI.RefreshFailureRateGraph(importerDetails, graphView, getCurrentTab());
+//                MonitorGraphUI.RefreshOutTransGraph(importerDetails, graphView, getCurrentTab());
+//                MonitorGraphUI.RefreshSuccessRateGraph(importerDetails, graphView, getCurrentTab());
+//                MonitorGraphUI.RefreshFailureRateGraph(importerDetails, graphView, getCurrentTab());
                 $('#divNoImportDataMsg').hide();
                 $('#graphChartImporter').show();
                 adjustImporterGraphSpacing()

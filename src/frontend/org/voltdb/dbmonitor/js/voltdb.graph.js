@@ -73,6 +73,14 @@
             dataParitionDetails = partitionDetails;
         };
 
+        var dataImporterSuccess = [];
+        var dataImporterFailures = [];
+        var dataImporterOutTrans = [];
+        var dataImporterDetails = [];
+        this.SetImporterData = function(importerDetails){
+            dataImporterDetails= importerDetails;
+        }
+
         function getEmptyData() {
             var arr = [];
             var theDate = new Date();
@@ -107,6 +115,44 @@
             }
 
             return arr;
+        }
+        var dataMapperImporterSec = {}
+        var dataMapperImporterMin = {}
+        var dataMapperImporterDay = {}
+
+        this.getImportData = function(emptyData, dataMapper){
+            var count = 0;
+            if(dataImporterDetails != undefined){
+                $.each(dataImporterDetails, function(key, value){
+                    if(key == "SUCCESSES" || key == "FAILURES" || key == "OUTSTANDING_REQUESTS"){
+                        $.each(value, function(dataType, dataTypeValue){
+                            var arr = [];
+                            arr.push(emptyData[0]);
+                            arr.push(emptyData[emptyData.length - 1]);
+                            if (key == "SUCCESSES"){
+                                dataImporterSuccess.push({ key: dataType, values: arr, color: getRandomColor() })
+                            } else if (key == "FAILURES"){
+                                dataImporterFailures.push({ key: dataType, values: arr, color: getRandomColor() })
+                            } else if (key == "OUTSTANDING_REQUESTS"){
+                                dataImporterOutTrans.push({ key: dataType, values: arr, color: getRandomColor() })
+                            }
+
+                            dataMapper[dataType] = count;
+                            count++;
+                        });
+                    }
+                });
+            }
+
+        }
+
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++ ) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
         }
 
         function getEmptyDataForPartition() {
@@ -823,7 +869,6 @@
                 'lastTimedTransactionCount': -1,
                 'lastTimerTick': -1
             };
-
             dataCpu[0]["values"] = getEmptyDataForView(view);
             dataRam[0]["values"] = getEmptyDataForView(view);
             dataLatency[0]["values"] = getEmptyDataForView(view);
@@ -2468,7 +2513,6 @@
         };
 
         this.RefreshOutTransGraph = function (outTransDetails, graphView, currentTab) {
-            debugger;
             var monitor = Monitors;
             var outTransDetailsArr = []
             var outTransDetailsArrMin = []
