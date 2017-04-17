@@ -1365,10 +1365,13 @@ function alertNodeClicked(obj) {
                     failures += info[colIndex["FAILURES"]];
 
                     importerDetails["SUCCESSES"][importerName] = success;
+                    importerDetails["SUCCESSES"]["TIMESTAMP"] = info[colIndex["TIMESTAMP"]];
                     importerDetails["FAILURES"][importerName] = failures;
+                    importerDetails["FAILURES"]["TIMESTAMP"] = info[colIndex["TIMESTAMP"]];
                     importerDetails["OUTSTANDING_REQUESTS"][importerName] = outStanding;
                     importerDetails["HOSTNAME"] = info[colIndex["HOSTNAME"]];
-                    importerDetails["TIMESTAMP"] = info[colIndex["TIMESTAMP"]];
+                    importerDetails["OUTSTANDING_REQUESTS"]["TIMESTAMP"] = info[colIndex["TIMESTAMP"]];
+
                 });
             }
         };
