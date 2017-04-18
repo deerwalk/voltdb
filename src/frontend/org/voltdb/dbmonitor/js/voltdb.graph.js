@@ -131,6 +131,10 @@
             return color;
         }
 
+        this.getImportMapperData = function(){
+            return dataMapperImporterSec;
+        }
+
         function getImportData(emptyData, dataMapper){
             var count = 0;
             var dataImporterSuccess = [];
@@ -1022,6 +1026,37 @@
 
             changeImporterAxisTimeFormat(view);
         };
+
+        this.AddImporterGraphLine = function(dataType, keyValue, timeUnit){
+            var arr = [];
+            if(timeUnit == "second"){
+                arr.push(emptyData[0]);
+                arr.push(emptyData[emptyData.length - 1]);
+            } else if(timeUnit == "minute"){
+                arr.push(emptyDataForMinutes[0]);
+                arr.push(emptyDataForMinutes[emptyDataForMinutes.length - 1]);
+            } else if(timeUnit == "day"){
+                arr.push(emptyDataForDays[0]);
+                arr.push(emptyDataForDays[emptyDataForDays.length - 1]);
+            }
+            Monitors[dataType].push({ key: keyValue, values: arr, color: getRandomColor() })
+            if(dataType == "successRateData"){
+                dataMapperImporterSec[keyValue] = getDataMapperIndex(dataMapperImporterSec);
+                dataMapperImporterMin[keyValue] = getDataMapperIndex(dataMapperImporterMin);
+                dataMapperImporterDay[keyValue] = getDataMapperIndex(dataMapperImporterDay);
+            }
+
+        }
+
+        function getDataMapperIndex(dataMap){
+            var count = 0;
+            $.each(dataMap, function(key, value){
+                if(dataMap[key] > count)
+                    count =  dataMap[key];
+            })
+            count++;
+            return count;
+        }
 
         this.UpdateCharts = function () {
             if (ramChart.is(":visible"))
@@ -2551,20 +2586,20 @@
             var outTransDetailsArrMin = [];
             var outTransDetailsArrDay = [];
 
-            if(localStorage.outTransDetailsMin != undefined){
+            if(localStorage.outTransDetailsMin != undefined && JSON.parse(localStorage.outTransDetailsMin).length == outTransDataMin.length){
                 outTransDetailsArrMin = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.outTransDetailsMin))
             } else {
                 outTransDetailsArrMin = JSON.stringify(convertDataFormatForPartition(outTransDataMin))
                 outTransDetailsArrMin = JSON.parse(outTransDetailsArrMin)
             }
 
-            if(localStorage.outTransDetailsDay != undefined){
+            if(localStorage.outTransDetailsDay != undefined  && JSON.parse(localStorage.outTransDetailsDay).length == outTransDataDay.length){
                 outTransDetailsArrDay = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.outTransDetailsDay))
             } else {
                 outTransDetailsArrDay = JSON.stringify(convertDataFormatForPartition(outTransDataDay))
                 outTransDetailsArrDay = JSON.parse(outTransDetailsArrDay)
             }
-            if(localStorage.outTransDetails != undefined){
+            if(localStorage.outTransDetails != undefined  && JSON.parse(localStorage.outTransDetails).length == outTransData.length){
                 outTransDetailsArr = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.outTransDetails))
             } else {
                 outTransDetailsArr = JSON.stringify(convertDataFormatForPartition(outTransData))
@@ -2720,20 +2755,20 @@
             var successRateDetailsArrMin = [];
             var successRageDetailsArrDay = [];
 
-            if(localStorage.successRateDetailsMin != undefined){
+            if(localStorage.successRateDetailsMin != undefined && JSON.parse(localStorage.successRateDetailsMin).length == successRateDataMin.length){
                 successRateDetailsArrMin = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.successRateDetailsMin))
             } else {
                 successRateDetailsArrMin = JSON.stringify(convertDataFormatForPartition(successRateDataMin))
                 successRateDetailsArrMin = JSON.parse(successRateDetailsArrMin)
             }
 
-            if(localStorage.successRateDetailsDay != undefined){
+            if(localStorage.successRateDetailsDay != undefined && JSON.parse(localStorage.successRateDetailsDay).length == successRateDataDay.length){
                 successRageDetailsArrDay = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.successRateDetailsDay))
             } else {
                 successRageDetailsArrDay = JSON.stringify(convertDataFormatForPartition(successRateDataDay))
                 successRageDetailsArrDay = JSON.parse(successRageDetailsArrDay)
             }
-            if(localStorage.successRateDetails != undefined){
+            if(localStorage.successRateDetails != undefined && JSON.parse(localStorage.successRateDetails).length == successRateData.length){
                 successRateDetailsArr = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.successRateDetails))
             } else {
                 successRateDetailsArr = JSON.stringify(convertDataFormatForPartition(successRateData))
@@ -2901,20 +2936,20 @@
             var failureRateDetailsArrMin = [];
             var failureRageDetailsArrDay = [];
 
-            if(localStorage.failureRateDetailsMin != undefined){
+            if(localStorage.failureRateDetailsMin != undefined && JSON.parse(localStorage.failureRateDetailsMin).length == failureRateDataMin.length){
                 failureRateDetailsArrMin = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.failureRateDetailsMin))
             } else {
                 failureRateDetailsArrMin = JSON.stringify(convertDataFormatForPartition(failureRateDataMin))
                 failureRateDetailsArrMin = JSON.parse(failureRateDetailsArrMin)
             }
 
-            if(localStorage.failureRateDetailsDay != undefined){
+            if(localStorage.failureRateDetailsDay != undefined  && JSON.parse(localStorage.failureRateDetailsDay).length == failureRateDataDay.length){
                 failureRageDetailsArrDay = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.failureRateDetailsDay))
             } else {
                 failureRageDetailsArrDay = JSON.stringify(convertDataFormatForPartition(failureRateDataDay))
                 failureRageDetailsArrDay = JSON.parse(failureRageDetailsArrDay)
             }
-            if(localStorage.failureRateDetails != undefined){
+            if(localStorage.failureRateDetails != undefined  && JSON.parse(localStorage.failureRateDetails).length == failureRateData.length){
                 failureRateDetailsArr = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.failureRateDetails))
             } else {
                 failureRateDetailsArr = JSON.stringify(convertDataFormatForPartition(failureRateData))

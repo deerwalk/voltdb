@@ -1136,11 +1136,23 @@ var loadPage = function (serverName, portid) {
         voltDbRenderer.getImporterGraphInformation(function(importerDetails){
             if(!$.isEmptyObject(importerDetails)){
                 graphView = $("#importerGraphView").val();
-                MonitorGraphUI.SetImporterData(importerDetails)
                 if(VoltDbUI.isFirstImporterLoad){
+                    MonitorGraphUI.SetImporterData(importerDetails)
                     MonitorGraphUI.AddImporterGraph(VoltDbUI.getFromLocalStorage("importer-graph-view"), $('#chartOutTransaction'), $('#chartSuccessRate'), $('#chartFailureRate'));
                     VoltDbUI.isFirstImporterLoad = false;
                 }
+                var dataMapper = MonitorGraphUI.getImportMapperData();
+                var dataArray = ["outTransData_second", "outTransDataMin_minute", "outTransDataDay_day", "successRateData_second", "successRateDataMin_minute",
+                "successRateDataDay_day", "failureRateData_second", "failureRateDataMin_minute", "failureRateDataDay_day"]
+                $.each(importerDetails["SUCCESSES"], function(key, value){
+                    if(key != "TIMESTAMP" && !dataMapper.hasOwnProperty(key)){
+                        for(var i = 0; i < dataArray.length; i++){
+                            var dataSplit = dataArray[i].split('_')
+                            MonitorGraphUI.AddImporterGraphLine(dataSplit[0], key, dataSplit[1])
+                        }
+                    }
+                });
+
                 MonitorGraphUI.RefreshOutTransGraph(importerDetails["OUTSTANDING_REQUESTS"], graphView, getCurrentTab());
                 MonitorGraphUI.RefreshSuccessRateGraph(importerDetails["SUCCESSES"], graphView, getCurrentTab());
                 MonitorGraphUI.RefreshFailureRateGraph(importerDetails["FAILURES"], graphView, getCurrentTab());
