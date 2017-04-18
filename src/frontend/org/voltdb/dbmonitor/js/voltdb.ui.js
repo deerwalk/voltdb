@@ -1155,6 +1155,10 @@ var loadPage = function (serverName, portid) {
                     MonitorGraphUI.AddImporterGraph(VoltDbUI.getFromLocalStorage("importer-graph-view"), $('#chartOutTransaction'), $('#chartSuccessRate'), $('#chartFailureRate'));
                     VoltDbUI.isFirstImporterLoad = false;
                 }
+                $('#divNoImportDataMsg').hide();
+                $('#graphChartImporter').show();
+                adjustImporterGraphSpacing()
+
                 var dataMapper = MonitorGraphUI.getImportMapperData();
                 var dataArray = ["outTransData_second", "outTransDataMin_minute", "outTransDataDay_day", "successRateData_second", "successRateDataMin_minute",
                 "successRateDataDay_day", "failureRateData_second", "failureRateDataMin_minute", "failureRateDataDay_day"]
@@ -1166,19 +1170,14 @@ var loadPage = function (serverName, portid) {
                         }
                     }
                 });
-
-                MonitorGraphUI.RefreshOutTransGraph(importerDetails["OUTSTANDING_REQUESTS"], graphView, getCurrentTab());
-                MonitorGraphUI.RefreshSuccessRateGraph(importerDetails["SUCCESSES"], graphView, getCurrentTab());
-                MonitorGraphUI.RefreshFailureRateGraph(importerDetails["FAILURES"], graphView, getCurrentTab());
-                $('#divNoImportDataMsg').hide();
-                $('#graphChartImporter').show();
-                adjustImporterGraphSpacing()
+                var curTab = VoltDbUI.getCookie("current-tab");
+                MonitorGraphUI.RefreshOutTransGraph(importerDetails["OUTSTANDING_REQUESTS"], graphView, curTab);
+                MonitorGraphUI.RefreshSuccessRateGraph(importerDetails["SUCCESSES"], graphView, curTab);
+                MonitorGraphUI.RefreshFailureRateGraph(importerDetails["FAILURES"], graphView, curTab);
             } else {
                 $('#divNoImportDataMsg').show();
                 $('#graphChartImporter').hide();
             }
-
-
         });
 
         voltDbRenderer.GetPartitionIdleTimeInformation(function (partitionDetail) {

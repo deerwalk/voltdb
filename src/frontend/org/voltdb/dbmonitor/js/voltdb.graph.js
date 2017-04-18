@@ -72,6 +72,9 @@
             maxMinPartition: "#4C76B0",
             multiPartition: "#FF8C00"
         }
+
+        var colorList = ["#A48805", "#1B87C8", "#D3D3D3", "#4C76B0", "#FF8C00"]
+
         this.enumMaxTimeGap = {
             secGraph: 300000,
             minGraph: 1800000,
@@ -143,18 +146,27 @@
             if(dataImporterDetails != undefined){
                 $.each(dataImporterDetails, function(key, value){
                     if(key == "SUCCESSES" || key == "FAILURES" || key == "OUTSTANDING_REQUESTS"){
+                        var colorIndex = -1;
+                        var prevKey = ""
                         $.each(value, function(dataType, dataTypeValue){
-                            var arr = [];
-                            arr.push(emptyData[0]);
-                            arr.push(emptyData[emptyData.length - 1]);
-                            if (key == "SUCCESSES" && dataType != "TIMESTAMP"){
-                                dataImporterSuccess.push({ key: dataType, values: arr, color: getRandomColor() })
-                                dataMapper[dataType] = count;
-                                count++;
-                            } else if (key == "FAILURES" && dataType != "TIMESTAMP"){
-                                dataImporterFailures.push({ key: dataType, values: arr, color: getRandomColor() })
-                            } else if (key == "OUTSTANDING_REQUESTS" && dataType != "TIMESTAMP"){
-                                dataImporterOutTrans.push({ key: dataType, values: arr, color: getRandomColor() })
+                            if(dataType != "TIMESTAMP"){
+                                var arr = [];
+                                arr.push(emptyData[0]);
+                                arr.push(emptyData[emptyData.length - 1]);
+                                if(prevKey != key){
+                                    colorIndex = 0;
+                                    prevKey = key;
+                                }
+                                if (key == "SUCCESSES"){
+                                    dataImporterSuccess.push({ key: dataType, values: arr, color: colorList[colorIndex] })
+                                    dataMapper[dataType] = count;
+                                    count++;
+                                } else if (key == "FAILURES"){
+                                    dataImporterFailures.push({ key: dataType, values: arr, color: colorList[colorIndex] })
+                                } else if (key == "OUTSTANDING_REQUESTS"){
+                                    dataImporterOutTrans.push({ key: dataType, values: arr, color: colorList[colorIndex] })
+                                }
+                                colorIndex++;
                             }
                         });
                     }
@@ -2649,12 +2661,8 @@
                 $.each(outTransDetail, function(key, value) {
                     if(key != "TIMESTAMP"){
                         var keyValue = key;
-                        var percentValue = value;
+                        var newValue = value;
 
-                        if (percentValue < 0)
-                            percentValue = 0;
-                        else if (percentValue > 100)
-                            percentValue = 100;
                         if (outTransSecCount >= 6 || monitor.outTransFirstData) {
                             if (!outTransDataMin.hasOwnProperty(keyValue)) {
                                 var keyIndex = dataMapperImporterMin[keyValue];
@@ -2663,8 +2671,8 @@
                                     outTransDataMin[keyIndex]["values"].push({"x": new Date(timeStamp), "y": outTransDataMin[keyIndex]["values"][outTransDataMin[keyIndex]["values"].length - 1].y });
                                     outTransDetailsArrMin = savePartitionDataToLocalStorage(outTransDetailsArrMin, {"x": new Date(timeStamp), "y": outTransDataMin[keyIndex]["values"][outTransDataMin[keyIndex]["values"].length - 1].y }, keyIndex)
                                 } else {
-                                    outTransDataMin[keyIndex]["values"].push({ 'x': new Date(timeStamp), 'y': percentValue });
-                                    outTransDetailsArrMin = savePartitionDataToLocalStorage(outTransDetailsArrMin, { 'x': new Date(timeStamp), 'y': percentValue }, keyIndex)
+                                    outTransDataMin[keyIndex]["values"].push({ 'x': new Date(timeStamp), 'y': newValue });
+                                    outTransDetailsArrMin = savePartitionDataToLocalStorage(outTransDetailsArrMin, { 'x': new Date(timeStamp), 'y': newValue }, keyIndex)
                                 }
                                 Monitors.outTransDataMin = outTransDataMin;
                             }
@@ -2677,8 +2685,8 @@
                                 outTransDataDay[keyIndexDay]["values"].push({ "x": new Date(timeStamp), "y": outTransDataDay[keyIndexDay]["values"][outTransDataDay[keyIndexDay]["values"].length - 1].y });
                                 outTransDetailsArrDay = savePartitionDataToLocalStorage(outTransDetailsArrDay, { "x": new Date(timeStamp), "y": outTransDataDay[keyIndexDay]["values"][outTransDataDay[keyIndexDay]["values"].length - 1].y }, keyIndexDay)
                             } else {
-                                outTransDataDay[keyIndexDay]["values"].push({ 'x': new Date(timeStamp), 'y': percentValue });
-                                outTransDetailsArrDay = savePartitionDataToLocalStorage(outTransDetailsArrDay, { 'x': new Date(timeStamp), 'y': percentValue }, keyIndexDay)
+                                outTransDataDay[keyIndexDay]["values"].push({ 'x': new Date(timeStamp), 'y': newValue });
+                                outTransDetailsArrDay = savePartitionDataToLocalStorage(outTransDetailsArrDay, { 'x': new Date(timeStamp), 'y': newValue }, keyIndexDay)
                             }
                             Monitors.outTransDataDay = outTransDataDay;
                         }
@@ -2690,8 +2698,8 @@
                             outTransData[keyIndexSec]["values"].push({"x": new Date(timeStamp), "y": outTransData[keyIndexSec]["values"][outTransData[keyIndexSec]["values"].length - 1].y });
                             outTransDetailsArr = savePartitionDataToLocalStorage(outTransDetailsArr, {"x": new Date(timeStamp), "y": outTransData[keyIndexSec]["values"][outTransData[keyIndexSec]["values"].length - 1].y }, keyIndexSec)
                         } else {
-                            outTransData[keyIndexSec].values.push({ 'x': new Date(timeStamp), 'y': percentValue });
-                            outTransDetailsArr = savePartitionDataToLocalStorage(outTransDetailsArr, { 'x': new Date(timeStamp), 'y': percentValue }, keyIndexSec  )
+                            outTransData[keyIndexSec].values.push({ 'x': new Date(timeStamp), 'y': newValue });
+                            outTransDetailsArr = savePartitionDataToLocalStorage(outTransDetailsArr, { 'x': new Date(timeStamp), 'y': newValue }, keyIndexSec  )
                         }
                         Monitors.outTransData = outTransData;
                     }
@@ -2717,7 +2725,7 @@
                     dataOutTrans = outTransData;
                 }
 
-                if (currentTab == NavigationTabs.Importer && currentViewImporter == graphView && outTransChart.is(":visible")) {
+                if (currentTab == NavigationTabs.Importer && currentViewImporter == graphView) {
                     d3.select('#visualisationOutTrans')
                         .datum(dataOutTrans)
                         .transition().duration(500)
@@ -2898,7 +2906,7 @@
                     dataSuccessRate = successRateData;
                 }
 
-                if (currentTab == NavigationTabs.Importer && currentViewImporter == graphView && outTransChart.is(":visible")) {
+                if (currentTab == NavigationTabs.Importer && currentViewImporter == graphView) {
                     d3.select('#visualisationSuccessRate')
                         .datum(dataSuccessRate)
                         .transition().duration(500)
@@ -3079,7 +3087,7 @@
                     dataFailureRate = failureRateData;
                 }
 
-                if (currentTab == NavigationTabs.Importer && currentViewImporter == graphView && outTransChart.is(":visible")) {
+                if (currentTab == NavigationTabs.Importer && currentViewImporter == graphView) {
                     d3.select('#visualisationFailureRate')
                         .datum(dataFailureRate)
                         .transition().duration(500)
