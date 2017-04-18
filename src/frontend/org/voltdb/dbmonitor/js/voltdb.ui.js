@@ -567,33 +567,33 @@ function downloadCSV(event,args,whichChart, chartId) {
         }
     } else if(whichChart == "outTrans"){
         if (importGraphView == "Seconds"){
-            chartData = JSON.parse(localStorage.outTransDetails)
+            chartData = convertImporterData(JSON.parse(localStorage.outTransDetails))
         }
         else if (importGraphView == "Minutes"){
-            chartData = JSON.parse(localStorage.outTransDetailsMin)
+            chartData = convertImporterData(JSON.parse(localStorage.outTransDetailsMin))
         }
         else if (importGraphView == "Days"){
-            chartData = JSON.parse(localStorage.outTransDetailsDay)
+            chartData = convertImporterData(JSON.parse(localStorage.outTransDetailsDay))
         }
     } else if(whichChart == "successRate"){
         if (importGraphView == "Seconds"){
-            chartData = JSON.parse(localStorage.successRateDetails)
+            chartData = convertImporterData(JSON.parse(localStorage.successRateDetails))
         }
         else if (importGraphView == "Minutes"){
-            chartData = JSON.parse(localStorage.successRateDetailsMin)
+            chartData = convertImporterData(JSON.parse(localStorage.successRateDetailsMin))
         }
         else if (importGraphView == "Days"){
-            chartData = JSON.parse(localStorage.successRateDetailsDay)
+            chartData = convertImporterData(JSON.parse(localStorage.successRateDetailsDay))
         }
     } else if(whichChart == "failureRate"){
         if (importGraphView == "Seconds"){
-            chartData = JSON.parse(localStorage.failureRateDetails)
+            chartData = convertImporterData(JSON.parse(localStorage.failureRateDetails))
         }
         else if (importGraphView == "Minutes"){
-            chartData = JSON.parse(localStorage.failureRateDetailsMin)
+            chartData = convertImporterData(JSON.parse(localStorage.failureRateDetailsMin))
         }
         else if (importGraphView == "Days"){
-            chartData = JSON.parse(localStorage.failureRateDetailsDay)
+            chartData = convertImporterData(JSON.parse(localStorage.failureRateDetailsDay))
         }
     }
 
@@ -622,6 +622,20 @@ function convertPartitionData(data){
             chartData.push({
                 "key": data[i].key.replace(" ", ""),
                 "type": getPartitionType(data[i].key, data[i].color),
+                "timestamp": data[i].values[j].x,
+                "value": data[i].values[j].y
+            })
+        }
+    }
+    return chartData;
+}
+
+function convertImporterData(data){
+    var chartData = [];
+    for (var i=0; i< data.length; i++){
+        for(var j=0 ; j< data[i].values.length; j++){
+            chartData.push({
+                "key": data[i].key.replace(" ", ""),
                 "timestamp": data[i].values[j].x,
                 "value": data[i].values[j].y
             })
