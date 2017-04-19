@@ -1035,8 +1035,20 @@
                 dataSuccessRate = Monitors.successRateData;
                 dataFailureRate = Monitors.failureRateData;
             }
-
             changeImporterAxisTimeFormat(view);
+
+            d3.select('#visualisationSuccessRate')
+                        .datum(dataSuccessRate)
+                        .transition().duration(500)
+                        .call(ChartSuccessRate);
+            d3.select('#visualisationFailureRate')
+                        .datum(dataFailureRate)
+                        .transition().duration(500)
+                        .call(ChartFailureRate);
+            d3.select('#visualisationOutTrans')
+                        .datum(dataOutTrans)
+                        .transition().duration(500)
+                        .call(ChartOutTrans);
         };
 
         this.AddImporterGraphLine = function(dataType, keyValue, timeUnit, colorIndex){

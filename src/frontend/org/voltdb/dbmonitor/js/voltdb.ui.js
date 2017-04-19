@@ -772,7 +772,11 @@ var loadPage = function (serverName, portid) {
                 }
             } else if (curTab == NavigationTabs.Importer) {
                 $("#overlay").show();
-                setTimeout(function () { $("#navImporter> a").trigger("click"); }, 100);
+                setTimeout(function () {
+                    $("#navImporter> a").trigger("click");
+                    MonitorGraphUI.RefreshImporterGraph(VoltDbUI.getFromLocalStorage("importer-graph-view"))
+                    }, 100);
+
             } else{
                 setTimeout(function () { $("#navDbmonitor > a").trigger("click"); }, 100);
             }
@@ -1157,7 +1161,7 @@ var loadPage = function (serverName, portid) {
                 }
                 $('#divNoImportDataMsg').hide();
                 $('#graphChartImporter').show();
-                adjustImporterGraphSpacing()
+
 
                 var dataMapper = MonitorGraphUI.getImportMapperData();
                 var colorIndex = MonitorGraphUI.getDataMapperIndex(dataMapper);
