@@ -567,33 +567,33 @@ function downloadCSV(event,args,whichChart, chartId) {
         }
     } else if(whichChart == "outTrans"){
         if (importGraphView == "Seconds"){
-            chartData = JSON.parse(localStorage.outTransDetails)
+            chartData = convertImporterData(JSON.parse(localStorage.outTransDetails))
         }
         else if (importGraphView == "Minutes"){
-            chartData = JSON.parse(localStorage.outTransDetailsMin)
+            chartData = convertImporterData(JSON.parse(localStorage.outTransDetailsMin))
         }
         else if (importGraphView == "Days"){
-            chartData = JSON.parse(localStorage.outTransDetailsDay)
+            chartData = convertImporterData(JSON.parse(localStorage.outTransDetailsDay))
         }
     } else if(whichChart == "successRate"){
         if (importGraphView == "Seconds"){
-            chartData = JSON.parse(localStorage.successRateDetails)
+            chartData = convertImporterData(JSON.parse(localStorage.successRateDetails))
         }
         else if (importGraphView == "Minutes"){
-            chartData = JSON.parse(localStorage.successRateDetailsMin)
+            chartData = convertImporterData(JSON.parse(localStorage.successRateDetailsMin))
         }
         else if (importGraphView == "Days"){
-            chartData = JSON.parse(localStorage.successRateDetailsDay)
+            chartData = convertImporterData(JSON.parse(localStorage.successRateDetailsDay))
         }
     } else if(whichChart == "failureRate"){
         if (importGraphView == "Seconds"){
-            chartData = JSON.parse(localStorage.failureRateDetails)
+            chartData = convertImporterData(JSON.parse(localStorage.failureRateDetails))
         }
         else if (importGraphView == "Minutes"){
-            chartData = JSON.parse(localStorage.failureRateDetailsMin)
+            chartData = convertImporterData(JSON.parse(localStorage.failureRateDetailsMin))
         }
         else if (importGraphView == "Days"){
-            chartData = JSON.parse(localStorage.failureRateDetailsDay)
+            chartData = convertImporterData(JSON.parse(localStorage.failureRateDetailsDay))
         }
     }
 
@@ -622,6 +622,20 @@ function convertPartitionData(data){
             chartData.push({
                 "key": data[i].key.replace(" ", ""),
                 "type": getPartitionType(data[i].key, data[i].color),
+                "timestamp": data[i].values[j].x,
+                "value": data[i].values[j].y
+            })
+        }
+    }
+    return chartData;
+}
+
+function convertImporterData(data){
+    var chartData = [];
+    for (var i=0; i< data.length; i++){
+        for(var j=0 ; j< data[i].values.length; j++){
+            chartData.push({
+                "key": data[i].key.replace(" ", ""),
                 "timestamp": data[i].values[j].x,
                 "value": data[i].values[j].y
             })
@@ -758,7 +772,11 @@ var loadPage = function (serverName, portid) {
                 }
             } else if (curTab == NavigationTabs.Importer) {
                 $("#overlay").show();
-                setTimeout(function () { $("#navImporter> a").trigger("click"); }, 100);
+                setTimeout(function () {
+                    $("#navImporter> a").trigger("click");
+                    MonitorGraphUI.RefreshImporterGraph(VoltDbUI.getFromLocalStorage("importer-graph-view"))
+                    }, 100);
+
             } else{
                 setTimeout(function () { $("#navDbmonitor > a").trigger("click"); }, 100);
             }
@@ -1136,23 +1154,35 @@ var loadPage = function (serverName, portid) {
         voltDbRenderer.getImporterGraphInformation(function(importerDetails){
             if(!$.isEmptyObject(importerDetails)){
                 graphView = $("#importerGraphView").val();
-                MonitorGraphUI.SetImporterData(importerDetails)
                 if(VoltDbUI.isFirstImporterLoad){
+                    MonitorGraphUI.SetImporterData(importerDetails)
                     MonitorGraphUI.AddImporterGraph(VoltDbUI.getFromLocalStorage("importer-graph-view"), $('#chartOutTransaction'), $('#chartSuccessRate'), $('#chartFailureRate'));
                     VoltDbUI.isFirstImporterLoad = false;
                 }
-                MonitorGraphUI.RefreshOutTransGraph(importerDetails["OUTSTANDING_REQUESTS"], graphView, getCurrentTab());
-                MonitorGraphUI.RefreshSuccessRateGraph(importerDetails["SUCCESSES"], graphView, getCurrentTab());
-                MonitorGraphUI.RefreshFailureRateGraph(importerDetails["FAILURES"], graphView, getCurrentTab());
                 $('#divNoImportDataMsg').hide();
                 $('#graphChartImporter').show();
-                adjustImporterGraphSpacing()
+
+
+                var dataMapper = MonitorGraphUI.getImportMapperData();
+                var colorIndex = MonitorGraphUI.getDataMapperIndex(dataMapper);
+                var dataArray = ["outTransData_second", "outTransDataMin_minute", "outTransDataDay_day", "successRateData_second", "successRateDataMin_minute",
+                "successRateDataDay_day", "failureRateData_second", "failureRateDataMin_minute", "failureRateDataDay_day"]
+                $.each(importerDetails["SUCCESSES"], function(key, value){
+                    if(key != "TIMESTAMP" && !dataMapper.hasOwnProperty(key)){
+                        for(var i = 0; i < dataArray.length; i++){
+                            var dataSplit = dataArray[i].split('_')
+                            MonitorGraphUI.AddImporterGraphLine(dataSplit[0], key, dataSplit[1], colorIndex)
+                        }
+                    }
+                });
+                var curTab = VoltDbUI.getCookie("current-tab");
+                MonitorGraphUI.RefreshOutTransGraph(importerDetails["OUTSTANDING_REQUESTS"], graphView, curTab);
+                MonitorGraphUI.RefreshSuccessRateGraph(importerDetails["SUCCESSES"], graphView, curTab);
+                MonitorGraphUI.RefreshFailureRateGraph(importerDetails["FAILURES"], graphView, curTab);
             } else {
                 $('#divNoImportDataMsg').show();
                 $('#graphChartImporter').hide();
             }
-
-
         });
 
         voltDbRenderer.GetPartitionIdleTimeInformation(function (partitionDetail) {

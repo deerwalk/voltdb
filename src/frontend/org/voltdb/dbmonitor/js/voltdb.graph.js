@@ -72,6 +72,9 @@
             maxMinPartition: "#4C76B0",
             multiPartition: "#FF8C00"
         }
+
+        var colorList = ["#A48805", "#1B87C8", "#D3D3D3", "#4C76B0", "#FF8C00", "#468706", "#C70000", "#544a48", "#AA4567", "#783300"]
+
         this.enumMaxTimeGap = {
             secGraph: 300000,
             minGraph: 1800000,
@@ -131,6 +134,10 @@
             return color;
         }
 
+        this.getImportMapperData = function(){
+            return dataMapperImporterSec;
+        }
+
         function getImportData(emptyData, dataMapper){
             var count = 0;
             var dataImporterSuccess = [];
@@ -139,18 +146,27 @@
             if(dataImporterDetails != undefined){
                 $.each(dataImporterDetails, function(key, value){
                     if(key == "SUCCESSES" || key == "FAILURES" || key == "OUTSTANDING_REQUESTS"){
+                        var colorIndex = -1;
+                        var prevKey = ""
                         $.each(value, function(dataType, dataTypeValue){
-                            var arr = [];
-                            arr.push(emptyData[0]);
-                            arr.push(emptyData[emptyData.length - 1]);
-                            if (key == "SUCCESSES" && dataType != "TIMESTAMP"){
-                                dataImporterSuccess.push({ key: dataType, values: arr, color: getRandomColor() })
-                                dataMapper[dataType] = count;
-                                count++;
-                            } else if (key == "FAILURES" && dataType != "TIMESTAMP"){
-                                dataImporterFailures.push({ key: dataType, values: arr, color: getRandomColor() })
-                            } else if (key == "OUTSTANDING_REQUESTS" && dataType != "TIMESTAMP"){
-                                dataImporterOutTrans.push({ key: dataType, values: arr, color: getRandomColor() })
+                            if(dataType != "TIMESTAMP"){
+                                var arr = [];
+                                arr.push(emptyData[0]);
+                                arr.push(emptyData[emptyData.length - 1]);
+                                if(prevKey != key){
+                                    colorIndex = 0;
+                                    prevKey = key;
+                                }
+                                if (key == "SUCCESSES"){
+                                    dataImporterSuccess.push({ key: dataType, values: arr, color: colorList[colorIndex] })
+                                    dataMapper[dataType] = count;
+                                    count++;
+                                } else if (key == "FAILURES"){
+                                    dataImporterFailures.push({ key: dataType, values: arr, color: colorList[colorIndex] })
+                                } else if (key == "OUTSTANDING_REQUESTS"){
+                                    dataImporterOutTrans.push({ key: dataType, values: arr, color: colorList[colorIndex] })
+                                }
+                                colorIndex++;
                             }
                         });
                     }
@@ -1019,9 +1035,52 @@
                 dataSuccessRate = Monitors.successRateData;
                 dataFailureRate = Monitors.failureRateData;
             }
-
             changeImporterAxisTimeFormat(view);
+
+            d3.select('#visualisationSuccessRate')
+                        .datum(dataSuccessRate)
+                        .transition().duration(500)
+                        .call(ChartSuccessRate);
+            d3.select('#visualisationFailureRate')
+                        .datum(dataFailureRate)
+                        .transition().duration(500)
+                        .call(ChartFailureRate);
+            d3.select('#visualisationOutTrans')
+                        .datum(dataOutTrans)
+                        .transition().duration(500)
+                        .call(ChartOutTrans);
         };
+
+        this.AddImporterGraphLine = function(dataType, keyValue, timeUnit, colorIndex){
+            var arr = [];
+            if(timeUnit == "second"){
+                arr.push(emptyData[0]);
+                arr.push(emptyData[emptyData.length - 1]);
+            } else if(timeUnit == "minute"){
+                arr.push(emptyDataForMinutes[0]);
+                arr.push(emptyDataForMinutes[emptyDataForMinutes.length - 1]);
+            } else if(timeUnit == "day"){
+                arr.push(emptyDataForDays[0]);
+                arr.push(emptyDataForDays[emptyDataForDays.length - 1]);
+            }
+            Monitors[dataType].push({ key: keyValue, values: arr, color: colorList[colorIndex] })
+            if(dataType == "successRateData"){
+                dataMapperImporterSec[keyValue] = MonitorGraphUI.getDataMapperIndex(dataMapperImporterSec);
+                dataMapperImporterMin[keyValue] = MonitorGraphUI.getDataMapperIndex(dataMapperImporterMin);
+                dataMapperImporterDay[keyValue] = MonitorGraphUI.getDataMapperIndex(dataMapperImporterDay);
+            }
+
+        }
+
+        this.getDataMapperIndex = function(dataMap){
+            var count = 0;
+            $.each(dataMap, function(key, value){
+                if(dataMap[key] > count)
+                    count =  dataMap[key];
+            })
+            count++;
+            return count;
+        }
 
         this.UpdateCharts = function () {
             if (ramChart.is(":visible"))
@@ -2551,20 +2610,20 @@
             var outTransDetailsArrMin = [];
             var outTransDetailsArrDay = [];
 
-            if(localStorage.outTransDetailsMin != undefined){
+            if(localStorage.outTransDetailsMin != undefined && JSON.parse(localStorage.outTransDetailsMin).length == outTransDataMin.length){
                 outTransDetailsArrMin = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.outTransDetailsMin))
             } else {
                 outTransDetailsArrMin = JSON.stringify(convertDataFormatForPartition(outTransDataMin))
                 outTransDetailsArrMin = JSON.parse(outTransDetailsArrMin)
             }
 
-            if(localStorage.outTransDetailsDay != undefined){
+            if(localStorage.outTransDetailsDay != undefined  && JSON.parse(localStorage.outTransDetailsDay).length == outTransDataDay.length){
                 outTransDetailsArrDay = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.outTransDetailsDay))
             } else {
                 outTransDetailsArrDay = JSON.stringify(convertDataFormatForPartition(outTransDataDay))
                 outTransDetailsArrDay = JSON.parse(outTransDetailsArrDay)
             }
-            if(localStorage.outTransDetails != undefined){
+            if(localStorage.outTransDetails != undefined  && JSON.parse(localStorage.outTransDetails).length == outTransData.length){
                 outTransDetailsArr = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.outTransDetails))
             } else {
                 outTransDetailsArr = JSON.stringify(convertDataFormatForPartition(outTransData))
@@ -2614,12 +2673,8 @@
                 $.each(outTransDetail, function(key, value) {
                     if(key != "TIMESTAMP"){
                         var keyValue = key;
-                        var percentValue = value;
+                        var newValue = value;
 
-                        if (percentValue < 0)
-                            percentValue = 0;
-                        else if (percentValue > 100)
-                            percentValue = 100;
                         if (outTransSecCount >= 6 || monitor.outTransFirstData) {
                             if (!outTransDataMin.hasOwnProperty(keyValue)) {
                                 var keyIndex = dataMapperImporterMin[keyValue];
@@ -2628,8 +2683,8 @@
                                     outTransDataMin[keyIndex]["values"].push({"x": new Date(timeStamp), "y": outTransDataMin[keyIndex]["values"][outTransDataMin[keyIndex]["values"].length - 1].y });
                                     outTransDetailsArrMin = savePartitionDataToLocalStorage(outTransDetailsArrMin, {"x": new Date(timeStamp), "y": outTransDataMin[keyIndex]["values"][outTransDataMin[keyIndex]["values"].length - 1].y }, keyIndex)
                                 } else {
-                                    outTransDataMin[keyIndex]["values"].push({ 'x': new Date(timeStamp), 'y': percentValue });
-                                    outTransDetailsArrMin = savePartitionDataToLocalStorage(outTransDetailsArrMin, { 'x': new Date(timeStamp), 'y': percentValue }, keyIndex)
+                                    outTransDataMin[keyIndex]["values"].push({ 'x': new Date(timeStamp), 'y': newValue });
+                                    outTransDetailsArrMin = savePartitionDataToLocalStorage(outTransDetailsArrMin, { 'x': new Date(timeStamp), 'y': newValue }, keyIndex)
                                 }
                                 Monitors.outTransDataMin = outTransDataMin;
                             }
@@ -2642,8 +2697,8 @@
                                 outTransDataDay[keyIndexDay]["values"].push({ "x": new Date(timeStamp), "y": outTransDataDay[keyIndexDay]["values"][outTransDataDay[keyIndexDay]["values"].length - 1].y });
                                 outTransDetailsArrDay = savePartitionDataToLocalStorage(outTransDetailsArrDay, { "x": new Date(timeStamp), "y": outTransDataDay[keyIndexDay]["values"][outTransDataDay[keyIndexDay]["values"].length - 1].y }, keyIndexDay)
                             } else {
-                                outTransDataDay[keyIndexDay]["values"].push({ 'x': new Date(timeStamp), 'y': percentValue });
-                                outTransDetailsArrDay = savePartitionDataToLocalStorage(outTransDetailsArrDay, { 'x': new Date(timeStamp), 'y': percentValue }, keyIndexDay)
+                                outTransDataDay[keyIndexDay]["values"].push({ 'x': new Date(timeStamp), 'y': newValue });
+                                outTransDetailsArrDay = savePartitionDataToLocalStorage(outTransDetailsArrDay, { 'x': new Date(timeStamp), 'y': newValue }, keyIndexDay)
                             }
                             Monitors.outTransDataDay = outTransDataDay;
                         }
@@ -2655,8 +2710,8 @@
                             outTransData[keyIndexSec]["values"].push({"x": new Date(timeStamp), "y": outTransData[keyIndexSec]["values"][outTransData[keyIndexSec]["values"].length - 1].y });
                             outTransDetailsArr = savePartitionDataToLocalStorage(outTransDetailsArr, {"x": new Date(timeStamp), "y": outTransData[keyIndexSec]["values"][outTransData[keyIndexSec]["values"].length - 1].y }, keyIndexSec)
                         } else {
-                            outTransData[keyIndexSec].values.push({ 'x': new Date(timeStamp), 'y': percentValue });
-                            outTransDetailsArr = savePartitionDataToLocalStorage(outTransDetailsArr, { 'x': new Date(timeStamp), 'y': percentValue }, keyIndexSec  )
+                            outTransData[keyIndexSec].values.push({ 'x': new Date(timeStamp), 'y': newValue });
+                            outTransDetailsArr = savePartitionDataToLocalStorage(outTransDetailsArr, { 'x': new Date(timeStamp), 'y': newValue }, keyIndexSec  )
                         }
                         Monitors.outTransData = outTransData;
                     }
@@ -2682,7 +2737,7 @@
                     dataOutTrans = outTransData;
                 }
 
-                if (currentTab == NavigationTabs.Importer && currentViewImporter == graphView && outTransChart.is(":visible")) {
+                if (currentTab == NavigationTabs.Importer && currentViewImporter == graphView) {
                     d3.select('#visualisationOutTrans')
                         .datum(dataOutTrans)
                         .transition().duration(500)
@@ -2720,20 +2775,20 @@
             var successRateDetailsArrMin = [];
             var successRageDetailsArrDay = [];
 
-            if(localStorage.successRateDetailsMin != undefined){
+            if(localStorage.successRateDetailsMin != undefined && JSON.parse(localStorage.successRateDetailsMin).length == successRateDataMin.length){
                 successRateDetailsArrMin = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.successRateDetailsMin))
             } else {
                 successRateDetailsArrMin = JSON.stringify(convertDataFormatForPartition(successRateDataMin))
                 successRateDetailsArrMin = JSON.parse(successRateDetailsArrMin)
             }
 
-            if(localStorage.successRateDetailsDay != undefined){
+            if(localStorage.successRateDetailsDay != undefined && JSON.parse(localStorage.successRateDetailsDay).length == successRateDataDay.length){
                 successRageDetailsArrDay = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.successRateDetailsDay))
             } else {
                 successRageDetailsArrDay = JSON.stringify(convertDataFormatForPartition(successRateDataDay))
                 successRageDetailsArrDay = JSON.parse(successRageDetailsArrDay)
             }
-            if(localStorage.successRateDetails != undefined){
+            if(localStorage.successRateDetails != undefined && JSON.parse(localStorage.successRateDetails).length == successRateData.length){
                 successRateDetailsArr = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.successRateDetails))
             } else {
                 successRateDetailsArr = JSON.stringify(convertDataFormatForPartition(successRateData))
@@ -2790,7 +2845,8 @@
                             var previousValue = previousSuccessRate[keyValue].value;
 
                             var calculatedValue = ((previousValue - newValue)*(-1))/((timeStamp - previousTimeStamp)/1000)
-
+                            if(calculatedValue == -0)
+                                calculatedValue = 0;
                             previousSuccessRate[keyValue] = {
                                                                 timeStamp: timeStamp,
                                                                 value: newValue
@@ -2863,7 +2919,7 @@
                     dataSuccessRate = successRateData;
                 }
 
-                if (currentTab == NavigationTabs.Importer && currentViewImporter == graphView && outTransChart.is(":visible")) {
+                if (currentTab == NavigationTabs.Importer && currentViewImporter == graphView) {
                     d3.select('#visualisationSuccessRate')
                         .datum(dataSuccessRate)
                         .transition().duration(500)
@@ -2901,20 +2957,20 @@
             var failureRateDetailsArrMin = [];
             var failureRageDetailsArrDay = [];
 
-            if(localStorage.failureRateDetailsMin != undefined){
+            if(localStorage.failureRateDetailsMin != undefined && JSON.parse(localStorage.failureRateDetailsMin).length == failureRateDataMin.length){
                 failureRateDetailsArrMin = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.failureRateDetailsMin))
             } else {
                 failureRateDetailsArrMin = JSON.stringify(convertDataFormatForPartition(failureRateDataMin))
                 failureRateDetailsArrMin = JSON.parse(failureRateDetailsArrMin)
             }
 
-            if(localStorage.failureRateDetailsDay != undefined){
+            if(localStorage.failureRateDetailsDay != undefined  && JSON.parse(localStorage.failureRateDetailsDay).length == failureRateDataDay.length){
                 failureRageDetailsArrDay = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.failureRateDetailsDay))
             } else {
                 failureRageDetailsArrDay = JSON.stringify(convertDataFormatForPartition(failureRateDataDay))
                 failureRageDetailsArrDay = JSON.parse(failureRageDetailsArrDay)
             }
-            if(localStorage.failureRateDetails != undefined){
+            if(localStorage.failureRateDetails != undefined  && JSON.parse(localStorage.failureRateDetails).length == failureRateData.length){
                 failureRateDetailsArr = getFormattedPartitionDataFromLocalStorage(JSON.parse(localStorage.failureRateDetails))
             } else {
                 failureRateDetailsArr = JSON.stringify(convertDataFormatForPartition(failureRateData))
@@ -2971,6 +3027,8 @@
                             var previousValue = previousFailureRate[keyValue].value;
 
                             var calculatedValue = ((previousValue - newValue)*(-1))/((timeStamp - previousTimeStamp)/1000)
+                            if(calculatedValue == -0)
+                                calculatedValue = 0;
 
                             previousFailureRate[keyValue] = {
                                                                 timeStamp: timeStamp,
@@ -3044,7 +3102,7 @@
                     dataFailureRate = failureRateData;
                 }
 
-                if (currentTab == NavigationTabs.Importer && currentViewImporter == graphView && outTransChart.is(":visible")) {
+                if (currentTab == NavigationTabs.Importer && currentViewImporter == graphView) {
                     d3.select('#visualisationFailureRate')
                         .datum(dataFailureRate)
                         .transition().duration(500)
