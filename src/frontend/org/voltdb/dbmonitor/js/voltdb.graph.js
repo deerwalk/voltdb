@@ -2845,7 +2845,8 @@
                             var previousValue = previousSuccessRate[keyValue].value;
 
                             var calculatedValue = ((previousValue - newValue)*(-1))/((timeStamp - previousTimeStamp)/1000)
-
+                            if(calculatedValue == -0)
+                                calculatedValue = 0;
                             previousSuccessRate[keyValue] = {
                                                                 timeStamp: timeStamp,
                                                                 value: newValue
@@ -3026,6 +3027,8 @@
                             var previousValue = previousFailureRate[keyValue].value;
 
                             var calculatedValue = ((previousValue - newValue)*(-1))/((timeStamp - previousTimeStamp)/1000)
+                            if(calculatedValue == -0)
+                                calculatedValue = 0;
 
                             previousFailureRate[keyValue] = {
                                                                 timeStamp: timeStamp,
