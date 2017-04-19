@@ -650,6 +650,9 @@
                     else if (d.series[0].key == "Replication Rate") {
                         unit = 'KBps';
                     }
+                    else if(VoltDbUI.getCookie("current-tab") == 6){
+                        unit = ''
+                    }
                     else {
                         unit = '%';
                         isPartitionIdleGraph = true;
