@@ -609,7 +609,7 @@
 
             //};
 
-            var contentGenerator = function (d) {
+            var contentGenerator = function (d, chartContainer) {
                 if (d === null) {
                     return '';
                 }
@@ -651,7 +651,10 @@
                         unit = 'KBps';
                     }
                     else if(VoltDbUI.getCookie("current-tab") == 6){
-                        unit = ''
+                        if(chartContainer == "chartOutTransaction")
+                            unit = 'Transactions'
+                        else
+                            unit = "Rate/s"
                     }
                     else {
                         unit = '%';
@@ -921,7 +924,7 @@
                     // generate data and set it into tooltip
                     // Bonus - If you override contentGenerator and return falsey you can use something like
                     //         React or Knockout to bind the data for your tooltip
-                    var newContent = contentGenerator(data);
+                    var newContent = contentGenerator(data, chartContainer.id);
 
                     if (data.series[0].value == null) {
                         tooltipElem.className = "";
