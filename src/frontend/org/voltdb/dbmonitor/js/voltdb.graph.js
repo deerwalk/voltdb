@@ -73,7 +73,7 @@
             multiPartition: "#FF8C00"
         }
 
-        var colorList = ["#A48805", "#1B87C8", "#D3D3D3", "#4C76B0", "#FF8C00"]
+        var colorList = ["#A48805", "#1B87C8", "#D3D3D3", "#4C76B0", "#FF8C00", "#468706", "#C70000", "#544a48", "#AA4567", "#783300"]
 
         this.enumMaxTimeGap = {
             secGraph: 300000,
@@ -1039,7 +1039,7 @@
             changeImporterAxisTimeFormat(view);
         };
 
-        this.AddImporterGraphLine = function(dataType, keyValue, timeUnit){
+        this.AddImporterGraphLine = function(dataType, keyValue, timeUnit, colorIndex){
             var arr = [];
             if(timeUnit == "second"){
                 arr.push(emptyData[0]);
@@ -1051,16 +1051,16 @@
                 arr.push(emptyDataForDays[0]);
                 arr.push(emptyDataForDays[emptyDataForDays.length - 1]);
             }
-            Monitors[dataType].push({ key: keyValue, values: arr, color: getRandomColor() })
+            Monitors[dataType].push({ key: keyValue, values: arr, color: colorList[colorIndex] })
             if(dataType == "successRateData"){
-                dataMapperImporterSec[keyValue] = getDataMapperIndex(dataMapperImporterSec);
-                dataMapperImporterMin[keyValue] = getDataMapperIndex(dataMapperImporterMin);
-                dataMapperImporterDay[keyValue] = getDataMapperIndex(dataMapperImporterDay);
+                dataMapperImporterSec[keyValue] = MonitorGraphUI.getDataMapperIndex(dataMapperImporterSec);
+                dataMapperImporterMin[keyValue] = MonitorGraphUI.getDataMapperIndex(dataMapperImporterMin);
+                dataMapperImporterDay[keyValue] = MonitorGraphUI.getDataMapperIndex(dataMapperImporterDay);
             }
 
         }
 
-        function getDataMapperIndex(dataMap){
+        this.getDataMapperIndex = function(dataMap){
             var count = 0;
             $.each(dataMap, function(key, value){
                 if(dataMap[key] > count)
