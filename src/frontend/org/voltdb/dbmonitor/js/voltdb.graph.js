@@ -554,7 +554,7 @@
                     .tickFormat(d3.format(',.2f'));
 
                 ChartOutTrans.yAxis
-                    .axisLabel('(%)')
+                    .axisLabel('(Transactions)')
                     .axisLabelDistance(10);
 
                 ChartOutTrans.margin({ left: 100 });
@@ -586,7 +586,7 @@
                     .tickFormat(d3.format(',.2f'));
 
                 ChartSuccessRate.yAxis
-                    .axisLabel('(%)')
+                    .axisLabel('(Rate/s)')
                     .axisLabelDistance(10);
 
                 ChartSuccessRate.margin({ left: 100 });
@@ -618,7 +618,7 @@
                     .tickFormat(d3.format(',.2f'));
 
                 ChartFailureRate.yAxis
-                    .axisLabel('(%)')
+                    .axisLabel('(Rate/s)')
                     .axisLabelDistance(10);
 
                 ChartFailureRate.margin({ left: 100 });
