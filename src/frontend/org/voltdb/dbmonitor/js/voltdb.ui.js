@@ -1159,7 +1159,6 @@ var loadPage = function (serverName, portid) {
                 if(curTab == NavigationTabs.Importer && !$("#navImporter").hasClass('active')){
                     $("#overlay").show();
                     setTimeout(function () { $("#navImporter> a").trigger("click"); }, 100);
-                    MonitorGraphUI.RefreshImporterGraph(VoltDbUI.getFromLocalStorage("importer-graph-view"))
                 }
 
                 if(VoltDbUI.isFirstImporterLoad){
