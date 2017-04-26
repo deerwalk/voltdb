@@ -1003,7 +1003,7 @@ $(document).ready(function () {
                     defSrc += '<div class="listView">';
                     defSrc += '<ul>';
                     for (var p = 0; p < procParams.length; ++p) {
-                        defSrc += '<li class="parameterValue">Param' + (p) + ' (' + procParams[p].type + ')</li>';
+                        defSrc += '<li class="parameterValue">Param' + (p + 1) + ' (' + procParams[p].type + ')</li>';
                     }
                     defSrc += '<li class="returnValue">Return Table[]</li>';
                     defSrc += '</ul>';
@@ -1013,7 +1013,7 @@ $(document).ready(function () {
                     src += '<div class="listView">';
                     src += '<ul>';
                     for (var p = 0; p < procParams.length; ++p) {
-                        src += '<li class="parameterValue">Param' + (p) + ' (' + procParams[p].type + ')</li>';
+                        src += '<li class="parameterValue">Param' + (p + 1) + ' (' + procParams[p].type + ')</li>';
                     }
                     src += '<li class="returnValue">Return Table[]</li>';
                     src += '</ul>';
@@ -1384,7 +1384,7 @@ function loadSQLQueryPage(serverName, portid, userName) {
                 defSrc += '<div class="listView">';
                 defSrc += '<ul>';
                 for (var p = 0; p < procParams.length; ++p) {
-                    defSrc += '<li class="parameterValue">Param' + (p) + ' (' + procParams[p].type + ')</li>';
+                    defSrc += '<li class="parameterValue">Param' + (p + 1) + ' (' + procParams[p].type + ')</li>';
                 }
                 defSrc += '<li class="returnValue">Return Table[]</li>';
                 defSrc += '</ul>';
@@ -1394,7 +1394,7 @@ function loadSQLQueryPage(serverName, portid, userName) {
                 src += '<div class="listView">';
                 src += '<ul>';
                 for (var p = 0; p < procParams.length; ++p) {
-                    src += '<li class="parameterValue">Param' + (p) + ' (' + procParams[p].type + ')</li>';
+                    src += '<li class="parameterValue">Param' + (p + 1) + ' (' + procParams[p].type + ')</li>';
                 }
                 src += '<li class="returnValue">Return Table[]</li>';
                 src += '</ul>';
