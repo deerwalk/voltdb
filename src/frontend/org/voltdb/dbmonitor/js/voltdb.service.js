@@ -370,7 +370,7 @@
             try {
                 var processName = "GRAPH_LATENCY";
                 var procedureNames = ['@Statistics'];
-                var parameters = ["LATENCY_HISTOGRAM"];
+                var parameters = ["LATENCY"];
                 var values = ['0'];
                 _connection = VoltDBCore.HasConnection(server, port, admin, user, processName);
                 if (_connection == null) {

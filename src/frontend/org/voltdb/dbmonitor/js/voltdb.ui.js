@@ -1140,7 +1140,7 @@ var loadPage = function (serverName, portid) {
         });
 
         voltDbRenderer.getLatencyGraphInformation(function (latencyDetails) {
-            MonitorGraphUI.RefreshLatency(latencyDetails, graphView, currentTab);
+            MonitorGraphUI.RefreshLatency(latencyDetails, graphView, currentTab, getCurrentServer());
         });
 
         voltDbRenderer.GetTransactionInformation(function (transactionDetails) {

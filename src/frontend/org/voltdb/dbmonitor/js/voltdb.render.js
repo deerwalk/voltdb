@@ -1210,20 +1210,20 @@ function alertNodeClicked(obj) {
             var colIndex = {};
             var counter = 0;
 
-            connection.Metadata['@Statistics_LATENCY_HISTOGRAM'].schema.forEach(function (columnInfo) {
-                if (columnInfo["name"] == "HOSTNAME" || columnInfo["name"] == "UNCOMPRESSED_HISTOGRAM" || columnInfo["name"] == "TIMESTAMP")
+            connection.Metadata['@Statistics_LATENCY'].schema.forEach(function (columnInfo) {
+                if (columnInfo["name"] == "HOSTNAME" || columnInfo["name"] == "P99" || columnInfo["name"] == "TIMESTAMP")
                     colIndex[columnInfo["name"]] = counter;
 
                 counter++;
             });
 
-            connection.Metadata['@Statistics_LATENCY_HISTOGRAM'].data.forEach(function (info) {
+            connection.Metadata['@Statistics_LATENCY'].data.forEach(function (info) {
                 var hostName = info[colIndex["HOSTNAME"]];
                 if (!latency.hasOwnProperty(hostName)) {
                     latency[hostName] = {};
                 }
                 latency[hostName]["TIMESTAMP"] = info[colIndex["TIMESTAMP"]];
-                latency[hostName]["UNCOMPRESSED_HISTOGRAM"] = info[colIndex["UNCOMPRESSED_HISTOGRAM"]];
+                latency[hostName]["P99"] = info[colIndex["P99"]];
             });
         };
 

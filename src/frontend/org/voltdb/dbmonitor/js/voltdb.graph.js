@@ -649,139 +649,6 @@
             return n;
         };
 
-        function Histogram(lowestTrackableValue, highestTrackableValue, nSVD, totalCount) {
-            this.lowestTrackableValue = lowestTrackableValue;
-            this.highestTrackableValue = highestTrackableValue;
-            this.nSVD = nSVD;
-            this.totalCount = totalCount;
-            this.count = [];
-            this.init();
-        }
-
-        Histogram.prototype.init = function () {
-            var largestValueWithSingleUnitResolution = 2 * Math.pow(10, this.nSVD);
-            this.unitMagnitude = Math.floor(Math.log(this.lowestTrackableValue) / Math.log(2));
-            var subBucketCountMagnitude = Math.ceil(Math.log(largestValueWithSingleUnitResolution) / Math.log(2));
-            this.subBucketHalfCountMagnitude = ((subBucketCountMagnitude > 1) ? subBucketCountMagnitude : 1) - 1;
-            this.subBucketCount = Math.pow(2, (this.subBucketHalfCountMagnitude + 1));
-            this.subBucketHalfCount = this.subBucketCount / 2;
-            var subBucketMask = goog.math.Long.fromInt(this.subBucketCount - 1);
-            this.subBucketMask = subBucketMask.shiftLeft(this.unitMagnitude);
-            // Establish leadingZeroCountBase, used in getBucketIndex() fast path:
-            this.leadingZeroCountBase = 64 - this.unitMagnitude - this.subBucketHalfCountMagnitude - 1;
-            var trackableValue = (this.subBucketCount - 1) << this.unitMagnitude;
-            var bucketsNeeded = 1;
-            while (trackableValue < this.highestTrackableValue) {
-                trackableValue *= 2;
-                bucketsNeeded++;
-            }
-            this.bucketCount = bucketsNeeded;
-            this.countsArrayLength = (this.bucketCount + 1) * (this.subBucketCount / 2);
-        };
-
-        Histogram.prototype.diff = function (newer) {
-            var h = new Histogram(newer.lowestTrackableValue, newer.highestTrackableValue, newer.nSVD, newer.totalCount - this.totalCount);
-            for (var i = 0; i < h.countsArrayLength; i++) {
-                h.count[i] = newer.count[i] - this.count[i];
-            }
-            return h;
-        };
-
-        Histogram.prototype.getCountAt = function (bucketIndex, subBucketIndex) {
-            var bucketBaseIndex = (bucketIndex + 1) << this.subBucketHalfCountMagnitude;
-            var offsetInBucket = subBucketIndex - this.subBucketHalfCount;
-            var countIndex = bucketBaseIndex + offsetInBucket;
-            return this.count[countIndex];
-        };
-
-        Histogram.prototype.normalizeIndex = function (index, normalizingIndexOffset, arrayLength) {
-            if (normalizingIndexOffset == 0) {
-                // Fastpath out of normalization. Keeps integer value histograms fast while allowing
-                // others (like DoubleHistogram) to use normalization at a cost...
-                return index;
-            }
-            if ((index > arrayLength) || (index < 0)) {
-                throw new ArrayIndexOutOfBoundsException("index out of covered value range");
-            }
-            var normalizedIndex = index - normalizingIndexOffset;
-            // The following is the same as an unsigned remainder operation, as long as no double wrapping happens
-            // (which shouldn't happen, as normalization is never supposed to wrap, since it would have overflowed
-            // or underflowed before it did). This (the + and - tests) seems to be faster than a % op with a
-            // correcting if < 0...:
-            if (normalizedIndex < 0) {
-                normalizedIndex += arrayLength;
-            } else if (normalizedIndex >= arrayLength) {
-                normalizedIndex -= arrayLength;
-            }
-            return normalizedIndex;
-        };
-
-        Histogram.prototype.getCountAtIndex = function (index) {
-            return this.count[this.normalizeIndex(index, 0, this.countsArrayLength)];
-        };
-
-        Histogram.prototype.valueFromIndex2 = function (bucketIndex, subBucketIndex) {
-            return subBucketIndex * Math.pow(2, bucketIndex + this.unitMagnitude);
-        };
-
-        Histogram.prototype.valueFromIndex = function (index) {
-            var bucketIndex = (index >> this.subBucketHalfCountMagnitude) - 1;
-            var subBucketIndex = (index & (this.subBucketHalfCount - 1)) + this.subBucketHalfCount;
-            if (bucketIndex < 0) {
-                subBucketIndex -= this.subBucketHalfCount;
-                bucketIndex = 0;
-            }
-            return this.valueFromIndex2(bucketIndex, subBucketIndex);
-        };
-
-        Histogram.prototype.lowestEquivalentValue = function (value) {
-            var bucketIndex = this.getBucketIndex(value);
-            var subBucketIndex = this.getSubBucketIndex(value, bucketIndex);
-            var thisValueBaseLevel = this.valueFromIndex2(bucketIndex, subBucketIndex);
-            return thisValueBaseLevel;
-        };
-
-        Histogram.prototype.highestEquivalentValue = function (value) {
-            return this.nextNonEquivalentValue(value) - 1;
-        };
-
-        Histogram.prototype.highestEquivalentValue = function (value) {
-            return this.lowestEquivalentValue(value) + this.sizeOfEquivalentValueRange(value);
-        };
-
-        Histogram.prototype.sizeOfEquivalentValueRange = function (value) {
-            var bucketIndex = this.getBucketIndex(value);
-            var subBucketIndex = this.getSubBucketIndex(value, bucketIndex);
-            var distanceToNextValue =
-                (1 << ( this.unitMagnitude + ((subBucketIndex >= this.subBucketCount) ? (bucketIndex + 1) : bucketIndex)));
-            return distanceToNextValue;
-        };
-
-        Histogram.prototype.getBucketIndex = function (value) {
-            return this.leadingZeroCountBase - (goog.math.Long.fromNumber(value).or(this.subBucketMask)).numberOfLeadingZeros();
-        };
-
-        Histogram.prototype.getSubBucketIndex = function (value, bucketIndex) {
-            return  (value >>> (bucketIndex + this.unitMagnitude));
-        };
-
-        Histogram.prototype.getValueAtPercentile = function (percentile) {
-            var requestedPercentile = Math.min(percentile, 100.0); // Truncate down to 100%
-            var countAtPercentile = Math.floor(((percentile / 100.0) * this.totalCount) + 0.5); // round to nearest
-            countAtPercentile = Math.max(countAtPercentile, 1); // Make sure we at least reach the first recorded entry
-            var totalToCurrentIndex = 0;
-            for (var i = 0; i < this.countsArrayLength; i++) {
-                totalToCurrentIndex += this.getCountAtIndex(i);
-                if (totalToCurrentIndex >= countAtPercentile) {
-                    var valueAtIndex = this.valueFromIndex(i);
-                    return (percentile == 0.0) ?
-                        this.lowestEquivalentValue(valueAtIndex)/1000.0 :
-                        this.highestEquivalentValue(valueAtIndex)/1000.0;
-                }
-            }
-            return 0;
-        };
-
         function read32(str) {
             var s1 = str.substring(0, 2);
             var s2 = str.substring(2, 4);
@@ -794,35 +661,6 @@
             var s1 = read32(str);
             var s2 = read32(str.substring(8, 16));
             return s2 + s1;
-        }
-
-        function convert2Histogram(str) {
-            // Read lowestTrackableValue
-            var lowestTrackableValue = parseInt(read64(str), 16);
-            str = str.substring(16, str.length);
-
-            // Read highestTrackableValue
-            var highestTrackableValue = parseInt(read64(str), 16);
-            str = str.substring(16, str.length);
-
-            // Read numberOfSignificantValueDigits
-            var nSVD = parseInt(read32(str), 16);
-            str = str.substring(8, str.length);
-
-            // Read totalCount
-            var totalCount = parseInt(read64(str), 16);
-            str = str.substring(16, str.length);
-
-            var histogram = new Histogram(lowestTrackableValue, highestTrackableValue, nSVD, totalCount);
-
-            var i = 0;
-            while (str.length >= 16) {
-                var value = parseInt(read64(str), 16);
-                histogram.count[i] = value;
-                str = str.substring(16, str.length);
-                i++;
-            }
-            return histogram;
         }
 
         var getEmptyDataForView = function (view) {
@@ -970,7 +808,7 @@
             dataOutTrans[0]["values"] = getEmptyDataForImporterView(view);
             dataSuccessRate[0]["values"] = getEmptyDataForImporterView(view);
             dataFailureRate[0]["values"] = getEmptyDataForImporterView(view);
-            changeAxisTimeFormat(view);
+            changeImporterAxisTimeFormat(view);
         };
 
         this.RefreshGraph = function (view) {
@@ -999,7 +837,7 @@
             }
 
             nv.utils.windowResize(ChartCpu.update);
-            changeImporterAxisTimeFormat(view);
+            changeAxisTimeFormat(view);
         };
 
         this.RefreshDrGraph = function (view) {
@@ -1269,7 +1107,7 @@
             currentTime = new Date()
         }
 
-        this.RefreshLatency = function (latency, graphView, currentTab) {
+        this.RefreshLatency = function (latency, graphView, currentTab, currentServer) {
             var monitor = Monitors;
             var dataLat = monitor.latData;
             var dataLatMin = monitor.latDataMin;
@@ -1279,6 +1117,10 @@
             var latencyArr = []
             var latencyArrMin = []
             var latencyArrDay = []
+
+            if ($.isEmptyObject(latency) || latency == undefined || !latency.hasOwnProperty(currentServer)
+            || latency[currentServer].P99 == undefined || latency[currentServer].TIMESTAMP == undefined)
+                return;
 
             if(localStorage.latencyMin != undefined){
                 latencyArrMin = getFormattedDataFromLocalStorage(JSON.parse(localStorage.latencyMin))
@@ -1332,28 +1174,9 @@
                 }
             }
 
-            // Compute latency statistics
-            jQuery.each(latency, function (id, val) {
-                var strLatStats = val["UNCOMPRESSED_HISTOGRAM"];
-                timeStamp = val["TIMESTAMP"];
-                var latStats = convert2Histogram(strLatStats);
-                var singlelat = 0;
-                if (!monitor.latHistogram.hasOwnProperty(id))
-                    singlelat = latStats.getValueAtPercentile(99);
-                else
-                    singlelat = monitor.latHistogram[id].diff(latStats).getValueAtPercentile(99);
-                singlelat = parseFloat(singlelat).toFixed(1) * 1;
+            var timeStamp = new Date(latency[currentServer].TIMESTAMP);
+            var lat = parseFloat(latency[currentServer].P99).toFixed(1) * 1;
 
-                if (singlelat > maxLatency) {
-                    maxLatency = singlelat;
-                }
-
-                monitor.latHistogram[id] = latStats;
-            });
-
-            var lat = maxLatency;
-            if (lat < 0)
-                lat = 0;
             if (monitor.latMaxTimeStamp <= timeStamp) {
                 if (latSecCount >= 6 || monitor.latFirstData) {
                     dataLatMin = sliceFirstData(dataLatMin, dataView.Minutes);
