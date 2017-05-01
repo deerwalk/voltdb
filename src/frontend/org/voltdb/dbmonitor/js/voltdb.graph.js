@@ -715,6 +715,7 @@
                 'tpsDataMin': getEmptyDataForMinutesOptimized(),
                 'tpsDataDay': getEmptyDataForDaysOptimized(),
                 'tpsFirstData': true,
+                'tpsMaxTimeStamp': null,
                 'memData': getEmptyDataOptimized(),
                 'memDataMin': getEmptyDataForMinutesOptimized(),
                 'memDataDay': getEmptyDataForDaysOptimized(),
@@ -1388,17 +1389,18 @@
             memMinCount++;
         };
 
-        this.RefreshTransaction = function (transactionDetails, graphView, currentTab) {
+        this.RefreshTransaction = function (transactionDetails, graphView, currentTab, currentServer) {
             var monitor = Monitors;
             var datatrans = monitor.tpsData;
             var datatransMin = monitor.tpsDataMin;
             var datatransDay = monitor.tpsDataDay;
-            var transacDetail = transactionDetails;
-            var transDetailsArr = [];
-            var transDetailsArrMin = [];
-            var transDetailsArrDay = [];
+            var timeStamp;
+            var transDetailsArr = []
+            var transDetailsArrMin = []
+            var transDetailsArrDay = []
 
-            if ($.isEmptyObject(transacDetail) || transacDetail == undefined || transacDetail["CurrentTimedTransactionCount"] == undefined || transacDetail["TimeStamp"] == undefined || transacDetail["currentTimerTick"] == undefined)
+            if ($.isEmptyObject(transactionDetails) || transactionDetails == undefined || !transactionDetails.hasOwnProperty(currentServer)
+            || transactionDetails[currentServer].TPS == undefined || transactionDetails[currentServer].TIMESTAMP == undefined)
                 return;
 
             if(localStorage.transDetailsMin != undefined){
@@ -1432,7 +1434,6 @@
                         })
                     }
                 }
-
                 if(transDetailsArrMin.length > 0 && !(currentTime.getTime() - (new Date(transDetailsArrMin[transDetailsArrMin.length - 1].timestamp)).getTime() > MonitorGraphUI.enumMaxTimeGap.minGraph)){
                     datatransMin = []
                     for(var j = 0; j< transDetailsArrMin.length; j++){
@@ -1443,10 +1444,10 @@
                     }
                 }
 
-                if(transDetailsArrDay.length > 0 && !(currentTime.getTime() - (new Date(transDetailsArrDay[transDetailsArrDay.length - 1].timestamp)).getTime() > MonitorGraphUI.enumMaxTimeGap.dayGraph)){
+                if(transDetailsArrDay.length > 0 && !(currentTime.getTime() - (new Date(transDetailsArrMin[transDetailsArrMin.length - 1].timestamp)).getTime() > MonitorGraphUI.enumMaxTimeGap.dayGraph)){
                     datatransDay = []
-                    for(var k = 0; k< transDetailsArrDay.length; k++){
-                        datatransDay = sliceFirstData(datatransDay, dataView.Day);
+                    for(var k = 0; k < transDetailsArrDay.length; k++){
+                        datatransDay = sliceFirstData(datatransDay, dataView.Days);
                         datatransDay.push({"x": new Date(transDetailsArrDay[k].timestamp),
                             "y": transDetailsArrDay[k].transaction
                         })
@@ -1454,125 +1455,70 @@
                 }
             }
 
-            var currentTimedTransactionCount = transacDetail["CurrentTimedTransactionCount"];
-            var currentTimerTick = transacDetail["currentTimerTick"];
+            var timeStamp = new Date(transactionDetails[currentServer].TIMESTAMP);
+            var tps = parseFloat(transactionDetails[currentServer].TPS).toFixed(1) * 1;
 
-            if (monitor.lastTimedTransactionCount > 0 && monitor.lastTimerTick > 0 && monitor.lastTimerTick != currentTimerTick) {
-                var delta = currentTimedTransactionCount - monitor.lastTimedTransactionCount;
-                var calculatedValue = parseFloat(delta * 1000.0 / (currentTimerTick - monitor.lastTimerTick)).toFixed(1) * 1;
-                if (calculatedValue < 0 || isNaN(calculatedValue) || (currentTimerTick - monitor.lastTimerTick == 0))
-                    calculatedValue = 0;
-
+            if (monitor.tpsMaxTimeStamp <= timeStamp) {
                 if (tpsSecCount >= 6 || monitor.tpsFirstData) {
                     datatransMin = sliceFirstData(datatransMin, dataView.Minutes);
-                    if (monitor.tpsFirstData || delta != 0 || (currentTimedTransactionCount == 0 && monitor.lastTimedTransactionCount == 0) || calculatedValue == 0) {
-                        datatransMin.push({ "x": new Date(transacDetail["TimeStamp"]), "y": calculatedValue });
-                        transDetailsArrMin = saveLocalStorageInterval(transDetailsArrMin, {"timestamp": new Date(transacDetail["TimeStamp"]), "transaction": calculatedValue })
+                    if (monitor.tpsMaxTimeStamp == timeStamp) {
+                        datatransMin.push({ 'x': new Date(timeStamp), 'y': datatransMin[datatransMin.length - 1].y });
+                        transDetailsArrMin = saveLocalStorageInterval(transDetailsArrMin, {"timestamp": new Date(timeStamp), "transaction": datatransMin[datatransMin.length - 1].y })
                     } else {
-                        datatransMin.push({ "x": new Date(transacDetail["TimeStamp"]), "y": datatransMin[datatransMin.length - 1].y });
-                        transDetailsArrMin = saveLocalStorageInterval(transDetailsArrMin, {"timestamp": new Date(transacDetail["TimeStamp"]), "transaction": datatransMin[datatransMin.length - 1].y })
+                        datatransMin.push({ 'x': new Date(timeStamp), 'y': tps });
+                        transDetailsArrMin = saveLocalStorageInterval(transDetailsArrMin, {"timestamp": new Date(timeStamp), "transaction": tps })
                     }
                     Monitors.tpsDataMin = datatransMin;
                     tpsSecCount = 0;
                 }
+
                 if (tpsMinCount >= 60 || monitor.tpsFirstData) {
                     datatransDay = sliceFirstData(datatransDay, dataView.Days);
-                    if (monitor.tpsFirstData || delta != 0 || (currentTimedTransactionCount == 0 && monitor.lastTimedTransactionCount == 0)|| calculatedValue == 0) {
-                        datatransDay.push({ "x": new Date(transacDetail["TimeStamp"]), "y": calculatedValue });
-                        transDetailsArrDay = saveLocalStorageInterval(transDetailsArrDay, {"timestamp": new Date(transacDetail["TimeStamp"]), "transaction": calculatedValue })
+                    if (monitor.tpsMaxTimeStamp == timeStamp) {
+                        datatransDay.push({ 'x': new Date(timeStamp), 'y': datatransDay[datatransDay.length - 1].y });
+                        transDetailsArrDay = saveLocalStorageInterval(transDetailsArrDay, {"timestamp": new Date(timeStamp), "transaction": datatransMin[datatransMin.length - 1].y })
                     } else {
-                        datatransDay.push({ "x": new Date(transacDetail["TimeStamp"]), "y": datatransDay[datatransDay.length - 1].y });
-                        transDetailsArrDay = saveLocalStorageInterval(transDetailsArrDay, {"timestamp": new Date(transacDetail["TimeStamp"]), "transaction": datatransDay[datatransDay.length - 1].y })
+                        datatransDay.push({ 'x': new Date(timeStamp), 'y': tps });
+                        transDetailsArrDay = saveLocalStorageInterval(transDetailsArrDay, {"timestamp": new Date(timeStamp), "transaction": tps })
                     }
                     Monitors.tpsDataDay = datatransDay;
                     tpsMinCount = 0;
                 }
+
                 datatrans = sliceFirstData(datatrans, dataView.Seconds);
-                if (monitor.tpsFirstData || delta != 0 || (currentTimedTransactionCount == 0 && monitor.lastTimedTransactionCount == 0)|| calculatedValue == 0) {
-                    datatrans.push({ "x": new Date(transacDetail["TimeStamp"]), "y": calculatedValue });
-                    transDetailsArr = saveLocalStorageInterval(transDetailsArr, {"timestamp": new Date(transacDetail["TimeStamp"]), "transaction": calculatedValue })
+                if (monitor.tpsMaxTimeStamp == timeStamp) {
+                    datatrans.push({ 'x': new Date(timeStamp), 'y': datatrans[datatrans.length - 1].y });
+                    transDetailsArr = saveLocalStorageInterval(transDetailsArr, {"timestamp": new Date(timeStamp), "transaction": datatrans[datatrans.length - 1].y })
                 } else {
-                    datatrans.push({ "x": new Date(transacDetail["TimeStamp"]), "y": datatrans[datatrans.length - 1].y });
-                    transDetailsArr = saveLocalStorageInterval(transDetailsArr, {"timestamp": new Date(transacDetail["TimeStamp"]), "transaction": datatrans[datatrans.length - 1].y })
+                    datatrans.push({ 'x': new Date(timeStamp), 'y': tps });
+                    transDetailsArr = saveLocalStorageInterval(transDetailsArr, {"timestamp": new Date(timeStamp), "transaction": tps })
                 }
                 Monitors.tpsData = datatrans;
-                monitor.tpsFirstData = false;
-            }
-            else{
-                var delta = currentTimedTransactionCount - monitor.lastTimedTransactionCount;
 
-                if (tpsSecCount >= 6 || monitor.tpsFirstData) {
-                    datatransMin = sliceFirstData(datatransMin, dataView.Minutes);
-                    if (monitor.tpsFirstData || delta != 0 || (currentTimedTransactionCount == 0 && monitor.lastTimedTransactionCount == 0)) {
-                        transDetailsArrMin = saveLocalStorageInterval(transDetailsArrMin, {"timestamp": new Date(transacDetail["TimeStamp"]), "transaction": 0 })
-                        datatransMin.push({ "x": new Date(transacDetail["TimeStamp"]), "y": 0 });
-                    }
-                    Monitors.tpsDataMin = datatransMin;
-                    tpsSecCount = 0;
-                }
+                localStorage.transDetails = JSON.stringify(transDetailsArr)
+                localStorage.transDetailsMin = JSON.stringify(transDetailsArrMin)
+                localStorage.transDetailsDay = JSON.stringify(transDetailsArrDay)
 
-                if (tpsMinCount >= 60 || monitor.tpsFirstData) {
-                    datatransDay = sliceFirstData(datatransDay, dataView.Days);
-                    if (monitor.tpsFirstData || delta != 0 || (currentTimedTransactionCount == 0 && monitor.lastTimedTransactionCount == 0)) {
-                        transDetailsArrDay = saveLocalStorageInterval(transDetailsArrDay, {"timestamp": new Date(transacDetail["TimeStamp"]), "transaction": 0 })
-                        datatransDay.push({ "x": new Date(transacDetail["TimeStamp"]), "y": 0 });
-                    }
-                    Monitors.tpsDataDay = datatransDay;
-                    tpsMinCount = 0;
-                }
+                if (graphView == 'Minutes')
+                    dataTransactions[0]["values"] = datatransMin;
+                else if (graphView == 'Days')
+                    dataTransactions[0]["values"] = datatransDay;
+                else
+                    dataTransactions[0]["values"] = datatrans;
 
-                if (monitor.tpsFirstData){
-                    if(localStorage.transDetails == undefined){
-                        datatrans.push({ "x": new Date(transacDetail["TimeStamp"]), "y": null });
-                        Monitors.tpsData = datatrans;
-                    }
-                    else{
-                        if (delta != 0 || (currentTimedTransactionCount == 0 && monitor.lastTimedTransactionCount == 0)) {
-                            datatrans.push({ "x": new Date(transacDetail["TimeStamp"]), "y": datatrans[datatrans.length - 1].y });
-                            transDetailsArr = saveLocalStorageInterval(transDetailsArr, {"timestamp": new Date(transacDetail["TimeStamp"]), "transaction": datatrans[datatrans.length - 1].y })
-                            Monitors.tpsData = datatrans;
-                        }
-                    }
-                }
-                else{
-                    if(localStorage.transDetails == undefined){
-                        datatrans.push({ "x": new Date(transacDetail["TimeStamp"]), "y": 0 });
-                        Monitors.tpsData = datatrans;
-                    } else {
-                        var calculatedValue = parseFloat(delta * 1000.0 / (currentTimerTick - monitor.lastTimerTick)).toFixed(1) * 1;
-                        if (delta != 0 || (currentTimedTransactionCount == 0 && monitor.lastTimedTransactionCount == 0)) {
-                            datatrans.push({ "x": new Date(transacDetail["TimeStamp"]), "y": calculatedValue });
-                            transDetailsArr = saveLocalStorageInterval(transDetailsArr, {"timestamp": new Date(transacDetail["TimeStamp"]), "transaction": calculatedValue })
-                            Monitors.tpsData = datatrans;
-                        }
-                    }
+                if (currentTab == NavigationTabs.DBMonitor && currentView == graphView && transactionChart.is(":visible")) {
+                    d3.select("#visualisationTransaction")
+                        .datum(dataTransactions)
+                        .transition().duration(500)
+                        .call(ChartTransactions);
                 }
                 monitor.tpsFirstData = false;
             }
-
-            localStorage.transDetails = JSON.stringify(transDetailsArr)
-            localStorage.transDetailsMin = JSON.stringify(transDetailsArrMin)
-            localStorage.transDetailsDay = JSON.stringify(transDetailsArrDay)
-
-            if (graphView == 'Minutes')
-                dataTransactions[0]["values"] = datatransMin;
-            else if (graphView == 'Days')
-                dataTransactions[0]["values"] = datatransDay;
-            else
-                dataTransactions[0]["values"] = datatrans;
-
-            monitor.lastTimedTransactionCount = currentTimedTransactionCount;
-            monitor.lastTimerTick = currentTimerTick;
-
-            if (currentTab == NavigationTabs.DBMonitor && currentView == graphView && transactionChart.is(":visible")) {
-                d3.select('#visualisationTransaction')
-                    .datum(dataTransactions)
-                    .transition().duration(500)
-                    .call(ChartTransactions);
-            }
-
+            if(timeStamp > monitor.tpsMaxTimeStamp)
+                monitor.tpsMaxTimeStamp = timeStamp;
             tpsSecCount++;
             tpsMinCount++;
+            transactionDetails = null
         };
 
         this.timeUnit = {

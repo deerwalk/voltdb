@@ -485,16 +485,6 @@ function alertNodeClicked(obj) {
             });
         };
         //
-        //Render Cluster Transaction Graph
-        this.GetTransactionInformation = function (onInformationLoaded) {
-            var transactionDetails = {};
-
-            VoltDBService.GetTransactionInformation(function (connection) {
-                getTransactionDetails(connection, transactionDetails);
-                onInformationLoaded(transactionDetails);
-            });
-        };
-        //
 
         //Get host and site count
         this.GetDeploymentInformation = function (onInformationLoaded) {
@@ -1211,7 +1201,8 @@ function alertNodeClicked(obj) {
             var counter = 0;
 
             connection.Metadata['@Statistics_LATENCY'].schema.forEach(function (columnInfo) {
-                if (columnInfo["name"] == "HOSTNAME" || columnInfo["name"] == "P99" || columnInfo["name"] == "TIMESTAMP")
+                if (columnInfo["name"] == "HOSTNAME" || columnInfo["name"] == "P99"
+                || columnInfo["name"] == "TIMESTAMP" || columnInfo["name"] == "TPS")
                     colIndex[columnInfo["name"]] = counter;
 
                 counter++;
@@ -1224,6 +1215,7 @@ function alertNodeClicked(obj) {
                 }
                 latency[hostName]["TIMESTAMP"] = info[colIndex["TIMESTAMP"]];
                 latency[hostName]["P99"] = info[colIndex["P99"]];
+                latency[hostName]["TPS"] = info[colIndex["TPS"]];
             });
         };
 
