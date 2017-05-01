@@ -561,7 +561,7 @@
                 ChartOutTrans.lines.forceY([0, 0.1]);
 
                 d3.select('#visualisationOutTrans')
-                    .datum(dataOutTrans)
+                    .datum([])
                     .transition().duration(500)
                     .call(ChartOutTrans);
 
@@ -593,7 +593,7 @@
                 ChartSuccessRate.lines.forceY([0, 0.1]);
 
                 d3.select('#visualisationSuccessRate')
-                    .datum(dataSuccessRate)
+                    .datum([])
                     .transition().duration(500)
                     .call(ChartSuccessRate);
 
@@ -625,7 +625,7 @@
                 ChartFailureRate.lines.forceY([0, 0.1]);
 
                 d3.select('#visualisationFailureRate')
-                    .datum(dataFailureRate)
+                    .datum([])
                     .transition().duration(500)
                     .call(ChartFailureRate);
 
@@ -805,9 +805,10 @@
             Monitors['failureRateFirstData'] = true;
             Monitors['failureRateMaxTimeStamp'] = null;
 
-            dataOutTrans[0]["values"] = getEmptyDataForImporterView(view);
-            dataSuccessRate[0]["values"] = getEmptyDataForImporterView(view);
-            dataFailureRate[0]["values"] = getEmptyDataForImporterView(view);
+            dataOutTrans = getEmptyDataForImporterView(view)['OUTSTANDING_REQUESTS'];
+            dataSuccessRate = getEmptyDataForImporterView(view)['SUCCESSES'];
+            dataFailureRate = getEmptyDataForImporterView(view)['FAILURES'];
+
             changeImporterAxisTimeFormat(view);
         };
 
