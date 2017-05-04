@@ -325,6 +325,8 @@ html, body {
 		margin-right:35px;
     }
 
+   .headLeft .logo img { width:140px; height:56px;}
+
     .headLeft .menu {
         float: left;
     }
@@ -3890,10 +3892,12 @@ label.errorTimeOut {
 .sliderGraph .ui-slider .ui-slider-handle {outline:none; border-radius:1px; top:-3px; border:1px solid #ccc!important; }
 .sliderMain { position:relative; top:3px;}
 .downloadBtnChart { float: right;margin-right: 10px;position: relative; top: -4px;}
+.downloadBtnChart img, .overlay-title img { width:24px; height:24px;}
 #timeInterval {border:0; color:#222; font-weight:bold; width:24px;}
 @-moz-document url-prefix() {#timeInterval {width:28px;}}
 .errorMsgLocalStorageFull { background:#fff; padding:10px 20px; margin-bottom:10px; position:relative;}
 .errorMsgLocalWrapper{ float:left; padding-right:5px; width:20px;}
+.errorMsgLocalWrapper img { width:16px; height:16px;}
 .textMsgLocalWrapper { float:left; width:95%;}
 .textMsgLocalWrapper p {color:#ff0000; font-weight:bold; position:relative; top:2px; font-size:13px;}
 .crossIconMsg { }
@@ -4061,6 +4065,7 @@ ul#shutdownMsg li{ font-size:13px; line-height:20px; }
 .shutdownErrorMsg {  padding:0 20px 15px 20px;color:#c70000; line-height:15px; width:400px;}
 .shutdownErrorMsg h2 { font-weight:bold; font-size:13px;}
 .shutdownRetryMsg { padding: 0 0 11px 0; text-align: center;}
+.shutdownLoader img, .shutdownSuccess img, .shutdownFailure img { width:16px; height:16px;}
 
 /******************SNMP******************************/
 .snmpForm > form input[type="text"],.snmpFormSelect > form > select { width:156px;}
