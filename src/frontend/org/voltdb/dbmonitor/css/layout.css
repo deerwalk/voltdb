@@ -883,56 +883,6 @@ html ul.tabs li.active, html ul.tabs li.active a:hover {
         color: #FFFFFF;
     }
 
-.tabs-filter-wrapper {
-    margin-bottom: 10px;
-}
-
-    .tabs-filter-wrapper .filter {
-        float: left;
-        width: 40%;
-    }
-
-    .tabs-filter-wrapper .pagination {
-        float: right;
-        text-align: right;
-        border-bottom: 1px solid #dbdbdb;
-        padding: 10px 0 17px 0;
-        font-size: 12px;
-    }
-
-        .tabs-filter-wrapper .pagination a {
-            background: #aa1f2f;
-            padding: 5px 10px;
-            color: #fff;
-        }
-
-            .tabs-filter-wrapper .pagination a:hover {
-                background: #76bd1d;
-            }
-
-            .tabs-filter-wrapper .pagination a.prev {
-                margin-right: 5px;
-            }
-
-            .tabs-filter-wrapper .pagination a.next {
-                margin-left: 5px;
-            }
-
-.storedProcWrapper {
-    margin-bottom: 20px;
-}
-
-.dataTablesWrapper {
-}
-
-.tableTitle {
-    float: left;
-    padding: 15px 15px 15px 28px;
-    font-size: 13px;
-    font-weight: bold;
-    width: 194px;
-}
-
 .icon-procedures {
     background-position: left -988px;
 }
@@ -4355,18 +4305,6 @@ ul#shutdownMsg li{ font-size:13px; line-height:20px; }
             font-family: Arial, Helvetica, sans-serif;
             font-size: 15px;
         }
-
-    .tabs-filter-wrapper .filter {
-        float: left;
-        width: auto;
-    }
-
-    .tabs-filter-wrapper .pagination {
-        clear: left;
-        float: left;
-        margin-top: 15px;
-    }
-
 
     ul.catalogNav {
         margin: 0 0 20px 0;
