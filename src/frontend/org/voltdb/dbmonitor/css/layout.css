@@ -196,14 +196,6 @@ body {
     width: 440px;
     background: #fff;
 }
-#loginBox .logoLogin {
-    padding: 10px 0 10px 90px;
-    border-bottom: 1px solid #CCC;
-}
-#loginBox form {
-    margin: 0 auto;
-    margin-top: 20px;
-}
 #loginBox label {
     color: #555;
     display: inline-block;
@@ -212,20 +204,6 @@ body {
     font-size: 13px;
     font-weight: bold;
     width: 55px;
-}
-#loginBox p,
-#loginBox a {
-    font-size: 11px;
-    color: #aaa;
-    float: right;
-    margin-top: -13px;
-    margin-right: 20px;
-    -webkit-transition: all .4s ease;
-    -moz-transition: all .4s ease;
-    transition: all .4s ease;
-}
-#loginBox p a:hover {
-    color: #555;
 }
 #loginBox input {
     font-family: "Helvetica Neue", Helvetica, sans-serif;
@@ -260,16 +238,6 @@ body {
     border-top: 1px solid #ccc;
     border-bottom-right-radius: 3px;
     border-bottom-left-radius: 3px;
-}
-#loginBox input[type=checkbox] {
-    margin-left: 20px;
-    margin-top: 30px;
-}
-#loginBox .check {
-    margin-left: 3px;
-    font-size: 11px;
-    color: #444;
-    text-shadow: 0 1px 0 #fff;
 }
 #loginBox input[type=submit] {
     background: #AA1F2F;
@@ -903,17 +871,6 @@ a.hideServers {
 #serverListWrapper {
     padding: 15px 15px 15px 15px;
 }
-ul.servers-list {
-    padding-right: 20px;
-    margin-bottom: 10px;
-}
-.popup_content ul.servers-list {
-    padding-right: 0;
-}
-ul.servers-list li {
-    border-bottom: 1px solid #dbdbdb;
-    padding: 15px 10px 15px 30px;
-}
 .serversTbl {
     width: 100%;
 }
@@ -1086,70 +1043,12 @@ table.serversTbl tr td.joining {
     text-indent: 20px;
     line-height: 17px;
 }
-ul.servers-list li:hover {
-    background-color: #f0f3f4;
-}
-ul.servers-list li.monitoring {
-    background-color: #f0f3f4;
-}
 table.serversTbl tr.serverActive {
     background-color: #f0f3f4;
-}
-ul.servers-list li.monitoring a {
-    font-weight: bold;
-    color: #76bd1d;
 }
 .serverNameAlign {
     float: left;
     word-break: break-all;
-}
-ul.servers-list li span.memory-status {
-    float: right;
-    color: #111;
-    margin-top: 4px;
-}
-ul.servers-list li span.alert {
-    color: #ea151d;
-}
-ul.servers-list li a {
-    display: inline-block;
-    padding: 4px 0;
-}
-ul.servers-list li a.alertIcon {
-    display: inline-block;
-    padding-left: 20px;
-}
-.server-info-heading {
-    margin-bottom: 15px;
-    background: #dee0e0;
-    font-weight: bold;
-    min-height: 50px;
-    line-height: 50px;
-}
-.server-info-heading .server {
-    float: left;
-    display: block;
-    padding-left: 10px;
-}
-.server-info-heading .servIp {
-    float: left;
-    margin-left: 34%;
-}
-ul.servers-list li span.servIpNum {
-    float: left;
-    margin-left: 15%;
-    margin-top: 4px;
-}
-.server-info-heading .memory-use {
-    float: right;
-    display: block;
-    padding-right: 10px;
-}
-.slide-pop-content .server-info-heading {
-    margin: 15px 15px 0 15px;
-}
-.slide-pop-content .server-info-heading span {
-    color: #111;
 }
 /*************Catalog page************/
 .catalogContainer,
@@ -3516,37 +3415,6 @@ label.errorTimeOut {
 .clsQueryBtns {
     float: right;
 }
-.sliderGraph {
-    float: left;
-    margin: 8px 30px 0 0;
-}
-.labelSlider {
-    float: left;
-    position: relative;
-    right: 208px;
-}
-@-moz-document url-prefix() {
-    .labelSlider {
-        right: 214px;
-        top: -2px;
-    }
-}
-.labelSlider label {
-    font-size: 14px;
-}
-.sliderGraph .ui-slider .ui-widget-header {
-    background: #ccc
-}
-.sliderGraph .ui-slider .ui-slider-handle {
-    outline: none;
-    border-radius: 1px;
-    top: -3px;
-    border: 1px solid #ccc!important;
-}
-.sliderMain {
-    position: relative;
-    top: 3px;
-}
 .downloadBtnChart {
     float: right;
     margin-right: 10px;
@@ -3833,29 +3701,6 @@ ul#shutdownMsg li {
     }
 }
 @media (min-width: 320px) and (max-width: 360px) {
-    .server-info-heading .server {
-        float: left;
-        display: block;
-        padding: 7px 0 0 10px;
-        width: 30px;
-        line-height: 18px;
-    }
-    .server-info-heading .memory-use {
-        float: right;
-        display: block;
-        padding: 6px 28px 0 0;
-        width: 30px;
-        line-height: 18px;
-    }
-    .server-info-heading .servIp {
-        margin-left: 25%;
-        width: 30px;
-        line-height: 18px;
-        margin-top: 5px;
-    }
-    ul.servers-list li span.servIpNum {
-        margin-left: 10%;
-    }
     .headLeft .logo {
         margin-right: 0;
     }
@@ -3995,14 +3840,6 @@ ul#shutdownMsg li {
     width: 560px;
 }
 /*admin*/
-.server-info-heading .servIp {
-    margin-left: 10%;
-    margin-top: 0;
-}
-ul.servers-list li span.servIpNum {
-    margin-left: 8%;
-}
-
 @media (max-width: 699px) {
     .arrowDRDatabase {
         background-image: url(../images/arrow_small.png);
@@ -4214,18 +4051,6 @@ ul.servers-list li span.servIpNum {
         min-height: 150px;
     }
 }
-@media (max-width: 1024px) {
-    .sliderGraph,
-    .labelSlider {
-        float: none;
-    }
-    .labelSlider {
-        right: 0;
-    }
-    .sliderMain {
-        margin-bottom: 10px;
-    }
-}
 @media (min-width: 480px) and (max-width: 540px) {
     #popServerList {
         width: 100%;
@@ -4270,12 +4095,6 @@ ul.servers-list li span.servIpNum {
     }
     .logHeight {
         height: 364px;
-    }
-    .server-info-heading .servIp {
-        margin-left: 18%;
-    }
-    ul.servers-list li span.servIpNum {
-        margin-left: 6%;
     }
     .tblshutdown tr th {
         padding: 20px 19px 20px 8px;
@@ -4434,14 +4253,6 @@ ul.servers-list li span.servIpNum {
         min-height: 150px;
     }
 }
-@media (min-width: 768px) and (max-width: 800px) {
-    .server-info-heading .servIp {
-        margin-left: 14%;
-    }
-    ul.servers-list li span.servIpNum {
-        margin-left: 3%;
-    }
-}
 @media (min-width: 700px) and (max-width: 902px) {
     .overviewTbl {
         overflow: auto;
@@ -4552,9 +4363,6 @@ ul.servers-list li span.servIpNum {
         height: 364px;
         position: relative;
         top: -7px;
-    }
-    .server-info-heading .servIp {
-        margin-left: 30%;
     }
     .refreshBtn {
         margin-bottom: 10px;
