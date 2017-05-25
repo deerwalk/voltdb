@@ -3166,7 +3166,7 @@ tr.drSubSection td {
     top: 2px;
 }
 .paging_extStyleLF {
-    width: 200px !important;
+    width: 203px !important;
     margin-bottom: 10px;
 }
 .dataTables_wrapper .dataTables_paginate { text-align:left}
@@ -3206,6 +3206,7 @@ tr.drSubSection td {
     font-weight: bold;
     width: 197px;
 }
+
 .drIcon {
     position: relative;
     left: 3px;
@@ -4466,10 +4467,14 @@ ul#shutdownMsg li {
     .gutter.gutter-horizontal {
         height: 75%;
     }
+    .drTitle{ width:175px;}
+
 }
 
-@media (min-width: 800px) and (max-width: 980px) {
+@media (min-width: 768px) and (max-width: 980px) {
 .tblScroll { overflow:initial;}
+.drSearch{ width:132px;}
+
 
 }
 /* ----------- iPad mini ----------- */
