@@ -3674,6 +3674,7 @@ ul#shutdownMsg li {
 .loadingSNMP {
     position: static;
 }
+
 /*********************************************media Qu********************/
 
 @media (max-width: 300px) {
@@ -4279,10 +4280,10 @@ ul#shutdownMsg li {
         float: none;
         width: 100%;
     }
-    .tblScroll {
+/*    .tblScroll {
         overflow: auto;
         width: 100%;
-    }
+    }*/
 }
 @media (width: 320px) {
     input.icon-search {
@@ -4389,7 +4390,7 @@ ul#shutdownMsg li {
         height: 310px!important;
     }
     .drScroll {
-        overflow: visible !important;
+        /*overflow: visible !important;*/
     }
 }
 @media screen and (orientation: landscape) {
@@ -4470,12 +4471,20 @@ ul#shutdownMsg li {
     .drTitle{ width:175px;}
 
 }
+@media (max-width: 766px) {
+.drReplicaContainer, .cmdLogContainer{ overflow:auto; width:100%;}
 
-@media (min-width: 768px) and (max-width: 980px) {
-.tblScroll { overflow:initial;}
+}
+
+@media (min-width: 767px) and (max-width: 980px) {
+.tblScroll { overflow: auto;
+    position: relative;
+    top: -45px;
+    width: 100%;}
 .drSearch{ width:132px;}
-
-
+table.dataTable {top:0;}
+.cmdLogContainer {overflow: auto; width: 100%;position: relative;   top: -48px;}
+.drReplicaContainer { top:-48px;overflow: auto; width: 100%;position: relative; }
 }
 /* ----------- iPad mini ----------- */
 @media only screen and (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
