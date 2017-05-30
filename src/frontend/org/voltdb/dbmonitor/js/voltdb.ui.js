@@ -1680,7 +1680,6 @@ var loadPage = function (serverName, portid) {
 
             var curTab = VoltDbUI.getCookie("current-tab");
             if (curTab == NavigationTabs.DR){
-                debugger;
                 setTimeout(function () { $("#navDbmonitor > a").trigger("click"); }, 100);
             }
         }
