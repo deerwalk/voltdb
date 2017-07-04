@@ -1209,10 +1209,10 @@ function alertNodeClicked(obj) {
         };
 
         var getLatencyDetails = function (connection, latency) {
-
             var colIndex = {};
             var counter = 0;
-
+            var tpsClusterValue = 0;
+            var timeStamp;
             connection.Metadata['@Statistics_LATENCY'].schema.forEach(function (columnInfo) {
                 if (columnInfo["name"] == "HOSTNAME" || columnInfo["name"] == "P99"
                 || columnInfo["name"] == "TIMESTAMP" || columnInfo["name"] == "TPS")
@@ -1221,15 +1221,23 @@ function alertNodeClicked(obj) {
                 counter++;
             });
 
+            latency["NODE_DETAILS"] = {}
             connection.Metadata['@Statistics_LATENCY'].data.forEach(function (info) {
                 var hostName = info[colIndex["HOSTNAME"]];
-                if (!latency.hasOwnProperty(hostName)) {
-                    latency[hostName] = {};
+
+                if (!latency["NODE_DETAILS"].hasOwnProperty(hostName)) {
+                    latency["NODE_DETAILS"][hostName] = {};
                 }
-                latency[hostName]["TIMESTAMP"] = info[colIndex["TIMESTAMP"]];
-                latency[hostName]["P99"] = info[colIndex["P99"]]/1000;
-                latency[hostName]["TPS"] = info[colIndex["TPS"]];
+                latency["NODE_DETAILS"][hostName]["TIMESTAMP"] = info[colIndex["TIMESTAMP"]];
+                latency["NODE_DETAILS"][hostName]["P99"] = info[colIndex["P99"]]/1000;
+                latency["NODE_DETAILS"][hostName]["TPS"] = info[colIndex["TPS"]];
+                tpsClusterValue += info[colIndex["TPS"]];
+                timeStamp = info[colIndex["TIMESTAMP"]];
             });
+
+            latency['CLUSTER_DETAILS'] = {};
+            latency['CLUSTER_DETAILS']['TPS'] = tpsClusterValue;
+            latency['CLUSTER_DETAILS']['TIMESTAMP'] = timeStamp;
         };
 
         var getMemoryDetails = function (connection, sysMemory, processName) {
