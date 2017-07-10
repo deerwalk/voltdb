@@ -1239,7 +1239,7 @@ function alertNodeClicked(obj) {
             });
             latency["CLUSTER_DETAILS"] = {};
             latency["CLUSTER_DETAILS"]["TPS"] = tpsClusterValue;
-            latency["CLUSTER_DETAILS"]["P99"] = latencyClusterValue;
+            latency["CLUSTER_DETAILS"]["P99"] = latencyClusterValue/1000;
             latency["CLUSTER_DETAILS"]["TIMESTAMP"] = timeStamp;
         };
 
