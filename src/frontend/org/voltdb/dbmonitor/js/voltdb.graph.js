@@ -1119,10 +1119,8 @@
             var latencyArr = []
             var latencyArrMin = []
             var latencyArrDay = []
-            if ($.isEmptyObject(latency) || latency == undefined || !latency.hasOwnProperty('NODE_DETAILS') ||
-            !latency['NODE_DETAILS'].hasOwnProperty(currentServer) ||
-            latency['NODE_DETAILS'][currentServer].P99 == undefined ||
-            latency['NODE_DETAILS'][currentServer].TIMESTAMP == undefined)
+            if ($.isEmptyObject(latency) || latency == undefined || !latency.hasOwnProperty('CLUSTER_DETAILS') ||
+            latency['CLUSTER_DETAILS'].P99 == undefined || latency['CLUSTER_DETAILS'].TIMESTAMP == undefined)
                 return;
 
             if(localStorage.latencyMin != undefined){
@@ -1177,8 +1175,8 @@
                 }
             }
 
-            var timeStamp = new Date(latency['NODE_DETAILS'][currentServer].TIMESTAMP);
-            var lat = parseFloat(latency['NODE_DETAILS'][currentServer].P99).toFixed(1) * 1;
+            var timeStamp = new Date(latency['CLUSTER_DETAILS'].TIMESTAMP);
+            var lat = parseFloat(latency['CLUSTER_DETAILS'].P99).toFixed(1) * 1;
 
             if (monitor.latMaxTimeStamp <= timeStamp) {
                 if (latSecCount >= 6 || monitor.latFirstData) {
