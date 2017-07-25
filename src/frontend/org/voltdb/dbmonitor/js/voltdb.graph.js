@@ -59,7 +59,7 @@
         var ChartProcessingTimeAnalysis = nv.models.multiBarHorizontalChart().showLegend(false).stacked(false).showControls(false);
         var ChartLatencyDetailAnalysis = nv.models.multiBarHorizontalChart().showLegend(false).stacked(false).showControls(false);
         var ChartFrequencyDetailAnalysis = nv.models.multiBarHorizontalChart().showLegend(false).stacked(false).showControls(false);
-        var ChartCombinedDetailAnalysis = nv.models.multiBarHorizontalChart().showLegend(false).stacked(false).showControls(false);
+        var ChartCombinedDetailAnalysis = nv.models.multiBarHorizontalChart().showLegend(false).stacked(true).showControls(false);
 
         var drChartList = {}
         var ChartCommandlog = nv.models.lineChart();
@@ -399,38 +399,27 @@
 
         function getBarHeightAndSpacing(dataSet, chart){
             var dataCount = dataSet.length;
-            if(dataCount == 1){
-                barHeight = 260;
-                chart.groupSpacing(.6);
-            }
-            else if(dataCount == 2){
-                barHeight = 305;
-                chart.groupSpacing(0.5);
+            if(dataCount < 3){
+                barHeight = 300;
+                chart.groupSpacing(.5);
             }
             else if(dataCount < 5){
-                barHeight = (dataCount * 111) + 56;
-                chart.groupSpacing(0.5);
+                barHeight = 400;
+                chart.groupSpacing(0.4);
             }
-            else if(dataCount < 8){
-                barHeight = (dataCount * 75) + 25;
-                chart.groupSpacing(0.3);
-            }
-            else if(dataCount < 14){
-                barHeight = (dataCount * 72) + 24;
-                chart.groupSpacing(0.3);
-            }
-            else if(dataCount < 25){
-                barHeight = (dataCount * 70) + 24;
+             else if(dataCount < 7){
+                barHeight = 400;
                 chart.groupSpacing(0.3);
             }
             else{
-                barHeight = (dataCount * 66) + 22;
-                chart.groupSpacing(0.3);
+                barHeight = 60 * dataCount;
+                chart.groupSpacing(0.2);
             }
         }
 
         function updateLatencyAnalysis(){
             ChartLatencyAnalysis.update();
+            updateAnalysisChartProperties($("#visualiseLatencyAnalysis"), ChartLatencyAnalysis)
             d3.selectAll("#chartLatencyAnalysis .nv-bar").on('click',
                 function(data){
                     $("#hidProcedureName").html(data.label);
@@ -441,6 +430,7 @@
 
         function updateFrequencyAnalysis(){
             ChartFrequencyAnalysis.update();
+            updateAnalysisChartProperties($("#visualiseFrequencyAnalysis"), ChartFrequencyAnalysis);
             d3.selectAll("#chartFrequencyAnalysis .nv-bar").on('click',
                 function(data){
                     $("#hidProcedureName").html(data.label);
@@ -452,7 +442,8 @@
 
         function updateCombinedAnalysis(){
             ChartProcessingTimeAnalysis.update();
-            d3.selectAll("#chartProcessingTimeAnalysis .nv-bar").on('click',
+            updateAnalysisChartProperties($("#visualiseProcessingTimeAnalysis"), ChartProcessingTimeAnalysis);
+             d3.selectAll("#chartProcessingTimeAnalysis .nv-bar").on('click',
                 function(data){
                     $("#hidProcedureName").html(data.label);
                     $('#showAnalysisCombinedDetails').trigger("click");
@@ -460,19 +451,23 @@
             );
         }
 
-        var wordWrap = function (textObj, data, width, labelSpacingX, labelSpacingY) {
-            var txtElement = d3.select(textObj);
-            var parentElement = d3.select(textObj.parentNode);
-            parentElement.append("foreignObject")
-                .attr('x', labelSpacingX)
-                .attr('y', labelSpacingY)
-                .attr("width", width)
-                .attr("height", 60)
-              .append("xhtml:p")
-                .attr('style','word-wrap: break-word;font-size:11px;text-align:right;')
-                .html(data);
-            txtElement.remove();
-        };
+        function updateAnalysisChartProperties(chartId, chartObj){
+            if(chartId.width() < 315 && chartId.width() > 100){
+                chartObj.margin({"left": 36,"right": 40})
+                chartObj.x(function(d) {
+                    if(d.label.length > 5)
+                        return d.label.substring(0,5) + "."
+                    return  d.label
+                  })
+            } else {
+                chartObj.margin({"left":174, "right":70});
+                chartObj.x(function(d) {
+                    if(d.label.length > 28)
+                        return d.label.substring(0,28) + ".."
+                    return  d.label
+                  })
+            }
+        }
 
         function updateAnalysisChartDetailProperties(chartId, chartObj){
             if(chartId.width() < 315 && chartId.width() > 100){
@@ -500,17 +495,16 @@
             nv.addGraph(function() {
                 ChartLatencyAnalysis
                   .y(function(d) { return d.value }).height(barHeight)
-                  .x(function(d) { return  d.label })
                   .showValues(true);
 
                 $("#chartLatencyAnalysis").css("height", barHeight-10)
-                ChartLatencyAnalysis.margin({"left": 115,"right": 40})
                 ChartLatencyAnalysis.valueFormat(d3.format(',.3f'));
                 ChartLatencyAnalysis.yAxis
                     .tickFormat(d3.format(',.2f'));
                 ChartLatencyAnalysis.xAxis
                     .axisLabelDistance(10)
                 ChartLatencyAnalysis.yAxis.axisLabelDistance(10);
+                updateAnalysisChartProperties($("#visualiseLatencyAnalysis"), ChartLatencyAnalysis);
                 d3.select('#visualiseLatencyAnalysis')
                     .datum(dataLatencyAnalysis)
                     .transition().duration(350)
@@ -522,14 +516,6 @@
                     var procedureType = VoltDbAnalysis.procedureValue[d.label].TYPE
                     return procedureType == "Multi Partitioned" ? "#14416d":"#1B87C8";
                 });
-                d3.select('#visualiseLatencyAnalysis > g > g > g.nv-x.nv-axis.nvd3-svg > g > g').selectAll('text')
-                .each(function(d,i){ wordWrap(this, d, 110, -115, -6); });
-                d3.selectAll("#chartLatencyAnalysis .nv-bar").on('click',
-                    function(data){
-                        $("#hidProcedureName").html(data.label);
-                        $('#showAnalysisDetails').trigger("click");
-                    }
-                );
                 nv.utils.windowResize(updateLatencyAnalysis);
                 return ChartLatencyAnalysis;
             });
@@ -537,17 +523,16 @@
             nv.addGraph(function() {
                 ChartFrequencyAnalysis
                     .y(function(d) { return d.value }).height(barHeight)
-                    .x(function(d) { return  d.label })
                     .showValues(true);
 
-                $("#chartFrequencyAnalysis").css("height", barHeight-10);
-                ChartLatencyAnalysis.margin({"left": 115,"right": 40})
+                $("#chartFrequencyAnalysis").css("height", barHeight-10)
                 ChartFrequencyAnalysis.valueFormat(d3.format(',.0d'));
                 ChartFrequencyAnalysis.yAxis
                     .tickFormat(d3.format(',.0d'));
                 ChartFrequencyAnalysis.xAxis
                     .axisLabelDistance(10)
                 ChartFrequencyAnalysis.yAxis.axisLabelDistance(10)
+                updateAnalysisChartProperties($("#visualiseFrequencyAnalysis"), ChartFrequencyAnalysis);
                 d3.select('#visualiseFrequencyAnalysis')
                     .datum(dataFrequencyAnalysis)
                     .transition().duration(350)
@@ -559,14 +544,6 @@
                     var procedureType = VoltDbAnalysis.procedureValue[d.label].TYPE
                     return procedureType == "Multi Partitioned" ? "#14416d":"#1B87C8";
                 });
-                d3.select('#visualiseFrequencyAnalysis > g > g > g.nv-x.nv-axis.nvd3-svg > g > g').selectAll('text')
-                .each(function(d,i){ wordWrap(this, d, 110, -115, -6); });
-                d3.selectAll("#chartFrequencyAnalysis .nv-bar").on('click',
-                    function(data){
-                        $("#hidProcedureName").html(data.label);
-                        $('#showAnalysisFreqDetails').trigger("click");
-                    }
-                );
                 nv.utils.windowResize(updateFrequencyAnalysis);
                 return ChartFrequencyAnalysis;
             });
@@ -574,17 +551,16 @@
             nv.addGraph(function() {
                 ChartProcessingTimeAnalysis
                     .y(function(d) { return d.value }).height(barHeight)
-                    .x(function(d) { return  d.label })
                     .showValues(true);
 
-                $("#chartProcessingTimeAnalysis").css("height", barHeight-10);
-                ChartLatencyAnalysis.margin({"left": 115,"right": 40})
+                $("#chartProcessingTimeAnalysis").css("height", barHeight-10)
                 ChartProcessingTimeAnalysis.valueFormat(d3.format(',.3f'));
                 ChartProcessingTimeAnalysis.yAxis
                     .tickFormat(d3.format(',.2f'));
                 ChartProcessingTimeAnalysis.xAxis
                     .axisLabelDistance(10)
                 ChartProcessingTimeAnalysis.yAxis.axisLabelDistance(10)
+                updateAnalysisChartProperties($("#visualiseProcessingTimeAnalysis"), ChartProcessingTimeAnalysis);
                 d3.select('#visualiseProcessingTimeAnalysis')
                     .datum(dataProcessingTimeAnalysis)
                     .transition().duration(350)
@@ -596,14 +572,6 @@
                     var procedureType = VoltDbAnalysis.procedureValue[d.label].TYPE
                     return procedureType == "Multi Partitioned" ? "#14416d":"#1B87C8";
                 });
-                d3.select('#visualiseProcessingTimeAnalysis > g > g > g.nv-x.nv-axis.nvd3-svg > g > g').selectAll('text')
-                .each(function(d,i){ wordWrap(this, d, 110, -115, -6); });
-                d3.selectAll("#chartProcessingTimeAnalysis .nv-bar").on('click',
-                    function(data){
-                        $("#hidProcedureName").html(data.label);
-                        $('#showAnalysisCombinedDetails').trigger("click");
-                    }
-                );
                 nv.utils.windowResize(updateCombinedAnalysis);
                 return ChartProcessingTimeAnalysis;
             });
@@ -612,6 +580,8 @@
         this.initializeProcedureDetailGraph = function(){
             nv.addGraph(function() {
                 ChartLatencyDetailAnalysis.x(function(d) {
+                    if(d.label.length > 20)
+                        return d.label.substring(0,20) + ".."
                     return  d.label
                   }).y(function(d) { return d.value }).height(barHeight)
                   .showValues(true);
@@ -621,10 +591,12 @@
                 ChartLatencyDetailAnalysis.xAxis
                     .axisLabelDistance(10)
                 ChartLatencyDetailAnalysis.yAxis.axisLabelDistance(10)
+                updateAnalysisChartDetailProperties($("#visualiseLatencyDetail"), ChartLatencyDetailAnalysis);
                 d3.select('#visualizeLatencyDetail')
                     .datum(dataLatencyDetailAnalysis)
                     .transition().duration(350)
                     .call(ChartLatencyDetailAnalysis);
+
                 nv.utils.windowResize(ChartLatencyDetailAnalysis.update);
                 return ChartLatencyDetailAnalysis;
             });
@@ -633,6 +605,8 @@
         this.initializeFrequencyDetailGraph = function(){
             nv.addGraph(function() {
                 ChartFrequencyDetailAnalysis.x(function(d) {
+                    if(d.label.length > 20)
+                        return d.label.substring(0,20) + ".."
                     return  d.label
                   }).y(function(d) { return d.value }).height(barHeight)
                   .showValues(true);
@@ -642,6 +616,7 @@
                 ChartFrequencyDetailAnalysis.xAxis
                     .axisLabelDistance(10)
                 ChartFrequencyDetailAnalysis.yAxis.axisLabelDistance(10)
+                updateAnalysisChartDetailProperties($("#visualizeFrequencyDetail"), ChartFrequencyDetailAnalysis);
                 d3.select('#visualizeFrequencyDetail')
                     .datum(dataFrequencyDetailAnalysis)
                     .transition().duration(350)
@@ -654,19 +629,19 @@
 
         this.initializeCombinedDetailGraph = function(){
             nv.addGraph(function() {
-                ChartCombinedDetailAnalysis.x(function(d) {
-                    if(d.label.length > 20)
-                        return d.label.substring(0,20) + ".."
-                    return  d.label
-                  }).y(function(d) { return d.value }).height(barHeight)
-                  .showValues(true);
+//                ChartCombinedDetailAnalysis.x(function(d) {
+//                    if(d.label.length > 20)
+//                        return d.label.substring(0,20) + ".."
+//                    return  d.label
+//                  }).y(function(d) { return d.value }).height(barHeight)
+//                  .showValues(true);
                 ChartCombinedDetailAnalysis.valueFormat(d3.format(',.3f'));
                 ChartCombinedDetailAnalysis.yAxis
                     .tickFormat(d3.format(',.2f'));
                 ChartCombinedDetailAnalysis.xAxis
                     .axisLabelDistance(10)
                 ChartCombinedDetailAnalysis.yAxis.axisLabelDistance(10)
-                updateAnalysisChartDetailProperties($("#visualizeCombinedDetail"), ChartCombinedDetailAnalysis);
+//                updateAnalysisChartDetailProperties($("#visualizeCombinedDetail"), ChartCombinedDetailAnalysis);
                 d3.select('#visualizeCombinedDetail')
                     .datum(dataCombinedDetailAnalysis)
                     .transition().duration(350)
@@ -682,7 +657,6 @@
             getBarHeightAndSpacing(dataLatency, ChartLatencyAnalysis);
             ChartLatencyAnalysis.height(barHeight);
             $("#chartLatencyAnalysis").css("height", barHeight-10);
-            ChartLatencyAnalysis.margin({"left": 115,"right": 40});
             dataLatencyAnalysis[0]["values"] = dataLatency;
             d3.select("#visualiseLatencyAnalysis")
                 .datum(dataLatencyAnalysis)
@@ -695,7 +669,6 @@
             getBarHeightAndSpacing(dataFrequency, ChartFrequencyAnalysis);
             ChartFrequencyAnalysis.height(barHeight);
             $("#chartFrequencyAnalysis").css("height", barHeight-10);
-            ChartFrequencyAnalysis.margin({"left": 115,"right": 40});
             dataFrequencyAnalysis[0]["values"] = dataFrequency;
             d3.select("#visualiseFrequencyAnalysis")
                 .datum(dataFrequencyAnalysis)
@@ -708,7 +681,6 @@
             getBarHeightAndSpacing(dataCombined, ChartProcessingTimeAnalysis);
             ChartProcessingTimeAnalysis.height(barHeight);
             $("#chartProcessingTimeAnalysis").css("height", barHeight-10);
-            ChartProcessingTimeAnalysis.margin({"left": 115,"right": 40});
             dataProcessingTimeAnalysis[0]["values"] = dataCombined;
             d3.select("#visualiseProcessingTimeAnalysis")
                 .datum(dataProcessingTimeAnalysis)
@@ -721,15 +693,15 @@
             getBarHeightAndSpacing(dataLatency, ChartLatencyDetailAnalysis);
             ChartLatencyDetailAnalysis.height(barHeight);
             $("#divVisualizeLatencyDetail").css("height", barHeight-10);
-            ChartLatencyDetailAnalysis.margin({"left": 80})
+//            debugger;
             dataLatencyDetailAnalysis[0]["values"] = dataLatency;
+
             d3.select("#visualizeLatencyDetail")
                 .datum(dataLatencyDetailAnalysis)
                 .transition().duration(500)
                 .call(ChartLatencyDetailAnalysis);
-            d3.select('#visualizeLatencyDetail > g > g > g.nv-x.nv-axis.nvd3-svg > g > g').selectAll('text')
-            .each(function(d,i){wordWrap(this, d, 110, -115, -8);});
-            $("#visualizeLatencyDetail").find('.nvd3').removeAttr("x");
+
+                   $("#visualizeLatencyDetail").find('.nvd3').removeAttr("x");
             $("#visualizeLatencyDetail").find('.nvd3').attr("x",344);
             $("#visualizeLatencyDetail").find('.nvd3').attr("y",172);
         }
@@ -739,14 +711,11 @@
             getBarHeightAndSpacing(freqDetails, ChartFrequencyDetailAnalysis);
             ChartFrequencyDetailAnalysis.height(barHeight);
             $("#divVisualizeFreqDetail").css("height", barHeight-10);
-            ChartFrequencyDetailAnalysis.margin({"left": 80})
             dataFrequencyDetailAnalysis[0]["values"] = freqDetails;
             d3.select("#visualizeFrequencyDetails")
                 .datum(dataFrequencyDetailAnalysis)
                 .transition().duration(500)
                 .call(ChartFrequencyDetailAnalysis);
-            d3.select('#visualizeFrequencyDetails > g > g > g.nv-x.nv-axis.nvd3-svg > g > g').selectAll('text')
-            .each(function(d,i){wordWrap(this, d, 110, -115, -8);});
             $("#visualizeFrequencyDetails").find('.nvd3').attr("x",344);
             $("#visualizeFrequencyDetails").find('.nvd3').attr("y",172);
         }
@@ -756,9 +725,20 @@
             getBarHeightAndSpacing(dataCombined, ChartCombinedDetailAnalysis);
             ChartCombinedDetailAnalysis.height(barHeight);
             $("#divVisualizeCombinedDetail").css("height", barHeight-10);
+
+//               var data = [{"key":"0","values":[{"x":2,"y":0.57}]},
+//            {"key":"62","values":[{"x":4,"y":0.23}]},
+//            {"key":"73","values":[{"x":dataCombined[0].label,"y":0.12}]},
+//            {"key":"56","values":[{"x":dataCombined[0].label,"y":0.25}]},
+//            {"key":"81","values":[{"x":dataCombined[0].label,"y":0.11}]},
+//            {"key":"23","values":[{"x":dataCombined[0].label,"y":0.10}]},
+//            {"key":"96","values":[{"x":dataCombined[0].label,"y":0.09}]},
+//            {"key":"45","values":[{"x":dataCombined[0].label,"y":0.11}]}
+//            ]
+            debugger;
             dataCombinedDetailAnalysis[0]["values"] = dataCombined;
             d3.select("#visualizeCombinedDetails")
-                .datum(dataCombinedDetailAnalysis)
+                .datum(dataCombined)
                 .transition().duration(500)
                 .call(ChartCombinedDetailAnalysis);
             $("#visualizeCombinedDetails").find('.nvd3').attr("x",344);

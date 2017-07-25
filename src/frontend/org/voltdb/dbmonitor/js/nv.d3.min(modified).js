@@ -618,6 +618,9 @@
                 }
                 var currentTime = d.value
 
+                if((d.series[0].key == "Execution Time" || d.series[0].key == "Frequency" || d.series[0].key == "Total Processing Time") && chartContainer == null)
+                    currentTime = d.data.label.split(" ")[1]
+
                 if (d.series[0].key == "Avg Execution Time" || d.series[0].key == "Frequency Detail" || d.series[0].key == "Processing Time Detail")
                     {
                         if(d.data.label.indexOf(' ') != -1)
@@ -639,6 +642,7 @@
                         .append("strong")
                         .classed("x-value", true)
                         .html(currentTime);
+//                        debugger;
                     var unit = '';
                     if (d.series[0].key == "CPU") {
                         unit = '%';
@@ -665,7 +669,7 @@
                             unit = "Transactions/s"
                     }
                     else if(chartContainer == null){
-                        if(d.series[0].key == "Execution Time" || d.series[0].key == "Avg Execution Time" || d.series[0].key == "Total Processing Time" || d.series[0].key == "Processing Time Detail")
+                        if(d.series[0].key == "Execution Time" || d.series[0].key == "Avg Execution Time" || d.series[0].key == "Total Processing Time" || d.series[0].key == "Processing Time Detail" || !isNaN(d.series[0].key))
                             unit = " ms"
                         else if(d.series[0].key == "Frequency" || d.series[0].key == "Frequency Detail")
                             unit = ""
@@ -693,14 +697,22 @@
                         .append("div")
                         .style("background-color", function (p) { return p.color });
                 else{
-                    if((d.data.key == "Execution Time" || d.data.key == "Frequency" || d.data.key == "Total Processing Time") && VoltDbAnalysis.procedureValue[d.data.label].TYPE == "Multi Partitioned"){
+                    if((d.data.key == "Execution Time" || d.data.key == "Frequency" || d.data.key == "Total Processing Time" ) && VoltDbAnalysis.procedureValue[d.data.label].TYPE == "Multi Partitioned"){
                         trowEnter.append("td")
                             .html("<span style='margin-bottom:0;margin-right:2px;width:14px;height:14px;background:"+ "#14416d" +"'></span><span>"+ d.series[0].key +"</span>" );
                     } else {
                         var keyName = d.series[0].key;
                         keyName = (keyName == "Frequency Detail" ? "Frequency":(keyName == "Processing Time Detail" ? "Total Processing Time" : keyName));
+
+                        if(!isNaN(keyName)){
                         trowEnter.append("td")
+                            .html("<span style='margin-bottom:0;margin-right:2px;width:14px;height:14px;background:"+d.color+"'></span><span>Partition" + " (" + keyName +")"+"</span>" );
+                        }
+                        else{
+                            trowEnter.append("td")
                             .html("<span style='margin-bottom:0;margin-right:2px;width:14px;height:14px;background:"+d.color+"'></span><span>"+ keyName +"</span>" );
+                        }
+
                     }
                 }
                 //trowEnter.append("td")
@@ -714,7 +726,7 @@
                     trowEnter.append("td")
                     .classed("value", true)
                     .html(function (p, i) { return valueFormatter(p.value, i) + unit });
-                } else if((d.series[0].key == "Avg Execution Time" || d.series[0].key == "Execution Time" || d.series[0].key == "Frequency" || d.series[0].key == "Total Processing Time" || d.series[0].key == "Frequency Detail" || d.series[0].key == "Processing Time Detail") && chartContainer == null){
+                } else if((d.series[0].key == "Avg Execution Time" || d.series[0].key == "Execution Time" || d.series[0].key == "Frequency" || d.series[0].key == "Total Processing Time" || d.series[0].key == "Frequency Detail" || d.series[0].key == "Processing Time Detail" || !isNaN(d.series[0].key))  && chartContainer == null){
                     trowEnter.append("td")
                         .html(function (p, i) { return (d.series[0].key != "Frequency"  && d.series[0].key != "Frequency Detail" ? p.value.toFixed(3) : p.value)+ unit });
                 } else {
@@ -965,7 +977,7 @@
                             .styleTween('transform', function (d) {
                                 return translateInterpolator;
                             }, 'important')
-                            // Safari has its own `-webkit-transform` and does not support `transform` 
+                            // Safari has its own `-webkit-transform` and does not support `transform`
                             // transform tooltip without transition only in Safari
                             .style('-webkit-transform', new_translate)
 
@@ -1166,7 +1178,7 @@
 
     /*
     Gets the browser window size
-    
+
     Returns object with height and width properties
      */
     nv.utils.windowSize = function () {
@@ -1553,7 +1565,7 @@
       showXAxis: true,
       tooltips: true
     });
-    
+
     To enable in the chart:
     chart.options = nv.utils.optionsFunc.bind(chart);
     */
@@ -1572,7 +1584,7 @@
     /*
     numTicks:  requested number of ticks
     data:  the chart data
-    
+
     returns the number of ticks to actually use on X axis, based on chart data
     to avoid duplicate ticks with the same value
     */
@@ -1610,7 +1622,7 @@
     Add a particular option from an options object onto chart
     Options exposed on a chart are a getter/setter function that returns chart
     on set to mimic typical d3 option chaining, e.g. svg.option1('a').option2('b');
-    
+
     option objects should be generated via Object.create() to provide
     the option of manipulating data via get/set functions.
     */
@@ -8104,7 +8116,7 @@
                             data[i].nonStackableSeries = nonStackableCount++;
                             parsed[i] = data[i];
                         } else {
-                            // don't stack this seires on top of the nonStackable seriees 
+                            // don't stack this seires on top of the nonStackable seriees
                             if (i > 0 && parsed[i - 1].nonStackable) {
                                 parsed[i].values.map(function (d, j) {
                                     d.y0 -= parsed[i - 1].values[j].y;
@@ -8350,7 +8362,7 @@
                             } else {
                                 // if all series are nonStacable, take the full width
                                 var width = (x.rangeBand() / nonStackableCount);
-                                // otherwise, nonStackable graph will be only taking the half-width 
+                                // otherwise, nonStackable graph will be only taking the half-width
                                 // of the x rangeBand
                                 if (data.length !== nonStackableCount) {
                                     width = x.rangeBand() / (nonStackableCount * 2);
@@ -9030,6 +9042,8 @@
 
                 var bars = groups.selectAll('g.nv-bar')
                     .data(function (d) { return d.values });
+
+
                 bars.exit().remove();
 
                 var barsEnter = bars.enter().append('g')
@@ -9110,7 +9124,7 @@
 
                 barsEnter.append('text');
                 barsEnter.append("foreignObject");
-
+                debugger;
                 if (showValues && !stacked) {
                     bars.select('text')
                         .attr('text-anchor', function (d, i) { return getY(d, i) < 0 ? 'end' : 'start' })
@@ -9161,6 +9175,16 @@
                         })
                 } else {
                     bars.selectAll('text').text('');
+                    var newBar =  groups.selectAll('.nv-series-7')
+                    .data(function (d) { return d.values });
+                     newBar.select('foreignObject')
+                        .attr("style", 'color:#C12026;font-size:25px;font-weight:600;cursor:default')
+                        .attr("height", "22px")
+                        .attr("width", "22px")
+                        .attr('y', (x.rangeBand() / (data.length * 2)) -15)
+                        .html(function (d, i){
+                                return "&#9888;";
+                        })
                 }
 
                 if (showBarLabels && !stacked) {
