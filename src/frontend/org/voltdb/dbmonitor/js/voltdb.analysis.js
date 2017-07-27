@@ -186,7 +186,7 @@ function loadAnalysisPage(){
                 MonitorGraphUI.RefreshAnalysisCombinedGraph(dataTotalProcessingProcedures);
             })
         })
-
+        VoltDbAnalysis.totalProcessingDetail = {};
         voltDbRenderer.GetProcedureDetailInformation(function (procedureDetails){
             var latencyDetails = [];
 //            procedureDetails["PROCEDURE_DETAIL"].sort(function(a, b) {
@@ -207,11 +207,11 @@ function loadAnalysisPage(){
                     VoltDbAnalysis.combinedDetail[item.PROCEDURE] = [];
                 }
 
-                if(VoltDbAnalysis.totalProcessingDetail[item.PARTITION_ID] == undefined){
-                    VoltDbAnalysis.totalProcessingDetail[item.PARTITION_ID] = [];
-                }
-
                 if(item.STATEMENT != "<ALL>"){
+                    if(VoltDbAnalysis.totalProcessingDetail[item.PARTITION_ID] == undefined){
+                        VoltDbAnalysis.totalProcessingDetail[item.PARTITION_ID] = [];
+                    }
+
                     VoltDbAnalysis.combinedDetail[item.PROCEDURE].push({
                         AVG: item.AVG_EXECUTION_TIME/1000000,
                         INVOCATIONS: item.INVOCATIONS,

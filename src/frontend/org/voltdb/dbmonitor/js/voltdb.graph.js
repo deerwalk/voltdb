@@ -491,6 +491,21 @@
             ChartLatencyDetailAnalysis.update;
         }
 
+        var wordWrap = function (textObj, data, width, labelSpacingX, labelSpacingY) {
+            var txtElement = d3.select(textObj);
+            var parentElement = d3.select(textObj.parentNode);
+            parentElement.append("foreignObject")
+                .attr('x', labelSpacingX)
+                .attr('y', labelSpacingY)
+                .attr("width", width)
+                .attr("height", 60)
+              .append("xhtml:p")
+                .attr('style','word-wrap: break-word;font-size:11px;text-align:right;')
+                .html(data);
+            txtElement.remove();
+        };
+
+
         this.initializeAnalysisGraph = function(){
             nv.addGraph(function() {
                 ChartLatencyAnalysis
@@ -629,25 +644,27 @@
 
         this.initializeCombinedDetailGraph = function(){
             nv.addGraph(function() {
-//                ChartCombinedDetailAnalysis.x(function(d) {
-//                    if(d.label.length > 20)
-//                        return d.label.substring(0,20) + ".."
-//                    return  d.label
-//                  }).y(function(d) { return d.value }).height(barHeight)
-//                  .showValues(true);
+                ChartCombinedDetailAnalysis.x(function(d) {
+                    if(d.x.length > 20)
+                        return d.x.substring(0,20) + ".."
+                    return  d.x
+                  }).y(function(d) { return d.y }).height(barHeight)
+                  .showValues(true);
                 ChartCombinedDetailAnalysis.valueFormat(d3.format(',.3f'));
                 ChartCombinedDetailAnalysis.yAxis
                     .tickFormat(d3.format(',.2f'));
                 ChartCombinedDetailAnalysis.xAxis
                     .axisLabelDistance(10)
+
                 ChartCombinedDetailAnalysis.yAxis.axisLabelDistance(10)
-//                updateAnalysisChartDetailProperties($("#visualizeCombinedDetail"), ChartCombinedDetailAnalysis);
-                d3.select('#visualizeCombinedDetail')
+
+                d3.select('#visualizeCombinedDetails')
                     .datum(dataCombinedDetailAnalysis)
                     .transition().duration(350)
                     .call(ChartCombinedDetailAnalysis);
 
-                nv.utils.windowResize(ChartCombinedDetailAnalysis.update);
+//                nv.utils.windowResize(ChartCombinedDetailAnalysis.update);
+
                 return ChartCombinedDetailAnalysis;
             });
         }
@@ -693,7 +710,6 @@
             getBarHeightAndSpacing(dataLatency, ChartLatencyDetailAnalysis);
             ChartLatencyDetailAnalysis.height(barHeight);
             $("#divVisualizeLatencyDetail").css("height", barHeight-10);
-//            debugger;
             dataLatencyDetailAnalysis[0]["values"] = dataLatency;
 
             d3.select("#visualizeLatencyDetail")
@@ -701,7 +717,7 @@
                 .transition().duration(500)
                 .call(ChartLatencyDetailAnalysis);
 
-                   $("#visualizeLatencyDetail").find('.nvd3').removeAttr("x");
+            $("#visualizeLatencyDetail").find('.nvd3').removeAttr("x");
             $("#visualizeLatencyDetail").find('.nvd3').attr("x",344);
             $("#visualizeLatencyDetail").find('.nvd3').attr("y",172);
         }
@@ -725,22 +741,23 @@
             getBarHeightAndSpacing(dataCombined, ChartCombinedDetailAnalysis);
             ChartCombinedDetailAnalysis.height(barHeight);
             $("#divVisualizeCombinedDetail").css("height", barHeight-10);
-
-//               var data = [{"key":"0","values":[{"x":2,"y":0.57}]},
-//            {"key":"62","values":[{"x":4,"y":0.23}]},
-//            {"key":"73","values":[{"x":dataCombined[0].label,"y":0.12}]},
-//            {"key":"56","values":[{"x":dataCombined[0].label,"y":0.25}]},
-//            {"key":"81","values":[{"x":dataCombined[0].label,"y":0.11}]},
-//            {"key":"23","values":[{"x":dataCombined[0].label,"y":0.10}]},
-//            {"key":"96","values":[{"x":dataCombined[0].label,"y":0.09}]},
-//            {"key":"45","values":[{"x":dataCombined[0].label,"y":0.11}]}
-//            ]
-            debugger;
+            ChartCombinedDetailAnalysis.margin({"left": 80})
             dataCombinedDetailAnalysis[0]["values"] = dataCombined;
             d3.select("#visualizeCombinedDetails")
                 .datum(dataCombined)
                 .transition().duration(500)
                 .call(ChartCombinedDetailAnalysis);
+               d3.select('#visualizeCombinedDetails > g > g > g.nv-x.nv-axis.nvd3-svg > g > g').selectAll('text')
+                .each(function(d,i){ wordWrap(this, d, 110, -115, -6); });
+//               d3.select('#visualizeCombinedDetails > g > g > g.nv-barsWrap.nvd3-svg > g > g > g > g.nv-group.nv-series-7').selectAll('text')
+//               .data(function (d) { return d.values })
+//                .attr('dy', '.32em')
+//                .attr('text-anchor', function (d, i) { return 'start' })
+//                .attr('y', 40 / (data.length * 2) + 100)
+//                .attr('x', function (d, i) { return d.x < 0 ? -4 : d.y - 100 })
+//                .text(function (d, i) {
+//                    return VoltDbUI.totalProcessingTime[d.x].toFixed(3);
+//                });
             $("#visualizeCombinedDetails").find('.nvd3').attr("x",344);
             $("#visualizeCombinedDetails").find('.nvd3').attr("y",172);
         }

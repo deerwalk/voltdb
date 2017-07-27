@@ -621,13 +621,15 @@
                 if((d.series[0].key == "Execution Time" || d.series[0].key == "Frequency" || d.series[0].key == "Total Processing Time") && chartContainer == null)
                     currentTime = d.data.label.split(" ")[1]
 
-                if (d.series[0].key == "Avg Execution Time" || d.series[0].key == "Frequency Detail" || d.series[0].key == "Processing Time Detail")
-                    {
-                        if(d.data.label.indexOf(' ') != -1)
-                            currentTime = d.data.label.split(" ")[1]
-                        else
-                            currentTime = d.data.label
+                if (d.series[0].key == "Avg Execution Time" || d.series[0].key == "Frequency Detail"){
+                    if(d.data.label.indexOf(' ') != -1)
+                        currentTime = d.data.label.split(" ")[1]
+                    else
+                        currentTime = d.data.label
                     }
+//                else if(!isNaN(d.series[0].key)){
+//                    currentTime = (d.data.y / VoltDbUI.totalProcessingTime[d.data.x]) * 100
+//                }
 
                 var isPartitionIdleGraph = false
                 var table = d3.select(document.createElement("table"));
@@ -642,7 +644,6 @@
                         .append("strong")
                         .classed("x-value", true)
                         .html(currentTime);
-//                        debugger;
                     var unit = '';
                     if (d.series[0].key == "CPU") {
                         unit = '%';
@@ -669,7 +670,7 @@
                             unit = "Transactions/s"
                     }
                     else if(chartContainer == null){
-                        if(d.series[0].key == "Execution Time" || d.series[0].key == "Avg Execution Time" || d.series[0].key == "Total Processing Time" || d.series[0].key == "Processing Time Detail" || !isNaN(d.series[0].key))
+                        if(d.series[0].key == "Execution Time" || d.series[0].key == "Avg Execution Time" || d.series[0].key == "Total Processing Time" || d.series[0].key == "Processing Time Detail")
                             unit = " ms"
                         else if(d.series[0].key == "Frequency" || d.series[0].key == "Frequency Detail")
                             unit = ""
@@ -726,10 +727,15 @@
                     trowEnter.append("td")
                     .classed("value", true)
                     .html(function (p, i) { return valueFormatter(p.value, i) + unit });
-                } else if((d.series[0].key == "Avg Execution Time" || d.series[0].key == "Execution Time" || d.series[0].key == "Frequency" || d.series[0].key == "Total Processing Time" || d.series[0].key == "Frequency Detail" || d.series[0].key == "Processing Time Detail" || !isNaN(d.series[0].key))  && chartContainer == null){
+                } else if((d.series[0].key == "Avg Execution Time" || d.series[0].key == "Execution Time" || d.series[0].key == "Frequency" || d.series[0].key == "Total Processing Time" || d.series[0].key == "Frequency Detail" || d.series[0].key == "Processing Time Detail")  && chartContainer == null){
                     trowEnter.append("td")
                         .html(function (p, i) { return (d.series[0].key != "Frequency"  && d.series[0].key != "Frequency Detail" ? p.value.toFixed(3) : p.value)+ unit });
-                } else {
+                } else if (!isNaN(d.series[0].key)){
+                    trowEnter.append("td")
+                        .html(function (p, i) { return ((d.data.y / VoltDbUI.totalProcessingTime[d.data.x]) * 100).toFixed(3) + unit });
+
+                }
+                else {
                     trowEnter.append("td")
                         .classed("value", true)
                         .html(function (p, i) { return valueFormatter(p.value, i) + unit });
@@ -9024,6 +9030,7 @@
 
                 var groups = wrap.select('.nv-groups').selectAll('.nv-group')
                     .data(function (d) { return d }, function (d, i) { return i });
+
                 groups.enter().append('g')
                     .style('stroke-opacity', 1e-6)
                     .style('fill-opacity', 1e-6);
@@ -9042,7 +9049,6 @@
 
                 var bars = groups.selectAll('g.nv-bar')
                     .data(function (d) { return d.values });
-
 
                 bars.exit().remove();
 
@@ -9124,8 +9130,8 @@
 
                 barsEnter.append('text');
                 barsEnter.append("foreignObject");
-                debugger;
-                if (showValues && !stacked) {
+
+                if (showValues && !stacked)     {
                     bars.select('text')
                         .attr('text-anchor', function (d, i) { return getY(d, i) < 0 ? 'end' : 'start' })
                         .attr('y', x.rangeBand() / (data.length * 2))
@@ -9174,17 +9180,7 @@
                             return xLength;
                         })
                 } else {
-                    bars.selectAll('text').text('');
-                    var newBar =  groups.selectAll('.nv-series-7')
-                    .data(function (d) { return d.values });
-                     newBar.select('foreignObject')
-                        .attr("style", 'color:#C12026;font-size:25px;font-weight:600;cursor:default')
-                        .attr("height", "22px")
-                        .attr("width", "22px")
-                        .attr('y', (x.rangeBand() / (data.length * 2)) -15)
-                        .html(function (d, i){
-                                return "&#9888;";
-                        })
+
                 }
 
                 if (showBarLabels && !stacked) {
@@ -9246,6 +9242,17 @@
 
             });
 
+            if(stacked){
+                d3.select('#visualizeCombinedDetails > g > g > g.nv-barsWrap.nvd3-svg > g > g > g > g.nv-group.nv-series-7').selectAll('text')
+               .data(function (d) { return d.values })
+                .attr('dy', '.32em')
+                .attr('text-anchor', function (d, i) { return getY(d, i) < 0 ? 'end' : 'start' })
+                .attr('y', (x.rangeBand() - 40))
+                .attr('x', function (d, i) { return getY(d, i) < 0 ? -4 : y(getY(d, i)) - y(0) })
+                .text(function (d, i) {
+                    return VoltDbUI.totalProcessingTime[d.x].toFixed(3);
+                });
+            }
             renderWatch.renderEnd('multibarHorizontal immediate');
             return chart;
         }
