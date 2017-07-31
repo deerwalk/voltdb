@@ -2633,21 +2633,18 @@ var loadPage = function (serverName, portid) {
                             }
 
                         }
-
-
 //                        VoltDbUI.totalProcessingTime.push({"x": subItems.STATEMENT, "y": combinedWeight})
-
-
                         statement = subItems.STATEMENT;
 
                         if(subItems.TYPE == "Single Partitioned"){
+                                combinedDetails[subItems.STATEMENT] = combinedWeight;
                             VoltDbUI.totalProcessingTime[subItems.STATEMENT]= combinedWeight;
                         }
                         else{
                             combinedWeight = (combinedWeight/count) * subItems.INVOCATIONS
+                            combinedDetails[subItems.STATEMENT] = combinedWeight;
                             VoltDbUI.totalProcessingTime[subItems.STATEMENT]= combinedWeight;
                         }
-//                        $(".generatedDate").html(VoltDbAnalysis.formatDateTime(subItems.TIMESTAMP));
                     })
 
 
@@ -2676,57 +2673,34 @@ var loadPage = function (serverName, portid) {
                 }
             }
 
-
             var z = 0;
             for( var key in VoltDbAnalysis.totalProcessingDetail){
                 var obj = VoltDbAnalysis.totalProcessingDetail[key];
                 obj.forEach(function(subItems){
                     if(subItems.PROCEDURE == procedureName){
 
-//                        if(subItems.STATEMENT == statement){
-//                            count = objectLength(obj, statement);
-//
-//                            if(subItems.TYPE == "Single Partitioned"){
-//                                combinedWeight += subItems.AVG * subItems.INVOCATIONS
-//                            }
-//                            else{ //For Multi partitioned
-//                                combinedWeight += subItems.AVG
-//                            }
-//                        }
-//                        else{
-//                            i++;
-//                            if(subItems.TYPE == "Single Partitioned"){
-//                                combinedWeight = subItems.AVG * subItems.INVOCATIONS
-//                            }
-//                            else{
-//                                combinedWeight = subItems.AVG * subItems.INVOCATIONS
-//                            }
-//
-//                        }
                         count = objectLength(obj, statement);
                         combinedWeight = subItems.AVG * subItems.INVOCATIONS
 
-//                        if(partitionDetails[z] == undefined){
-//                            partitionDetails[z] = [];
-//                        }
-
-//                         var values = [];
-//                         values.push({"x": subItems.STATEMENT, "y": combinedWeight});
                         if(partitionDetails[subItems.PARTITION_ID]== undefined){
                             partitionDetails.push({"key": subItems.PARTITION_ID})
                             partitionDetails[z]["values"] = [];
                         }
 
                         partitionDetails[z]["values"].push({"x": subItems.STATEMENT, "y": combinedWeight})
-
-
                     }
                     statement = subItems.STATEMENT;
                 });
                 z++;
 
             }
-            MonitorGraphUI.RefreshCombinedDetailGraph(partitionDetails);
+            debugger;
+            if($("#hidPartitionType").html() == "Single Partitioned"){
+                MonitorGraphUI.RefreshCombinedDetailGraph(partitionDetails);
+            }else{
+                MonitorGraphUI.RefreshCombinedDetailGraph(finalDetails);
+            }
+
         }
     });
 
