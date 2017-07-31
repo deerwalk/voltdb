@@ -2395,7 +2395,7 @@ var loadPage = function (serverName, portid) {
             var procDetails = {};
             var finalDetails = [];
             var statement = '';
-            var avg=0;
+            var sum=0;
             var j = 0;
             var count = 0;
             var isMultiple= false;
@@ -2412,26 +2412,17 @@ var loadPage = function (serverName, portid) {
                 var newStatement = '';
                 var latValue;
 //                $("#generatedDate").html(VoltDbAnalysis.formatDateTime(item.TIMESTAMP));
-
                 if(item.PROCEDURE == procedureName ){
-                    containLongName = checkObjForLongStatementName(VoltDbAnalysis.latencyDetailValue, procedureName);
 
-                    if(containLongName){
-                        newStatement = (i + 1) + ") " + item.STATEMENT;
-                    }
-                    else{
-                        newStatement = item.STATEMENT;
-                    }
-                    var comp1 = newStatement.indexOf(') ') !== -1 ? newStatement.split(') ')[1]: newStatement;
-                    var comp2 = statement.indexOf(') ') !== -1 ? statement.split(') ')[1]: statement;
-                    if (comp1 == comp2){
-                        avg += item.value;
+//                    newStatement = item.STATEMENT;
+                    if (statement == item.STATEMENT){
+                        sum += item.value;
                         isMultiple = true;
                     }
                     else{
                         i++;
                         isMultiple = false;
-                        avg = item.value;
+                        sum = item.value;
                     }
 
                     if(isMultiple){
@@ -2454,6 +2445,13 @@ var loadPage = function (serverName, portid) {
 
                     statement = newStatement;
 
+                        count = calculateStatementCount(VoltDbAnalysis.latencyDetailValue, item.STATEMENT)
+                        procDetails[item.STATEMENT] = sum/count;
+                    }
+                    else{
+                        procDetails[item.STATEMENT] = sum;
+                    }
+                    statement = item.STATEMENT;
                 }
             });
 
@@ -2491,17 +2489,6 @@ var loadPage = function (serverName, portid) {
         }
     });
 
-     function checkObjForLongStatementName(profileData, procedureName){
-        for(var j = 0; j < profileData.length; j++){
-            if(profileData[j].PROCEDURE == procedureName){
-                if(profileData[j].STATEMENT.length > 14){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     $("#showAnalysisFreqDetails").popup({
         open: function (event, ui, ele)  {
             var statement = '';
@@ -2529,25 +2516,20 @@ var loadPage = function (serverName, portid) {
 
 //                $(".generatedDate").html(VoltDbAnalysis.formatDateTime(item.TIMESTAMP));
                 if(item.PROCEDURE == procedureName ){
+                    newStatement = item.STATEMENT;
+                     if(item.type == "Single Partitioned"){
+                        if (newStatement == statement){
 
-                    containLongName = checkObjForLongStatementName(VoltDbAnalysis.latencyDetailValue, procedureName);
-
-                    if(containLongName){
-                        newStatement = (i + 1) + ") " + item.STATEMENT;
-                    }
-                    else{
-                        newStatement = item.STATEMENT;
-                    }
-
-                    var comp1 = newStatement.indexOf(') ') !== -1 ? newStatement.split(') ')[1]: newStatement;
-                    var comp2 = statement.indexOf(') ') !== -1 ? statement.split(') ')[1]: statement;
-                    if (comp1 == comp2){
-                        totalInvocations += item.INVOCATION;
-                    }
-                    else{
-                        i++;
+                            totalInvocations += item.INVOCATION;
+                        }
+                        else{
+                            i++;
+                            totalInvocations = item.INVOCATION;
+                        }
+                     }
+                     else{
                         totalInvocations = item.INVOCATION;
-                    }
+                     }
 
                     freqDetails[item.STATEMENT] = totalInvocations;
 
@@ -2581,7 +2563,7 @@ var loadPage = function (serverName, portid) {
 
     $("#showAnalysisCombinedDetails").popup({
         open: function (event, ui, ele)  {
-            var procedureName = $("#hidProcedureName").html().split(' ')[1];
+            var procedureName = $("#hidProcedureName").html();
             $(".procedureName").html(procedureName);
              //filter specific procedure calls from list of datas
             var count = 0;
@@ -2594,6 +2576,8 @@ var loadPage = function (serverName, portid) {
             var i=0;
             var containLongName = false;
             VoltDbUI.totalProcessingTime = [];
+            var sum = 0;
+
 
             if(VoltDbAnalysis.latencyDetailValue.length == 0){
                  $("#spanCombinedLegend").hide();
@@ -2603,33 +2587,27 @@ var loadPage = function (serverName, portid) {
             getTooltipValues(procedureName);
 
 
-//            procedureDetails["PROCEDURE_DETAIL"].sort(function(a, b) {
-//                return parseFloat(b.AVG_EXECUTION_TIME) - parseFloat(a.AVG_EXECUTION_TIME);
-//            });
-
             for (var key in VoltDbAnalysis.combinedDetail){
-
-                var newStatement = '';
                 var obj = VoltDbAnalysis.combinedDetail[key];
                 if(key == procedureName){
+
+                    //Calculate sumOfEachProcedure
+//                    var sumOfEachProcedure = VoltDbUI.calculateCombinedDetailValue(obj);
                     obj.forEach(function(subItems){
                         if(subItems.STATEMENT == statement){
-                            count = objectLength(obj, statement);
-
                             if(subItems.TYPE == "Single Partitioned"){
-                                combinedWeight += subItems.AVG * subItems.INVOCATIONS
+                                sum += subItems.AVG * subItems.INVOCATIONS
                             }
                             else{ //For Multi partitioned
-                                combinedWeight += subItems.AVG
+                                sum += subItems.AVG
                             }
                         }
                         else{
-                            i++;
                             if(subItems.TYPE == "Single Partitioned"){
-                                combinedWeight = subItems.AVG * subItems.INVOCATIONS
+                                sum = subItems.AVG * subItems.INVOCATIONS
                             }
                             else{
-                                combinedWeight = subItems.AVG * subItems.INVOCATIONS
+                                sum += subItems.AVG
                             }
 
                         }
@@ -2644,6 +2622,7 @@ var loadPage = function (serverName, portid) {
                             combinedWeight = (combinedWeight/count) * subItems.INVOCATIONS
                             combinedDetails[subItems.STATEMENT] = combinedWeight;
                             VoltDbUI.totalProcessingTime[subItems.STATEMENT]= combinedWeight;
+
                         }
                     })
 
@@ -2656,8 +2635,6 @@ var loadPage = function (serverName, portid) {
                         $("#spanCombinedLegend").show();
                         $("#totalProcTimeLegend").show();
                     }
-
-
                     var k=0;
                     for (var key in combinedDetails){
                         if(containLongName){
@@ -2700,7 +2677,6 @@ var loadPage = function (serverName, portid) {
             }else{
                 MonitorGraphUI.RefreshCombinedDetailGraph(finalDetails);
             }
-
         }
     });
 
@@ -2713,9 +2689,10 @@ var loadPage = function (serverName, portid) {
             var largest = VoltDbAnalysis.latencyDetailValue[0].MIN;
 
             if(item.PROCEDURE == procedureName ){
-                 if(VoltDbUI.executionDetails[item.STATEMENT] == undefined){
-                        VoltDbUI.executionDetails[item.STATEMENT]={};
-                    }
+                if(VoltDbUI.executionDetails[item.STATEMENT] == undefined){
+                    VoltDbUI.executionDetails[item.STATEMENT]={};
+                }
+
                 if (statement == item.STATEMENT){
                     if(item.MIN < smallest){
                         smallest = item.MIN;
@@ -2734,7 +2711,6 @@ var loadPage = function (serverName, portid) {
 
                     VoltDbUI.executionDetails[item.STATEMENT]["MIN"] = smallest;
                     VoltDbUI.executionDetails[item.STATEMENT]["MAX"] = largest;
-//                    VoltDbUI.executionDetails[item.STATEMENT]["INVOCATION"] = invocations;
                 }
                 else{
                     VoltDbUI.executionDetails[item.STATEMENT]["INVOCATION"] = item.INVOCATION;
@@ -2757,6 +2733,16 @@ var loadPage = function (serverName, portid) {
         }
       }
       return result;
+    }
+
+    function calculateStatementCount(arr, statement){
+        var count = 0;
+        var j = 0;
+        while(j < arr.length){
+            if (arr[j]['STATEMENT'] == statement) count += 1;
+                j += 1;
+        }
+        return count;
     }
 
     $("#btnThreshold").popup({

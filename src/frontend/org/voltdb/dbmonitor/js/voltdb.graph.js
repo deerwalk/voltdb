@@ -478,24 +478,6 @@
             }
         }
 
-        function updateAnalysisChartDetailProperties(chartId, chartObj){
-            if(chartId.width() < 315 && chartId.width() > 100){
-                chartObj.margin({"left": 36,"right": 40})
-                chartObj.x(function(d) {
-                    if(d.label.length > 5)
-                        return d.label.substring(0,5) + "."
-                    return  d.label
-                  })
-            } else {
-                chartObj.margin({"left":90});
-                chartObj.x(function(d) {
-                    if(d.label.length > 18)
-                        return d.label.substring(0,18) + ".."
-                    return  d.label
-                  })
-            }
-        }
-
         function updateLatencyDetailAnalysis(){
             ChartLatencyDetailAnalysis.update;
         }
@@ -666,7 +648,6 @@
                     .axisLabelDistance(10)
 
                 ChartCombinedDetailAnalysis.yAxis.axisLabelDistance(10)
-
                 d3.select('#visualizeCombinedDetails')
                     .datum(dataCombinedDetailAnalysis)
                     .transition().duration(350)
@@ -768,7 +749,7 @@
                 .transition().duration(500)
                 .call(ChartCombinedDetailAnalysis);
                d3.select('#visualizeCombinedDetails > g > g > g.nv-x.nv-axis.nvd3-svg > g > g').selectAll('text')
-                .each(function(d,i){ wordWrap(this, d, 110, -115, -6); });
+            .each(function(d,i){wordWrap(this, d, 110, -115, -8);});
             }
 
 //               d3.select('#visualizeCombinedDetails > g > g > g.nv-barsWrap.nvd3-svg > g > g > g > g.nv-group.nv-series-7').selectAll('text')
@@ -780,6 +761,7 @@
 //                .text(function (d, i) {
 //                    return VoltDbUI.totalProcessingTime[d.x].toFixed(3);
 //                });
+
             $("#visualizeCombinedDetails").find('.nvd3').attr("x",344);
             $("#visualizeCombinedDetails").find('.nvd3').attr("y",172);
         }
