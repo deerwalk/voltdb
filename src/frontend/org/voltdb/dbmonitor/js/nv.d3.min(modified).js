@@ -613,11 +613,23 @@
                 if (d === null) {
                     return '';
                 }
-
                 if (d.series[0].value == null) {
                     return '';
                 }
                 var currentTime = d.value
+
+                if((d.series[0].key == "Execution Time" || d.series[0].key == "Frequency" || d.series[0].key == "Combined") && chartContainer == null)
+                    currentTime = d.data.label.split(" ")[1]
+
+                if (d.series[0].key == "Avg Execution Time")
+                    {
+                        currentTime = d.data.label.split("(")[0]
+                        if(currentTime.indexOf("<") >= 0){
+                        currentTime = currentTime.replace("<", "&lt;");
+                        currentTime = currentTime.replace(">", "&gt;");
+                        }
+                    }
+
                 var isPartitionIdleGraph = false
                 var table = d3.select(document.createElement("table"));
                 if (headerEnabled) {
@@ -638,7 +650,7 @@
                     else if (d.series[0].key == "RAM") {
                         unit = 'GB';
                     }
-                    else if (d.series[0].key == "Latency") {
+                    else if (d.series[0].key == "Latency" && chartContainer != null) {
                         unit = 'ms';
                     }
                     else if (d.series[0].key == "Transactions") {
@@ -656,6 +668,14 @@
                         else
                             unit = "Transactions/s"
                     }
+                    else if(chartContainer == null){
+                        if(d.series[0].key == "Execution Time" || d.series[0].key == "Avg Execution Time")
+                            unit = " ms"
+                        else if(d.series[0].key == "Frequency")
+                            unit = ""
+                        else
+                            unit = " %"
+                    }
                     else {
                         unit = '%';
                         isPartitionIdleGraph = true;
@@ -671,12 +691,19 @@
                     .enter()
                     .append("tr")
                     .classed("highlight", function (p) { return p.highlight });
-
-                trowEnter.append("td")
-                    .classed("legend-color-guide", true)
-                    .append("div")
-                    .style("background-color", function (p) { return p.color });
-
+                if(chartContainer != null)
+                    trowEnter.append("td")
+                        .classed("legend-color-guide", true)
+                        .append("div")
+                        .style("background-color", function (p) { return p.color });
+                else{
+                    if((d.data.key == "Execution Time" || d.data.key == "Frequency" || d.data.key == "Combined") && VoltDbAnalysis.procedureValue[d.data.label].TYPE == "Multi Partitioned")
+                        trowEnter.append("td")
+                            .html("<span style='margin-bottom:0;margin-right:2px;width:14px;height:14px;background:"+ "#14416d" +"'></span><span>"+ d.series[0].key +"</span>" );
+                    else
+                        trowEnter.append("td")
+                            .html("<span style='margin-bottom:0;margin-right:2px;width:14px;height:14px;background:"+d.color+"'></span><span>"+ d.series[0].key +"</span>" );
+                }
                 //trowEnter.append("td")
                 //    .classed("key", true)
                 //    .html(function (p, i) { return keyFormatter(p.key, i) });
@@ -688,6 +715,9 @@
                     trowEnter.append("td")
                     .classed("value", true)
                     .html(function (p, i) { return valueFormatter(p.value, i) + unit });
+                } else if((d.series[0].key == "Avg Execution Time" || d.series[0].key == "Execution Time" || d.series[0].key == "Frequency" || d.series[0].key == "Combined") && chartContainer == null){
+                    trowEnter.append("td")
+                        .html(function (p, i) { return (d.series[0].key != "Frequency" ? (d.series[0].key == "Combined" ? p.value.toFixed(3) : p.value.toFixed(6)) : p.value)+ unit });
                 } else {
                     trowEnter.append("td")
                         .classed("value", true)
@@ -708,6 +738,106 @@
                             .style("border-top-color", opacityScale(opacity));
                     }
                 });
+                if((d.series[0].key == "Execution Time" || d.series[0].key == "Frequency" || d.series[0].key == "Combined") && chartContainer == null){
+                    var trowEnter0 = tbodyEnter.selectAll("tr")
+                    .append("tr");
+
+                    trowEnter0.append("td")
+                    .html("Type")
+                    trowEnter0.append("td")
+                        .html(VoltDbAnalysis.procedureValue[d.data.label].TYPE == undefined ? "Unknown" : VoltDbAnalysis.procedureValue[d.data.label].TYPE);
+
+                    var trowEnter1 = tbodyEnter
+                    .append("tr");
+
+                    trowEnter1.append("td")
+                    .html("AverageExecTime*Invocation")
+                    trowEnter1.append("td")
+                        .html((VoltDbAnalysis.procedureValue[d.data.label].AVG * VoltDbAnalysis.procedureValue[d.data.label].INVOCATIONS).toFixed(6) + " ms");
+
+                    if(d.series[0].key != "Frequency"){
+                        var trowEnter2 = tbodyEnter
+                        .append("tr");
+
+                        trowEnter2.append("td")
+                        .html("Frequency")
+
+                        trowEnter2.append("td")
+                            .html(VoltDbAnalysis.procedureValue[d.data.label].INVOCATIONS);
+                    }
+
+                    if(d.series[0].key != "Combined"){
+                        var trowEnter3 = tbodyEnter
+                        .append("tr");
+
+                        trowEnter3.append("td")
+                        .html("Combined")
+
+                        trowEnter3.append("td")
+                            .html(VoltDbAnalysis.procedureValue[d.data.label].COMBINED.toFixed(3) + " %");
+                    }
+
+                    if(d.series[0].key != "Execution Time"){
+                        var trowEnter4 = tbodyEnter
+                        .append("tr");
+
+                        trowEnter4.append("td")
+                        .html("Execution Time")
+
+                        trowEnter4.append("td")
+                            .html(VoltDbAnalysis.procedureValue[d.data.label].AVG.toFixed(6) + " ms");
+                    }
+
+                    if(VoltDbAnalysis.procedureValue[d.data.label].WARNING != ""){
+                        var trowEnter5 = tbodyEnter
+                        .append("tr");
+
+                        trowEnter5.append("td")
+                        .html("Warning")
+
+                        trowEnter5.append("td")
+                            .html(VoltDbAnalysis.procedureValue[d.data.label].WARNING);
+                    }
+                }
+
+                if((d.series[0].key == "Avg Execution Time") && chartContainer == null){
+                    var trowEnter1 = tbodyEnter.selectAll("tr")
+                    .append("tr");
+
+                    trowEnter1.append("td")
+                    .html("Min Execution Time")
+
+                    trowEnter1.append("td")
+                        .html(VoltDbAnalysis.latencyDetail[d.data.label].MIN + " ms");
+
+                    var trowEnter2 = tbodyEnter
+                        .append("tr");
+
+                        trowEnter2.append("td")
+                        .html("Max Execution Time")
+
+                        trowEnter2.append("td")
+                            .html(VoltDbAnalysis.latencyDetail[d.data.label].MAX + " ms");
+
+                    var trowEnter3 = tbodyEnter
+                        .append("tr");
+
+                        trowEnter3.append("td")
+                        .html("Invocations")
+
+                        trowEnter3.append("td")
+                            .html(VoltDbAnalysis.latencyDetail[d.data.label].INVOCATIONS);
+
+                    var trowEnter4 = tbodyEnter
+                        .append("tr");
+
+                        trowEnter4.append("td")
+                        .html("Partition ID")
+
+                        trowEnter4.append("td")
+                            .html(VoltDbAnalysis.latencyDetail[d.data.label].PARTITION_ID);
+
+                }
 
                 var html = table.node().outerHTML;
                 if (d.footer !== undefined)
@@ -924,7 +1054,7 @@
                     // generate data and set it into tooltip
                     // Bonus - If you override contentGenerator and return falsey you can use something like
                     //         React or Knockout to bind the data for your tooltip
-                    var newContent = contentGenerator(data, chartContainer.id);
+                    var newContent = contentGenerator(data, chartContainer == undefined ? null : chartContainer.id);
 
                     if (data.series[0].value == null) {
                         tooltipElem.className = "";
@@ -8818,7 +8948,6 @@
 
         var x0, y0; //used to store previous scales
         var renderWatch = nv.utils.renderWatch(dispatch, duration);
-
         function chart(selection) {
             renderWatch.reset();
             selection.each(function (data) {
@@ -8991,12 +9120,19 @@
                 }
 
                 barsEnter.append('text');
+                barsEnter.append("foreignObject");
 
                 if (showValues && !stacked) {
                     bars.select('text')
                         .attr('text-anchor', function (d, i) { return getY(d, i) < 0 ? 'end' : 'start' })
                         .attr('y', x.rangeBand() / (data.length * 2))
                         .attr('dy', '.32em')
+                        .attr('style', function(d, i){
+                            if((d.key == "Execution Time" || d.key == "Frequency" || d.key == "Combined")
+                            && VoltDbAnalysis.procedureValue[d.label].COMBINED > VoltDbUI.getFromLocalStorage("usagePercentage")
+                            && VoltDbAnalysis.procedureValue[d.label].TYPE == "Multi Partitioned")
+                                return "fill:#C12026"
+                        })
                         .text(function (d, i) {
                             var t = valueFormat(getY(d, i))
                                 , yerr = getYerr(d, i);
@@ -9006,9 +9142,34 @@
                                 return t + '±' + valueFormat(Math.abs(yerr));
                             return t + '+' + valueFormat(Math.abs(yerr[1])) + '-' + valueFormat(Math.abs(yerr[0]));
                         });
+                    bars.select('foreignObject')
+                        .attr("style", 'color:#C12026;font-size:25px;font-weight:600;cursor:default')
+                        .attr("height", "22px")
+                        .attr("width", "22px")
+                        .attr('y', (x.rangeBand() / (data.length * 2)) -15)
+                        .html(function (d, i){
+                            if((d.key == "Execution Time" || d.key == "Frequency" || d.key == "Combined")
+                            && VoltDbAnalysis.procedureValue[d.label].COMBINED > VoltDbUI.getFromLocalStorage("usagePercentage")
+                            && VoltDbAnalysis.procedureValue[d.label].TYPE == "Multi Partitioned")
+                                return "&#9888;";
+                            else
+                                return "";
+                        })
                     bars.watchTransition(renderWatch, 'multibarhorizontal: bars')
                         .select('text')
                         .attr('x', function (d, i) { return getY(d, i) < 0 ? -4 : y(getY(d, i)) - y(0) + 4 })
+
+                    bars.watchTransition(renderWatch, 'multibarhorizontal: bars')
+                        .select('foreignObject')
+                        .attr('x', function (d, i) {
+                            var charLength = d.value.toString().length - 1
+                            var xLength = getY(d, i) < 0 ? -4 : y(getY(d, i)) - y(0) + 16;
+                            if(d.key == "Combined")
+                                xLength += VoltDbAnalysis.proceduresCount > 1 ? (2 * charLength) : 35 + (2.5 * charLength);//xLength - 70;
+                            else
+                                xLength += (6.5 * charLength);
+                            return xLength;
+                        })
                 } else {
                     bars.selectAll('text').text('');
                 }

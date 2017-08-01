@@ -683,7 +683,7 @@ var loadPage = function (serverName, portid) {
     $("#showHideDrBlock").addClass('expanded');
     $("#showHideCLPBlock").removeClass('collapsed');
     $("#showHideCLPBlock").addClass('expanded');
-
+    loadAnalysisPage();
     var userName = VoltDbUI.getCookie('username') != undefined ? VoltDbUI.getCookie('username') : "";
     var password = VoltDbUI.getCookie('password') != undefined ? VoltDbUI.getCookie('password') : "";
 
@@ -750,6 +750,9 @@ var loadPage = function (serverName, portid) {
                 }
             } else if (curTab == NavigationTabs.DR){
                 //Do nothing
+            }  else if (curTab == NavigationTabs.Analysis) {
+                $("#overlay").show();
+                setTimeout(function () { $("#navAnalysis > a").trigger("click"); }, 100);
             } else{
                 setTimeout(function () { $("#navDbmonitor > a").trigger("click"); }, 100);
             }
@@ -2384,6 +2387,102 @@ var loadPage = function (serverName, portid) {
         }
     });
 
+    $("#showAnalysisDetails").popup({
+        open: function (event, ui, ele)  {
+            var procedureName = $("#hidProcedureName").html().split(' ')[1];
+            $("#procedureName").html(procedureName);
+             //filter specific procedure calls from list of datas
+            var procDetails = [];
+            VoltDbAnalysis.latencyDetailValue.forEach (function(item){
+                //order items w.r.to latency
+                var latValue;
+                $("#generatedDate").html(VoltDbAnalysis.formatDateTime(item.TIMESTAMP));
+                if(item.PROCEDURE == procedureName ){
+                    procDetails.push({"label": item.label , "value": item.value})
+                }
+            });
+            MonitorGraphUI.RefreshLatencyDetailGraph(procDetails);
+        }
+    });
+
+    $("#showAnalysisFreqDetails").popup({
+        open: function (event, ui, ele)  {
+
+            var procedureName = $("#hidProcedureName").html().split(' ')[1];
+            $(".procedureName").html(procedureName);
+             //filter specific procedure calls from list of datas
+            var freqDetails = [];
+            VoltDbAnalysis.latencyDetailValue.forEach (function(item){
+                //order items w.r.to latency
+                var latValue;
+                $(".generatedDate").html(VoltDbAnalysis.formatDateTime(item.TIMESTAMP));
+                if(item.PROCEDURE == procedureName ){
+                    freqDetails.push({"label": item.label , "value": item.INVOCATION})
+                }
+            });
+            MonitorGraphUI.RefreshFrequencyDetailGraph(freqDetails);
+        }
+    });
+
+    $("#showAnalysisCombinedDetails").popup({
+        open: function (event, ui, ele)  {
+            var procedureName = $("#hidProcedureName").html().split(' ')[1];
+            $(".procedureName").html(procedureName);
+             //filter specific procedure calls from list of datas
+            var combinedDetails = [];
+            var combinedWeight = 0;
+            var sumOfEachProcedure = 0;
+
+            for (var key in VoltDbAnalysis.combinedDetail){
+                var obj = VoltDbAnalysis.combinedDetail[key];
+                if(key.split('(')[0] == procedureName){
+                    //Calculate sumOfEachProcedure
+                    var sumOfEachProcedure = VoltDbUI.calculateCombinedDetailValue(obj);
+                    obj.forEach(function(subItems){
+                        combinedWeight = (((subItems.AVG/1000000) * subItems.INVOCATIONS)/sumOfEachProcedure) * 100;
+                        combinedDetails.push({"label": subItems.STATEMENT + '(' + subItems.PARTITION_ID + ')' , "value": combinedWeight})
+                        $(".generatedDate").html(VoltDbAnalysis.formatDateTime(subItems.TIMESTAMP));
+                    })
+
+                }
+            }
+
+            MonitorGraphUI.RefreshCombinedDetailGraph(combinedDetails);
+        }
+    });
+
+
+
+    $("#btnThreshold").popup({
+        open: function (event, ui, ele) {
+              if(VoltDbUI.getFromLocalStorage("usagePercentage") == undefined){
+                    saveInLocalStorage("usagePercentage", 20)
+                }
+
+            $("#partitionThreshold").val(VoltDbUI.getFromLocalStorage("usagePercentage"))
+            $("#replicatedThreshold").val(VoltDbUI.getFromLocalStorage("frequencyForProc"))
+        },
+       afterOpen: function () {
+            var popup = $(this)[0];
+            $("#btnSaveThreshold").unbind("click");
+            $("#btnSaveThreshold").on("click", function () {
+                saveInLocalStorage("usagePercentage", $("#partitionThreshold").val())
+                saveInLocalStorage("frequencyForProc", $("#replicatedThreshold").val())
+                //saveInLocalStorage("execTimeForProc", $("#execTime").val())
+                $("#btnAnalyzeNow").trigger("click");
+                //Close the popup
+                popup.close();
+            });
+
+            $("#btnCancelThreshold").unbind("click");
+            $("#btnCancelThreshold").on("click", function () {
+                popup.close();
+            });
+        }
+
+    });
+
+
     VoltDbUI.refreshConnectionTime('20000');
 };
 
@@ -2401,7 +2500,6 @@ var configureUserPreferences = function () {
     userPreference["partitionIdleTime"] = {};
     userPreference["storedProcedures "] = {};
     userPreference["databaseTables "] = {};
-
     $('#showMyPreference').popup({
         open: function (event, ui, ele) {
             userPreference = getUserPreferences();
@@ -2487,7 +2585,8 @@ var NavigationTabs = {
     Schema: 3,
     SQLQuery: 4,
     DR: 5,
-    Importer: 6
+    Importer: 6,
+    Analysis: 7
 };
 
 var getCurrentTab = function () {
@@ -2511,6 +2610,10 @@ var getCurrentTab = function () {
     } else if (activeLinkId ==  "navImporter"){
         $(".nvtooltip").show();
         return NavigationTabs.Importer;
+    } else if(activeLinkId == "navAnalysis"){
+        VoltDbAnalysis.refreshChart();
+        $(".nvtooltip").show();
+        return NavigationTabs.Analysis;
     }
     $(".nvtooltip").show();
     return NavigationTabs.DBMonitor;
@@ -2799,6 +2902,14 @@ var adjustImporterGraphSpacing = function() {
                 );
             }
         };
+
+        this.calculateCombinedDetailValue=function(profileData){
+            var totalValue = 0;
+            for(var j = 0; j < profileData.length; j++){
+                totalValue += (profileData[j].AVG/1000000) * profileData[j].INVOCATIONS;
+            }
+            return totalValue;
+        }
 
         this.loadSchemaTab = function () {
             this.isSchemaTabLoading = true;
