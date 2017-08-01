@@ -112,6 +112,9 @@ function QueryUI(queryTab) {
             // semicolon boundaries -- semicolons might appear in quoted text.
             src = disguiseQuotedStrings(src, stringBank);
 
+            //Replace extra spaces from query statement.
+            src = src.replace(/\s+/g, ' ');
+
             splitStmts = src.split(';');
 
             statementBank = [];
@@ -233,9 +236,9 @@ function QueryUI(queryTab) {
         if (source != null){
             source = source.replace(/^\s+|\s+$/g,'');
             if (source == '')
-                source = $('#querybox-' + query_id)[0].innerText.replace(/\s+/g, ' ');
+                source = $('#querybox-' + query_id)[0].innerText;
         } else
-            source = $('#querybox-' + query_id)[0].innerText.replace(/\s+/g, ' ');
+            source = $('#querybox-' + query_id)[0].innerText;
 
         source = source.replace(/^\s+|\s+$/g,'');
         source = source.replace("\\", "\\\\");
