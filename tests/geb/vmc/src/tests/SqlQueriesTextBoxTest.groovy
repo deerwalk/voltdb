@@ -170,17 +170,17 @@ class SqlQueriesTextBoxTest extends TestBase {
         assert insertQueryWithSpaces.contains(page.queryResultBoxTd.jquery.html());
         report "nello";
     }
-//
-//    def cleanup() {
-//        when:
-//        String dropQuery = page.getDeleteQueryForSqlQueriesTextBoxTest();
-//        and:
-//        page.setQueryText(dropQuery);
-//        then:
-//        page.runQuery();
-//        then:
-//        !page.queryErrHtml.click();
-//        then:
-//        page.refreshquery.click();
-//    }
+
+    def cleanup() {
+        when:
+        String dropQuery = page.getDeleteQueryForSqlQueriesTextBoxTest();
+        and:
+        page.setQueryText(dropQuery);
+        then:
+        page.runQuery();
+        then:
+        !page.queryErrHtml.click();
+        then:
+        page.refreshquery.click();
+    }
 }
