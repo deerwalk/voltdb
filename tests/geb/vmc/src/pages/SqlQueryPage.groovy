@@ -104,11 +104,12 @@ class SqlQueryPage extends VoltDBManagementCenterPage {
         saveTabPopupOk          { $("#btnSaveQueryOk") }
         saveTabPopupTextField   { $("#txtQueryName") }
 
-        deleteTabOk             { $("#btnCloseTabOk")}
-        deleteTabCancel         { $("#btnCloseTabCancel")}
+        deleteTabOk             { $("#btnCloseTabOk") }
+        deleteTabCancel         { $("#btnCloseTabCancel") }
 
         // SqlQueriesTextBox
-        // #table_r0_html_0 > thead > tr > th
+        queryResultBox          { $("#table_r0_html_0 > tbody") }
+        queryResultBoxTd        { queryResultBox.find("td") }
     }
     static at = {
         sqlQueryTab.displayed
@@ -897,6 +898,19 @@ class SqlQueryPage extends VoltDBManagementCenterPage {
         int count = 0;
         while((line = br.readLine()) != null && count <= 6) {
             if (count == 6)
+                query = line;
+            count++;
+        }
+        return query;
+    }
+
+    def String getInsertQueryWithSpacesForSqlQueriesTextBoxTest() {
+        BufferedReader br = new BufferedReader(new FileReader("src/resources/sqlQueriesTextBox.txt"));
+        String line = null;
+        String query = "";
+        int count = 0;
+        while((line = br.readLine()) != null && count <= 7) {
+            if (count == 7)
                 query = line;
             count++;
         }

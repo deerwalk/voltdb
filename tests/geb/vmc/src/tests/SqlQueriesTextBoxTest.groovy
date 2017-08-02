@@ -117,10 +117,9 @@ class SqlQueriesTextBoxTest extends TestBase {
         page.refreshquery.click();
 
         when:
-        String insertQueryWithSpecialCharacters = page.getUpdateQueryWithSpecialCharactersForSqlQueriesTextBoxTest();
-        println(insertQueryWithSpecialCharacters);
+        String updateQueryWithSpecialCharacters = page.getUpdateQueryWithSpecialCharactersForSqlQueriesTextBoxTest();
         and:
-        page.setQueryText(insertQueryWithSpecialCharacters);
+        page.setQueryText(updateQueryWithSpecialCharacters);
         then:
         page.runQuery();
         then:
@@ -141,16 +140,47 @@ class SqlQueriesTextBoxTest extends TestBase {
         report "nello";
     }
 
-    def cleanup() {
+    def checkInsertQueryWithSpaces() {
         when:
-        String dropQuery = page.getDeleteQueryForSqlQueriesTextBoxTest();
+        String insertQueryWithSpaces = page.getInsertQueryWithSpacesForSqlQueriesTextBoxTest();
         and:
-        page.setQueryText(dropQuery);
+//        page.queryInput.jquery.html("<div style='white-space:pre'>INSERT INTO my_test_table VALUES 'asdf     asf';</div>");
+        page.queryInput.jquery.html(insertQueryWithSpaces);
         then:
         page.runQuery();
         then:
-        !page.queryErrHtml.click();
+        !page.queryErrHtml.isDisplayed();
         then:
         page.refreshquery.click();
+
+        when:
+        String selectQuery = page.getSelectQueryForSqlQueriesTextBoxTest();
+        and:
+        page.setQueryText(selectQuery);
+        then:
+        page.runQuery();
+        then:
+        !page.queryErrHtml.isDisplayed();
+        then:
+        page.refreshquery.click();
+
+        when:
+        page.queryResultBoxTd.isDisplayed();
+        then:
+        assert insertQueryWithSpaces.contains(page.queryResultBoxTd.jquery.html());
+        report "nello";
     }
+//
+//    def cleanup() {
+//        when:
+//        String dropQuery = page.getDeleteQueryForSqlQueriesTextBoxTest();
+//        and:
+//        page.setQueryText(dropQuery);
+//        then:
+//        page.runQuery();
+//        then:
+//        !page.queryErrHtml.click();
+//        then:
+//        page.refreshquery.click();
+//    }
 }
