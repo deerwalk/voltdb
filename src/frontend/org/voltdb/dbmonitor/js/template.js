@@ -236,7 +236,7 @@ $(document).ready(function () {
         var content = $("#d").find('.dataBlockContent pre').html()
         var dl = document.createElement('a');
         dl.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(content));
-        dl.setAttribute('download', 'ddl.txt');
+        dl.setAttribute('download', 'ddl.sql');
         dl.click();
     })
 
