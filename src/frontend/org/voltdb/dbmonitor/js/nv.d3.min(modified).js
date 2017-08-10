@@ -698,16 +698,20 @@
                     if((d.data.key == "Execution Time" || d.data.key == "Frequency" || d.data.key == "Total Processing Time") && VoltDbAnalysis.procedureValue[d.data.label].TYPE == "Multi Partitioned"){
                         trowEnter.append("td")
                             .html("<span style='margin-bottom:0;margin-right:2px;width:14px;height:14px;background:"+ "#14416d" +"'></span><span>"+ d.series[0].key +"</span>" );
-                    } else {
+                    }
+                    else if (d.series[0].key == "Total Processing Time SP" || d.series[0].key == "Frequency SP" || d.series[0].key == "Execution Time SP"){
+                        var keyName = d.series[0].key;
+                        keyName = (keyName == "Frequency Detail" ? "Frequency":(keyName == "Processing Time Detail" ? "Total Processing Time" : keyName));
+                        trowEnter.append("td")
+                            .html("<span style='margin-bottom:0;margin-right:2px;width:14px;height:14px;background:"+d.color+"'></span><span>Percentage</span>" );
+                    }
+                    else {
                         var keyName = d.series[0].key;
                         keyName = (keyName == "Frequency Detail" ? "Frequency":(keyName == "Processing Time Detail" ? "Total Processing Time" : keyName));
                         trowEnter.append("td")
                             .html("<span style='margin-bottom:0;margin-right:2px;width:14px;height:14px;background:"+d.color+"'></span><span>"+ keyName +"</span>" );
                     }
                 }
-                //trowEnter.append("td")
-                //    .classed("key", true)
-                //    .html(function (p, i) { return keyFormatter(p.key, i) });
 
                 if(isPartitionIdleGraph){
                     trowEnter.append("td")
@@ -719,7 +723,12 @@
                 } else if((d.series[0].key == "Avg Execution Time" || d.series[0].key == "Execution Time" || d.series[0].key == "Frequency" || d.series[0].key == "Total Processing Time" || d.series[0].key == "Frequency Detail" || d.series[0].key == "Processing Time Detail") && chartContainer == null){
                     trowEnter.append("td")
                         .html(function (p, i) { return (d.series[0].key != "Frequency"  && d.series[0].key != "Frequency Detail" ? p.value.toFixed(3) : p.value)+ unit });
-                } else {
+                }
+                else if (d.series[0].key == "Total Processing Time SP" || d.series[0].key == "Frequency SP" || d.series[0].key == "Execution Time SP"){
+                    trowEnter.append("td")
+                        .html(function (p, i) { return ((d.data.y / d.data.z) * 100).toFixed(3) + unit });
+                }
+                else {
                     trowEnter.append("td")
                         .classed("value", true)
                         .html(function (p, i) { return valueFormatter(p.value, i) + unit });
@@ -802,9 +811,6 @@
                     .html("Min Execution Time")
 
                     var statement = d.data.label;
-                    if(statement.indexOf(')') !== -1){
-                        statement = d.data.label.split(') ')[1]
-                    }
 
                     trowEnter1.append("td")
                         .html(VoltDbUI.executionDetails[statement].MIN/1000000+ " ms");
@@ -828,6 +834,63 @@
 
                         trowEnter3.append("td")
                             .html(VoltDbUI.executionDetails[statement].INVOCATION);
+                }
+                else if(d.series[0].key == "Total Processing Time SP") {
+                    var trowEnter1 = tbodyEnter.selectAll("tr")
+                    .append("tr");
+                    trowEnter1.append("td")
+                    .html("Partition ID")
+                    var partitionId = d.data.PARTITION_ID;
+
+                    trowEnter1.append("td")
+                        .html(partitionId);
+
+                    var trowEnter2 = tbodyEnter
+                        .append("tr");
+
+                        trowEnter2.append("td")
+                        .html("Total Processing Time")
+
+                        trowEnter2.append("td")
+                            .html(d.series[0].value.toFixed(3) +"s");
+                }
+                 else if(d.series[0].key == "Frequency SP") {
+                    var trowEnter1 = tbodyEnter.selectAll("tr")
+                    .append("tr");
+                    trowEnter1.append("td")
+                    .html("Partition ID")
+                    var partitionId = d.data.PARTITION_ID;
+
+                    trowEnter1.append("td")
+                        .html(partitionId);
+
+                    var trowEnter2 = tbodyEnter
+                        .append("tr");
+
+                        trowEnter2.append("td")
+                        .html("Frequency")
+
+                        trowEnter2.append("td")
+                            .html(d.series[0].value.toFixed(3) +"");
+                }
+                else if(d.series[0].key == "Execution Time SP") {
+                    var trowEnter1 = tbodyEnter.selectAll("tr")
+                    .append("tr");
+                    trowEnter1.append("td")
+                    .html("Partition ID")
+                    var partitionId = d.data.PARTITION_ID;
+
+                    trowEnter1.append("td")
+                        .html(partitionId);
+
+                    var trowEnter2 = tbodyEnter
+                        .append("tr");
+
+                        trowEnter2.append("td")
+                        .html("Avg Execution Time")
+
+                        trowEnter2.append("td")
+                            .html(d.series[0].value.toFixed(3) +"ms");
                 }
 
                 var html = table.node().outerHTML;
@@ -9021,14 +9084,15 @@
                     .style('stroke-opacity', 1e-6)
                     .style('fill-opacity', 1e-6)
                     .remove();
+
                 groups
                     .attr('class', function (d, i) { return 'nv-group nv-series-' + i })
                     .classed('hover', function (d) { return d.hover })
-                    .style('fill', function (d, i) { return color(d, i) })
-                    .style('stroke', function (d, i) { return color(d, i) });
+                    .style('fill', function (d, i) { return "rgb(27, 135, 200)" })
+                    .style('stroke', function (d, i) { return "rgb(27, 135, 200)"  })
                 groups.watchTransition(renderWatch, 'multibarhorizontal: groups')
                     .style('stroke-opacity', 1)
-                    .style('fill-opacity', .75);
+                    .style('fill-opacity', .75)
 
                 var bars = groups.selectAll('g.nv-bar')
                     .data(function (d) { return d.values });
@@ -9125,12 +9189,22 @@
                         })
                         .text(function (d, i) {
                             var unit = " ";
-                            if(d.key == "Execution Time" || d.key == "Avg Execution Time")
+                            if(d.key == "Execution Time" || d.key == "Avg Execution Time"){
                                 unit = "ms";
-                            else if (d.key == "Total Processing Time" || d.key == "Processing Time Detail")
+                                var t = getY(d, i).toFixed(3);
+                            }
+                            else if (d.key == "Total Processing Time" || d.key == "Processing Time Detail"){
                                 unit = "s";
-                            var t = valueFormat(getY(d, i))
-                                , yerr = getYerr(d, i);
+                                var t = getY(d, i).toFixed(3);
+                            }
+                            else{
+                                var t = getY(d, i)
+                            }
+
+                            var yerr = getYerr(d, i);
+
+//                            var t = valueFormat(getY(d, i))
+//                                , yerr = getYerr(d, i);
                             if (yerr === undefined)
                                 return t + unit;
                             if (!yerr.length)
@@ -9198,7 +9272,7 @@
                         })
                         .select('rect')
                         .attr('width', function (d, i) {
-                            return Math.abs(y(getY(d, i) + d.y0) - y(d.y0))
+                            return Math.abs(y(getY(d, i) + d.y0) - y(d.y0)) - 0.6
                         })
                         .attr('height', x.rangeBand());
                 else
@@ -9224,7 +9298,47 @@
                 y0 = y.copy();
 
             });
+             if(stacked){
+               if(VoltDbUI.isTotalProcessing){
 
+                     d3.select('#visualizeCombinedDetails > g > g > g.nv-barsWrap.nvd3-svg > g > g > g > g.nv-group.nv-series-'+ (VoltDbUI.partitionLength - 1)).selectAll('text')
+                   .data(function (d) { return d.values })
+                    .attr('dy', '.32em')
+                    .attr('text-anchor', function (d, i) { return getY(d, i) < 0 ? 'end' : 'start' })
+                    .attr('y', (x.rangeBand() - 20))
+                    .attr('x', function (d, i) { return getY(d, i) < 0 ? -4 : y(getY(d, i)) - y(0) })
+                    .text(function (d, i) {
+                        return d.z.toFixed(3) + 's';
+                    });
+                   }
+
+
+                if(VoltDbUI.isLatency){
+                    d3.select('#visualizeLatencyDetail > g > g > g.nv-barsWrap.nvd3-svg > g > g > g > g.nv-group.nv-series-'+ (VoltDbUI.partitionLength - 1)).selectAll('text')
+                   .data(function (d) {
+                        return d.values})
+                    .attr('dy', '.32em')
+                    .attr('text-anchor', function (d, i) { return getY(d, i) < 0 ? 'end' : 'start' })
+                    .attr('y', (x.rangeBand() - 20))
+                    .attr('x', function (d, i) { return getY(d, i) < 0 ? -4 : y(getY(d, i)) - y(0) })
+                    .text(function (d, i) {
+                        return d.z.toFixed(3) + 'ms';
+                    });
+                }
+
+                if(VoltDbUI.isFrequency){
+                    d3.select('#visualizeFrequencyDetails > g > g > g.nv-barsWrap.nvd3-svg > g > g > g > g.nv-group.nv-series-'+ (VoltDbUI.partitionLength - 1)).selectAll('text')
+                   .data(function (d) {
+                        return d.values})
+                    .attr('dy', '.32em')
+                    .attr('text-anchor', function (d, i) { return getY(d, i) < 0 ? 'end' : 'start' })
+                    .attr('y', (x.rangeBand() - 20))
+                    .attr('x', function (d, i) { return getY(d, i) < 0 ? -4 : y(getY(d, i)) - y(0) })
+                    .text(function (d, i) {
+                        return d.z + '';
+                    });
+                }
+            }
             renderWatch.renderEnd('multibarHorizontal immediate');
             return chart;
         }
@@ -9642,6 +9756,7 @@
             },
             tooltipContent: {
                 get: function () { return tooltip.contentGenerator(); }, set: function (_) {
+
                     // deprecated after 1.7.1
                     nv.deprecated('tooltipContent', 'use chart.tooltip.contentGenerator() instead');
                     tooltip.contentGenerator(_);
@@ -10687,7 +10802,7 @@
             , id = Math.floor(Math.random() * 10000) //Create semi-unique ID in case user doesn't select one
             , container = null
             , color = nv.utils.defaultColor()
-            , valueFormat = d3.format(',.2f')
+            , valueFormat = d3.format(',.3f')
             , showLabels = true
             , labelsOutside = false
             , labelType = "key"
