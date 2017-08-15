@@ -1421,6 +1421,7 @@
         <div class="overlay-btns"><a href="#" class="btn" id="savePreference">Save</a></div>
     </div>
     <div style="display:none" id="hidProcedureName"></div>
+    <div style="display:none" id="hidTableType"></div>
     <div><a href="#analysisDetails" class="btn" id="showAnalysisDetails" style="display:none;"></a> </div>
     <div id="analysisDetails" style="display:none">
         <div class="overlay-title procDetailTitle ">
@@ -1475,6 +1476,26 @@
             </div>
         </div>
     </div>
+
+     <div><a href="#analysisData" class="btn" id="showAnalysisData" style="display:none;"></a> </div>
+    <div id="analysisData" style="display:none">
+        <div class="overlay-title procDetailTitle ">
+           Detail view of Data for <span id="hidTableName"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="overlay-content overlay-content-proc-detail">
+            <div class="legendAnalysis" id="dataLegend"><span class="circle"></span>
+            <span id="spanDataLegend">Data Volume By Table</span></div>
+             <div class="clear"></div>
+
+            <div class="proDetailsHeightAdjstment">
+                <div id="divVisualizeDataDetail">
+                     <svg class="proDetailSvgHeight" id="visualizeDataDetail"></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="thresholdPopup" style="display:none">
         <div class="overlay-title ">
            <span>Settings</span>

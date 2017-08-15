@@ -695,9 +695,14 @@
                         .append("div")
                         .style("background-color", function (p) { return p.color });
                 else{
+                    var label = "";
+                    if(d.data.label == undefined)
+                        label = d.data.x
+                    else
+                        label = d.data.label
                     if(((d.data.key == "Execution Time" || d.data.key == "Frequency" || d.data.key == "Total Processing Time")
                     && VoltDbAnalysis.procedureValue[d.data.label].TYPE == "Multi Partitioned")
-                    || (d.data.key == "Tuple Count" && VoltDbAnalysis.tablePropertyValue[d.data.label].PARTITION_TYPE != "Partitioned")){
+                    || (d.data.key == "Tuple Count" && VoltDbAnalysis.tablePropertyValue[label].PARTITION_TYPE != "Partitioned")){
                         trowEnter.append("td")
                             .html("<span style='margin-bottom:-3px;margin-right:2px;width:14px;height:14px;background:"+ "#14416d" +"'></span><span>"+ d.series[0].key +"</span>" );
                     } else {
@@ -829,13 +834,17 @@
                         trowEnter3.append("td")
                         .html("Invocations")
 
-
-
                         trowEnter3.append("td")
                             .html(VoltDbUI.executionDetails[statement].INVOCATION);
                 }
 
                 if(d.series[0].key == "Tuple Count"){
+
+                    var label = "";
+                    if(d.data.label == undefined)
+                        label = d.data.x
+                    else
+                        label = d.data.label
                     var trowEnter2 = tbodyEnter
                     .append("tr");
 
@@ -843,7 +852,27 @@
                     .html("Table Type")
 
                     trowEnter2.append("td")
-                    .html(VoltDbAnalysis.tablePropertyValue[d.data.label].PARTITION_TYPE);
+                    .html(VoltDbAnalysis.tablePropertyValue[label].PARTITION_TYPE);
+
+                    if(d.data.label == undefined){
+                        var trowEnter2 = tbodyEnter
+                        .append("tr");
+
+                         trowEnter2.append("td")
+                        .html("Tuple Percent")
+
+                        trowEnter2.append("td")
+                        .html(((d.data.y/d.data.z) * 100).toFixed(3) + "%");
+
+                        var trowEnter2 = tbodyEnter
+                        .append("tr");
+
+                         trowEnter2.append("td")
+                        .html("Partition ID")
+
+                        trowEnter2.append("td")
+                        .html(d.data.PARTITION_ID);
+                    }
                 }
 
                 var html = table.node().outerHTML;
@@ -9040,8 +9069,8 @@
                 groups
                     .attr('class', function (d, i) { return 'nv-group nv-series-' + i })
                     .classed('hover', function (d) { return d.hover })
-                    .style('fill', function (d, i) { return color(d, i) })
-                    .style('stroke', function (d, i) { return color(d, i) });
+                    .style('fill', function (d, i) { return "rgb(27, 135, 200)" })
+                    .style('stroke', function (d, i) { return "rgb(27, 135, 200)" });
                 groups.watchTransition(renderWatch, 'multibarhorizontal: groups')
                     .style('stroke-opacity', 1)
                     .style('fill-opacity', .75);
@@ -9214,7 +9243,7 @@
                         })
                         .select('rect')
                         .attr('width', function (d, i) {
-                            return Math.abs(y(getY(d, i) + d.y0) - y(d.y0))
+                            return Math.abs(y(getY(d, i) + d.y0) - y(d.y0) - 0.5)
                         })
                         .attr('height', x.rangeBand());
                 else
@@ -9238,6 +9267,21 @@
                 //store old scales for use in transitions on update
                 x0 = x.copy();
                 y0 = y.copy();
+
+                 if(stacked){
+//                   if(VoltDbUI.isTotalProcessing){
+                         d3.select('#visualizeDataDetail > g > g > g.nv-barsWrap.nvd3-svg > g > g > g > g.nv-group.nv-series-7').selectAll('text')
+                       .data(function (d) { return d.values })
+                        .attr('dy', '.32em')
+                        .attr('text-anchor', function (d, i) { return getY(d, i) < 0 ? 'end' : 'start' })
+                        .attr('y', (x.rangeBand() - 20))
+                        .attr('x', function (d, i) { return getY(d, i) < 0 ? -4 : y(getY(d, i)) - y(0) })
+                        .text(function (d, i) {
+                            return d.z.toFixed(3);
+                        });
+//                       }
+                 }
+
 
             });
 

@@ -269,10 +269,13 @@ function loadAnalysisPage(){
                 }
             }
             MonitorGraphUI.initializeAnalysisTableGraph();
-            var tableData = []
+            MonitorGraphUI.initializeAnalysisTableDetailGraph();
+            var tableData = [];
             var isReplicated = false;
             var isPartitioned = false;
             var timeStamp;
+            var data = {};
+            VoltDbAnalysis.tableData = tableDetails["TABLES"];
             $.each(tableDetails["TABLES"], function(key, value){
                 var tableName = key;
                 var tupleCount = value["TUPLE_COUNT"];
@@ -288,7 +291,7 @@ function loadAnalysisPage(){
                     "PARTITION_TYPE": value["PARTITION_TYPE"]
                 }
 
-                tableData.push({"label": tableName, "value": tupleCount})
+                tableData.push({"label": tableName, "value": tupleCount, "type": value["PARTITION_TYPE"]})
             });
 
             formatAnalysisTableLegend(isPartitioned, isReplicated)
@@ -297,7 +300,7 @@ function loadAnalysisPage(){
             setTimeout(function(){
                 tableData.sort(function(a,b) {return ((b.value) > (a.value)) ? 1 : (((a.value) > (b.value)) ? -1 : 0);});
                 MonitorGraphUI.RefreshAnalysisTableGraph(tableData);
-            }, 500)
+            }, 100)
 
         })
     }
@@ -317,6 +320,7 @@ function loadAnalysisPage(){
         this.partitionStatus = "SP"
         this.latencyDetailTest = {};
         this.currentTab = "Average Execution Time";
+        this.tableData  =[];
         this.formatDateTime = function(timestamp) {
             var dateTime = new Date(timestamp);
             //get date

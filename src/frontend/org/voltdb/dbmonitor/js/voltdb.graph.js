@@ -1,4 +1,3 @@
-
 (function (window) {
 
     var IMonitorGraphUI = (function () {
@@ -61,6 +60,7 @@
         var ChartFrequencyDetailAnalysis = nv.models.multiBarHorizontalChart().showLegend(false).stacked(false).showControls(false);
         var ChartCombinedDetailAnalysis = nv.models.multiBarHorizontalChart().showLegend(false).stacked(false).showControls(false);
         var ChartDataTableAnalysis = nv.models.multiBarHorizontalChart().showLegend(false).stacked(false).showControls(false);
+        var ChartDataTableDetailAnalysis = nv.models.multiBarHorizontalChart().showLegend(false).stacked(true).showControls(false);
 
         var drChartList = {}
         var ChartCommandlog = nv.models.lineChart();
@@ -402,6 +402,12 @@
             color: "rgb(27, 135, 200)"
         }];
 
+         var dataTableDetailsAnalysis = [{
+            key: "Tuple Count",
+            values: [],
+            color: "rgb(27, 135, 200)"
+        }];
+
         var barHeight = 0;
 
         function getBarHeightAndSpacing(dataSet, chart){
@@ -440,7 +446,17 @@
         }
 
         function updateTableAnalysis(){
-            ChartLatencyAnalysis.update();
+            ChartDataTableAnalysis.update();
+            d3.selectAll("#chartDataTableAnalysis .nv-bar").on('click',
+                function(data){
+//                    if(data.type == "Partitioned"){
+                        $("#hidTableName").html(data.label);
+                        $("#hidTableType").html(data.type);
+                        $('#showAnalysisData').trigger("click");
+//                    }
+
+                }
+            );
         }
 
         function updateLatencyAnalysis(){
@@ -511,6 +527,32 @@
                     .datum(dataTableAnalysis)
                     .transition().duration(350)
                     .call(ChartDataTableAnalysis);
+                nv.utils.windowResize(updateTableAnalysis);
+                return ChartDataTableAnalysis;
+            });
+        }
+
+        this.initializeAnalysisTableDetailGraph = function(){
+            nv.addGraph(function() {
+//                ChartDataTableDetailAnalysis
+//                  .y(function(d) {
+//                   return d.y
+//
+//                   }).height(barHeight)
+//                  .x(function(d) { return  d.x })
+//                  .showValues(true);
+
+                ChartDataTableDetailAnalysis.margin({"left": 115,"right": 40})
+                ChartDataTableDetailAnalysis.valueFormat(d3.format(',.3f'));
+                ChartDataTableDetailAnalysis.yAxis
+                    .tickFormat(d3.format(',.2f'));
+                ChartDataTableDetailAnalysis.xAxis
+                    .axisLabelDistance(10)
+                ChartDataTableDetailAnalysis.yAxis.axisLabelDistance(10);
+                d3.select('#visualizeDataDetail')
+                    .datum(dataTableDetailsAnalysis)
+                    .transition().duration(350)
+                    .call(ChartDataTableDetailAnalysis);
 
 //                d3.selectAll("#chartDataTableAnalysis .nv-bar").on('click',
 //                    function(data){
@@ -518,8 +560,8 @@
 //                        $('#showAnalysisDetails').trigger("click");
 //                    }
 //                );
-                nv.utils.windowResize(ChartDataTableAnalysis.update);
-                return ChartDataTableAnalysis;
+                nv.utils.windowResize(ChartDataTableDetailAnalysis.update);
+                return ChartDataTableDetailAnalysis;
             });
         }
 
@@ -707,8 +749,10 @@
             ChartDataTableAnalysis.update;
             getBarHeightAndSpacing(dataTable, ChartDataTableAnalysis);
             ChartDataTableAnalysis.height(barHeight);
-            $("#chartDataTableAnalysis").css("height", barHeight + 50);
-            ChartDataTableAnalysis.margin({"left": 125,"right": 40});
+//            $("#chartDataTableAnalysis").css("height", barHeight + 50);
+//            ChartDataTableAnalysis.margin({"left": 50,"right": 40});
+            $("#chartDataTableAnalysis").css("height", barHeight-10);
+            ChartDataTableAnalysis.margin({"left": 115,"right": 50})
             dataTableAnalysis[0]["values"] = dataTable;
             d3.select("#visualiseDataTable")
                 .datum(dataTableAnalysis)
@@ -723,6 +767,36 @@
                 });
             d3.select('#visualiseDataTable > g > g > g.nv-x.nv-axis.nvd3-svg > g > g').selectAll('text')
                 .each(function(d,i){ wordWrap(this, d, 110, -115, -6); });
+        }
+
+        this.RefreshAnalysisTableDetailGraph = function(dataTable){
+            ChartDataTableDetailAnalysis.update;
+            if(dataTable.length > 0){
+                getBarHeightAndSpacing(dataTable[0].values, ChartDataTableDetailAnalysis);
+            }
+            ChartDataTableDetailAnalysis.height(barHeight);
+
+            $("#visualizeDataDetail").css("height", barHeight-10);
+            ChartDataTableDetailAnalysis.margin({"left": 60, "right": 70})
+
+            dataTableDetailsAnalysis[0]["values"] = dataTable;
+            d3.select("#visualizeDataDetail")
+                .datum(dataTable)
+                .transition().duration(500)
+                .call(ChartDataTableDetailAnalysis);
+            d3.selectAll("#visualizeDataDetail .nv-barsWrap .nv-bar rect")
+                .attr("style", "cursor: pointer");
+//            d3.selectAll("#visualizeDataDetail .nv-barsWrap .nv-bar rect")
+//                .style("fill", function(d, i){
+//                    var tableType = VoltDbAnalysis.tablePropertyValue[d.label].PARTITION_TYPE
+//                    return tableType != "Partitioned" ? "#14416d":"#1B87C8";
+//                });
+//            d3.select('#visualizeDataDetail > g > g > g.nv-x.nv-axis.nvd3-svg > g > g').selectAll('text')
+//                .each(function(d,i){ wordWrap(this, d, 110, -115, -6); });
+
+                        $("#visualizeDataDetail").find('.nvd3').removeAttr("x");
+            $("#visualizeDataDetail").find('.nvd3').attr("x",344);
+            $("#visualizeDataDetail").find('.nvd3').attr("y",172);
         }
 
         this.RefreshAnalysisLatencyGraph = function(dataLatency, dataFrequency){
@@ -3384,4 +3458,3 @@
 
     window.MonitorGraphUI = new IMonitorGraphUI();
 })(window);
-
