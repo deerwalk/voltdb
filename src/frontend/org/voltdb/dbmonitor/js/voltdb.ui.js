@@ -2761,6 +2761,73 @@ var loadPage = function (serverName, portid) {
         }
     });
 
+    $("#showAnalysisData").popup({
+        open: function (event, ui, ele)  {
+            var tableData = []
+            var isReplicated = false;
+            var isPartitioned = false;
+            var timeStamp;
+            var orderedDetails = {};
+            var statementList = [];
+            var i =0;
+            var partitionDetails = [];
+
+            if($("#hidTableType").html() == "Replicated"){
+                MonitorGraphUI.RefreshAnalysisTableDetailGraph(partitionDetails);
+            }
+            else{
+
+                $.each(VoltDbAnalysis.tableData, function(key, value){
+                    var tableName = key;
+                    var tupleCount = value["TUPLE_COUNT"];
+                    timeStamp = value["TIMESTAMP"];
+
+
+                    if(key == $("#hidTableName").html()){
+                       if(orderedDetails[tableName] == undefined){
+                            orderedDetails[tableName] = [];
+                            statementList.push(tableName)
+                       }
+                       $.each(value["PARTITIONS"], function(key, value){
+                        orderedDetails[tableName].push({"PARTITION_ID" : value["partition_id"], "TABLE" : tableName, "TUPLE_COUNT": value["tupleCount"], "type": value["type"], "TOTAL_TUPLE": tupleCount})
+                       })
+                    }
+                });
+
+                 if(statementList.length > 0){
+                    for(var u=0; u< statementList.length; u++){
+                         orderedDetails[statementList[u]].sort(function(a, b) {
+                              var nameA = a.TUPLE_COUNT; // ignore upper and lowercase
+                              var nameB = b.TUPLE_COUNT; // ignore upper and lowercase
+                              if (nameA > nameB) {
+                                return -1;
+                              }
+                              if (nameA < nameB) {
+                                return 1;
+                              }
+
+                              // names must be equal
+                              return 0;
+                        });
+                    }
+               }
+
+                for(var x=0; x< orderedDetails[statementList[0]].length; x++){
+                    var u = 0;
+                    for(var key in orderedDetails){
+                        if(partitionDetails[x]== undefined){
+                            partitionDetails.push({"key": "Tuple Count"})
+                            partitionDetails[x]["values"] = [];
+                        }
+                        partitionDetails[x]["values"].push({"PARTITION_ID": orderedDetails[key][x].PARTITION_ID,  "x": orderedDetails[key][x].TABLE, "y": orderedDetails[key][x].TUPLE_COUNT, "z": orderedDetails[key][x].TOTAL_TUPLE})
+                    }
+                    u++;
+                }
+                MonitorGraphUI.RefreshAnalysisTableDetailGraph(partitionDetails);
+            }
+        }
+    });
+
     function sortArray(partitionDetails){
         for(var key in partitionDetails){
             var arr = partitionDetails[key].values
